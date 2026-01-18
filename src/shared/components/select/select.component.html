@@ -2,19 +2,6 @@
   <app-input-label [field]="f" [isRequired]="isRequired" />
 
   <div class="input-wrap">
-    <!-- <select
-      [id]="f.name"
-      [formControl]="control"
-      [ngClass]="control.invalid && control.touched ? 'invalid' : ''">
-      <option value="">
-        {{ f.placeholder ? f.placeholder : 'Select ' + f.label }}
-      </option>
-      @for (item of f.options; track $index) {
-        <option [value]="item.value">
-          {{ item.option }}
-        </option>
-      }
-    </select> -->
     <p-select
       [id]="f.name"
       class="w-100"

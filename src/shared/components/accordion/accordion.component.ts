@@ -1,5 +1,13 @@
-import { ChangeDetectionStrategy, Component, output, input, computed, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  output,
+  input,
+  computed,
+  signal,
+  effect
+} from '@angular/core';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { IconComponent } from '../icon/icon.component';
 import { Facility } from 'app/pages/auth/register/register.component';
 import { ColConfig, TableComponent } from '../table/table.component';
@@ -9,10 +17,20 @@ import { ColConfig, TableComponent } from '../table/table.component';
   templateUrl: './accordion.component.html',
   styleUrls: ['./accordion.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, IconComponent, TableComponent]
+  imports: [ReactiveFormsModule, IconComponent, TableComponent]
 })
 export class AccordionComponent {
   searchTerm = signal('');
+  searchControl = new FormControl('');
+
+  constructor() {
+    effect(() => {
+      this.searchControl.setValue(this.searchTerm());
+    });
+    effect(() => {
+      this.searchTerm.set(this.searchControl.value || '');
+    });
+  }
   open = input<boolean>(false);
   preSelect = input<Facility[]>([]);
   isOpen = signal<boolean>(this.open());

@@ -19,9 +19,9 @@
           <input
             type="text"
             placeholder="Search"
-            [ngModel]="searchTerm()"
+            [formControl]="searchControl"
             (click)="$event.stopPropagation()"
-            (ngModelChange)="searchTerm.set($event); isOpen.set(true)" />
+            (input)="isOpen.set(true)" />
         </div>
         <button (click)="emitSelectedData($event); $event.stopPropagation()">Done</button>
       </ng-content>
