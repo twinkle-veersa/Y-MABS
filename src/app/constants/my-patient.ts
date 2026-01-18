@@ -39,7 +39,7 @@ export const MY_PATIENT: {
         { label: 'Patient ID', key: 'PatientID' },
         { label: 'Patient First Name', key: 'FirstName' },
         { label: 'Patient Last Name', key: 'LastName' },
-        { label: 'Patient DOB', key: 'DateOfBirth', pipe: { name: 'date', args: ['MM/dd/YYYY'] } },
+        { label: 'Patient DOB', key: 'DateOfBirth', pipe: { name: 'date', args: ['MM/dd/yyyy'] } },
         { label: 'Patient Phone Number', key: 'Phone', pipe: { name: 'phone' } },
         { label: 'Patient Email Address', key: 'Email' }
       ],

@@ -299,8 +299,8 @@ export class PatientsComponent implements AfterViewInit {
     { key: 'authType', title: 'Authorization Type' },
     { key: 'paSubmit', title: 'PA Submitted By' },
     { key: 'paOutcome', title: 'PA Outcome' },
-    { key: 'paStart', title: 'PA Start Date', pipeName: 'date', pipeAttr: ['MM/dd/YYYY'] },
-    { key: 'paEnd', title: 'PA End Date', pipeName: 'date', pipeAttr: ['MM/dd/YYYY'] },
+    { key: 'paStart', title: 'PA Start Date', pipeName: 'date', pipeAttr: ['MM/dd/yyyy'] },
+    { key: 'paEnd', title: 'PA End Date', pipeName: 'date', pipeAttr: ['MM/dd/yyyy'] },
     { key: 'paAuth', title: 'PA Auth Number' }
   ];
 
@@ -362,8 +362,8 @@ export class PatientsComponent implements AfterViewInit {
     { key: 'authType', title: 'Authorization Type' },
     { key: 'paSubmit', title: 'PA Submitted Date' },
     { key: 'paOutcome', title: 'PA Outcome' },
-    { key: 'paStart', title: 'PA Start Date', pipeName: 'date', pipeAttr: ['MM/dd/YYYY'] },
-    { key: 'paEnd', title: 'PA End Date', pipeName: 'date', pipeAttr: ['MM/dd/YYYY'] },
+    { key: 'paStart', title: 'PA Start Date', pipeName: 'date', pipeAttr: ['MM/dd/yyyy'] },
+    { key: 'paEnd', title: 'PA End Date', pipeName: 'date', pipeAttr: ['MM/dd/yyyy'] },
     { key: 'paAuth', title: 'PA Auth Number' }
   ];
 

@@ -83,7 +83,7 @@ export class PatientsDetailComponent implements OnInit {
 
   caseColumns: ColConfig[] = [
     { key: 'CaseId', title: 'Case ID' },
-    { key: 'CaseStartDate', title: 'Date Submitted', pipeName: 'date', pipeAttr: ['MM/dd/YYYY'] },
+    { key: 'CaseStartDate', title: 'Date Submitted', pipeName: 'date', pipeAttr: ['MM/dd/yyyy'] },
     { key: 'EnrollmentStatus', title: 'Enrollment Status' },
     { key: 'CaseStatus', title: 'Case Status' },
     { key: 'Reverification', title: 'Benefits Reverification?', pipeName: 'boolean' },

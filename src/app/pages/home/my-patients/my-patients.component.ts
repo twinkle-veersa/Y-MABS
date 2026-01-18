@@ -122,7 +122,7 @@ export class MyPatientsComponent implements OnInit {
       title: 'Date of Birth',
       sortable: true,
       pipeName: 'date',
-      pipeAttr: ['MM/dd/YYYY']
+      pipeAttr: ['MM/dd/yyyy']
     },
     { key: 'PrescriberName', title: 'Prescriber', sortable: true },
     { key: 'PrescriberNpi', title: 'Prescriber NPI', sortable: true },
