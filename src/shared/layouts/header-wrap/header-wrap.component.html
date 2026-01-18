@@ -1,6 +1,6 @@
 <div class="container inner">
   <div class="tabs-group">
-    <ng-content select=".tab"></ng-content>
+    <ng-content select=".tab" />
   </div>
   <div class="card" [class.border]="bordered()">
     @if (heading()) {
@@ -24,9 +24,9 @@
       </div>
     }
     <div class="content" [class.no-padding]="noContentPadding()">
-      <ng-content></ng-content>
+      <ng-content />
       <div class="page-actions">
-        <ng-content select="[action]"></ng-content>
+        <ng-content select="[action]" />
       </div>
     </div>
   </div>

@@ -8,7 +8,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     <div class="content">
       <h2 [innerHTML]="title()"></h2>
       <p [innerHTML]="content()"></p>
-      <ng-content></ng-content>
+      <ng-content />
     </div>
   </div>`
 })

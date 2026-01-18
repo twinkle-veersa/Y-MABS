@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 
 import { NgOptimizedImage } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -19,10 +19,10 @@ export class HamburgerComponent {
   api = inject(ApiService);
   readonly content = BASE.header;
   navs = input<Nav[]>();
-  sidebarOpen = false;
+  sidebarOpen = signal(false);
 
   toggleSidebar() {
-    this.sidebarOpen = !this.sidebarOpen;
+    this.sidebarOpen.set(!this.sidebarOpen());
   }
   logout() {
     this.api.logout();

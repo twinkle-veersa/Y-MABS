@@ -3,7 +3,7 @@
     <app-icon icon="bars" />
     <span>MENU</span>
   </button>
-  <div class="sidebar" [class.open]="sidebarOpen">
+  <div class="sidebar" [class.open]="sidebarOpen()">
     <div class="hamburger-header">
       <button class="hamburger-btn" (click)="toggleSidebar()">
         <app-icon icon="cross" />
