@@ -10,6 +10,8 @@
 /node_modules
 npm-debug.log
 yarn-error.log
+.yarn
+.pnp.*
 
 # IDEs and editors
 .idea/
@@ -37,6 +39,7 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+.eslintcache
 
 # System files
 .DS_Store

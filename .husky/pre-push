@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Check/Fix Code Format
+npm run format-check
+
+# Check lint
+npm run lint

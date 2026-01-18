@@ -1,0 +1,5 @@
+npx --no -- commitlint --edit "$1" || {
+  echo "❌ Commit message validation failed..! \nPlease ensure unsing conventional commit standards\n"
+  echo "✅ Please use below options to properly format your commit message based on conventional commits standards"
+  exec < /dev/tty && npx cz --hook
+}
