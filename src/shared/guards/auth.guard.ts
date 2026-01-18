@@ -2,26 +2,23 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { ApiService } from '@shared/services/api.service';
 
-export const authGuard: CanActivateFn = () => {
-  if (!inject(ApiService).isLoggedIn()) {
-    inject(Router).navigate(['/login']);
-    return false;
-  }
-  return true;
-};
+function createGuard(
+  conditionFn: (api: ApiService) => boolean,
+  redirectPath: string
+): CanActivateFn {
+  return () => {
+    const api = inject(ApiService);
+    const router = inject(Router);
+    if (conditionFn(api)) {
+      router.navigate([redirectPath]);
+      return false;
+    }
+    return true;
+  };
+}
 
-export const loginGuard: CanActivateFn = () => {
-  if (inject(ApiService).isLoggedIn()) {
-    inject(Router).navigate(['/home']);
-    return false;
-  }
-  return true;
-};
+export const authGuard = createGuard(api => !api.isLoggedIn(), '/login');
 
-export const firstTimeLoginGuard: CanActivateFn = () => {
-  if (!inject(ApiService).isFirstTimeLoginFlow()) {
-    inject(Router).navigate(['/login']);
-    return false;
-  }
-  return true;
-};
+export const loginGuard = createGuard(api => api.isLoggedIn(), '/home');
+
+export const firstTimeLoginGuard = createGuard(api => !api.isFirstTimeLoginFlow(), '/login');

@@ -1,6 +1,6 @@
 import { inject, Injector, Pipe, PipeTransform, ProviderToken } from '@angular/core';
 import { DecimalPipe, TitleCasePipe, DatePipe } from '@angular/common';
-import { AdressPipe } from './address.pipe';
+import { AddressPipe } from './address.pipe';
 import { PhonePipe } from './phone.pipe';
 import { BooleanPipe } from './boolean.pipe';
 
@@ -10,7 +10,7 @@ const pipesMap = {
   titlecase: TitleCasePipe,
   number: DecimalPipe,
   date: DatePipe,
-  address: AdressPipe,
+  address: AddressPipe,
   boolean: BooleanPipe,
   phone: PhonePipe
 } as const;

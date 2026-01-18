@@ -5,7 +5,7 @@ import { DataService } from '@shared/services/data.service';
 import { ChartComponent } from '@shared/components/chart/chart.component';
 import { CaseData } from './dashboard.model';
 import { HomeHeaderComponent } from '@shared/layouts/home-header/home-header.component';
-import { sanitizeArrayResponse } from '@shared/utils/utility.funtions';
+import { sanitizeArrayResponse } from '@shared/utils/utility.functions';
 import { Router } from '@angular/router';
 
 @Component({

@@ -16,7 +16,7 @@ import { IconComponent } from '@shared/components/icon/icon.component';
 import { DynamicFieldDirective } from '@shared/utils/dynamic-field.directive';
 import { FormTitleComponent } from '@shared/layouts/form-title/form-title.component';
 import { HeaderWrapComponent } from '@shared/layouts/header-wrap/header-wrap.component';
-import { sanitizePhone } from '@shared/utils/utility.funtions';
+import { sanitizePhone } from '@shared/utils/utility.functions';
 
 import {
   ReqInfo,
@@ -31,7 +31,7 @@ import {
   SecurityQuestionPayload
 } from './profile.model';
 import { matchPassword } from '@shared/utils/password-validations';
-import { formatPhoneInObj } from '@shared/utils/utility.funtions';
+import { formatPhoneInObj } from '@shared/utils/utility.functions';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { DataService } from '@shared/services/data.service';

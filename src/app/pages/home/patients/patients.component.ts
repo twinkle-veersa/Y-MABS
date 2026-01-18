@@ -425,19 +425,18 @@ export class PatientsComponent implements AfterViewInit {
   }
 
   checkScroll() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const stepperEl = this.stepper.nativeElement;
+    const stepperEl = this.stepper.nativeElement as HTMLElement;
     this.canScrollLeft.set(stepperEl.scrollLeft > 0);
     this.canScrollRight.set(stepperEl.scrollLeft < stepperEl.scrollWidth - stepperEl.clientWidth);
   }
 
   scrollLeft() {
-    this.stepper.nativeElement.scrollBy({ left: -250, behavior: 'smooth' });
+    (this.stepper.nativeElement as HTMLElement).scrollBy({ left: -250, behavior: 'smooth' });
     setTimeout(() => this.checkScroll(), 300);
   }
 
   scrollRight() {
-    this.stepper.nativeElement.scrollBy({ left: 250, behavior: 'smooth' });
+    (this.stepper.nativeElement as HTMLElement).scrollBy({ left: 250, behavior: 'smooth' });
     setTimeout(() => this.checkScroll(), 300);
   }
   getFormattedDate(d: string | undefined) {

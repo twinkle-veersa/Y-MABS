@@ -1,6 +1,6 @@
 import { FieldConfig, SelectOptions, StepDetail } from '@shared/models';
 import { stateOptions } from './dropdown-options';
-import { groupedIntoOne } from '@shared/utils/utility.funtions';
+import { groupedIntoOne } from '@shared/utils/utility.functions';
 import { REGEX } from './regex';
 import { PopupType } from '@shared/components/popup/popup.component';
 

@@ -1,9 +1,9 @@
 import {
   ComponentRef,
+  DestroyRef,
   Directive,
   inject,
   input,
-  OnDestroy,
   OnInit,
   Renderer2,
   ViewContainerRef
@@ -15,7 +15,7 @@ import { SelectComponent } from '@shared/components/select/select.component';
 import { CheckboxComponent } from '@shared/components/checkbox/checkbox.component';
 import { DatepickerComponent } from '@shared/components/datepicker/datepicker.component';
 import { FieldConfig, FieldType } from '@shared/models';
-import { Subject, takeUntil } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UtilityService } from '@shared/services/utility.service';
 
 type ComponentTypes =
@@ -41,7 +41,7 @@ const ComponentMap: Record<FieldType, ComponentTypes> = {
 };
 
 @Directive({ selector: '[appDynamicField]' })
-export class DynamicFieldDirective implements OnInit, OnDestroy {
+export class DynamicFieldDirective implements OnInit {
   readonly field = input.required<FieldConfig>();
   readonly group = input.required<FormGroup>();
   readonly flex = input<boolean>(false);
@@ -49,8 +49,8 @@ export class DynamicFieldDirective implements OnInit, OnDestroy {
   private container = inject(ViewContainerRef);
   private renderer = inject(Renderer2);
   private util = inject(UtilityService);
+  private destroyRef = inject(DestroyRef);
   private cmpRef!: ComponentRef<FieldComponent> | null;
-  private destroy$ = new Subject<void>();
 
   ngOnInit() {
     const cmp = ComponentMap[this.field().fieldType];
@@ -59,7 +59,7 @@ export class DynamicFieldDirective implements OnInit, OnDestroy {
       if (this.field().dependsOn !== undefined) {
         const controlDependsOn = this.group().get(this.field().dependsOn!);
         controlDependsOn?.valueChanges
-          .pipe(takeUntil(this.destroy$))
+          .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe((val: string | string[]) =>
             val
               ? val.includes(this.field().condition ?? '')
@@ -120,11 +120,5 @@ export class DynamicFieldDirective implements OnInit, OnDestroy {
     this.container.remove();
     this.updateValidations();
     this.cmpRef = null;
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.cmpRef?.destroy();
   }
 }

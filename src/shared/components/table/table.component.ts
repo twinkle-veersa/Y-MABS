@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -10,11 +8,14 @@ import {
   linkedSignal,
   signal
 } from '@angular/core';
-import { DynamicPipe, PipeName } from '@shared/utils/dynamic-pipe.pipe';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { IconComponent } from '../icon/icon.component';
 import { toSignal } from '@angular/core/rxjs-interop';
+
+import { DynamicPipe, PipeName } from '@shared/utils/dynamic-pipe.pipe';
+import { IconComponent } from '../icon/icon.component';
 import { PdfViewerComponent } from '../pdf-viewer.component';
+
+type TableRow = Record<string, unknown>;
 
 @Component({
   selector: 'app-table',
@@ -65,10 +66,13 @@ export class TableComponent {
 
   selectedPdf: unknown | null = null;
   selectedRows = linkedSignal(() => this.preSelectedRows());
-  isSelected(data: any): boolean {
+  isSelected(data: unknown): boolean {
     if (this.idKey()) {
-      const selected = (this.selectedRows() as any[]).map(x => x[this.idKey()!]);
-      return selected.includes(data[this.idKey()!]);
+      const idKey = this.idKey()!;
+      const selected = (this.selectedRows() as unknown[]).map(
+        x => (x as Record<string, unknown>)[idKey]
+      );
+      return selected.includes((data as Record<string, unknown>)[idKey]);
     }
     return this.selectedRows().includes(data);
   }
@@ -84,10 +88,10 @@ export class TableComponent {
     this.currentPage.set(1);
   }
 
-  private sortData(data: any[], column: string, direction: 'asc' | 'desc'): any[] {
+  private sortData(data: unknown[], column: string, direction: 'asc' | 'desc'): unknown[] {
     return [...data].sort((a, b) => {
-      const valA = a[column];
-      const valB = b[column];
+      const valA = (a as Record<string, unknown>)[column];
+      const valB = (b as Record<string, unknown>)[column];
       if (valA == null) return direction === 'asc' ? 1 : -1;
       if (valB == null) return direction === 'asc' ? -1 : 1;
       if (valA < valB) return direction === 'asc' ? -1 : 1;
@@ -108,17 +112,18 @@ export class TableComponent {
     }
   }
 
-  onSelection(row: any, idx: number) {
+  onSelection(row: unknown, idx: number) {
     if (!this.selection()) return this.emitAction.emit({ type: 'click', data: row, idx });
     if (this.selection() === 'single') {
       this.selectedRows.set([row]);
     } else if (this.selection() === 'multiple') {
       if (this.idKey()) {
-        const selected = (this.selectedRows() as any[]).map(x => x[this.idKey()!]);
-        if (selected.includes(row[this.idKey()!])) {
+        const idKey = this.idKey()!;
+        const selected = (this.selectedRows() as TableRow[]).map(x => x[idKey] as unknown);
+        if (selected.includes((row as TableRow)[idKey] as unknown)) {
           const arr = this.selectedRows();
           const idx = this.selectedRows().findIndex(
-            (x: any) => x[this.idKey()!] == row[this.idKey()!]
+            (x: unknown) => (x as TableRow)[idKey] === (row as TableRow)[idKey]
           );
           arr.splice(idx, 1);
           this.selectedRows.set(arr);

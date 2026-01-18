@@ -51,15 +51,15 @@ import { FieldConfig } from '@shared/models';
 import { ApiService } from '@shared/services/api.service';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
-import { AdressPipe } from '@shared/utils/address.pipe';
+import { AddressPipe } from '@shared/utils/address.pipe';
 import { PhonePipe } from '@shared/utils/phone.pipe';
 import { InputComponent } from '@shared/components/input/input.component';
 
-import { formatDate, formatPhone, sanitizePhone } from '@shared/utils/utility.funtions';
+import { formatDate, formatPhone, sanitizePhone } from '@shared/utils/utility.functions';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { FullpageAlertsComponent } from '@shared/layouts/fullpage-alerts/fullpage-alerts.component';
-import { convertToBase64 } from '@shared/utils/utility.funtions';
+import { convertToBase64 } from '@shared/utils/utility.functions';
 import { REGEX } from '@constants/regex';
 import { Address } from 'app/pages/auth/register/register.component';
 import { DataService } from '@shared/services/data.service';
@@ -93,7 +93,7 @@ import { AlertService } from '@shared/services/alert.service';
     FullpageAlertsComponent,
     PdfViewerComponent
   ],
-  providers: [AdressPipe, PhonePipe],
+  providers: [AddressPipe, PhonePipe],
   templateUrl: './enrollment.component.html',
   styleUrl: './enrollment.component.scss',
   host: { '(window:beforeunload)': 'canNavigateOut($event)' },

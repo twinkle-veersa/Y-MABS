@@ -22,8 +22,8 @@ import { DynamicFieldDirective } from '@shared/utils/dynamic-field.directive';
 import { AccordionComponent } from '@shared/components/accordion/accordion.component';
 import { PhonePipe } from '@shared/utils/phone.pipe';
 import { PopupComponent } from '@shared/components/popup/popup.component';
-import { formatPhoneInObj, sanitizeObj } from '@shared/utils/utility.funtions';
-import { AdressPipe } from '@shared/utils/address.pipe';
+import { formatPhoneInObj, sanitizeObj } from '@shared/utils/utility.functions';
+import { AddressPipe } from '@shared/utils/address.pipe';
 import { Address, Facility } from 'app/pages/auth/register/register.component';
 import { ApiService } from '@shared/services/api.service';
 import { TooltipModule } from 'primeng/tooltip';
@@ -53,7 +53,7 @@ const NPI_ERROR_MSG = `One or more pieces of information entered do not match ou
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [PhonePipe, AdressPipe]
+  providers: [PhonePipe, AddressPipe]
 })
 export class SettingsComponent {
   readonly tabs = SETTING_TABS;
@@ -459,7 +459,7 @@ export class SettingsComponent {
     const username = this.data.accountInfoRs.value()?.Payload?.Username as string;
     const contacts = this.getContact();
     const saveRequests = facilitiesSource.map(facility => {
-      const payload = {
+      const payload: AccountUpdatePayload = {
         Username: username,
         MasterAccountId: masterAccountId,
         IsNewUser: false,
@@ -473,7 +473,6 @@ export class SettingsComponent {
           Phone: facility.Phone || null,
           PhoneType: 'Office',
           Extension: null,
-          FacilityType: 'Practice Office',
           Address: [this.getAddress(facility.Address ?? [])],
           Contacts: contacts
         }
@@ -532,9 +531,12 @@ export class SettingsComponent {
         this.deletdData();
         return;
       }
-      payload.PrescriberId =
+      (payload as AccountUpdatePayload & { PrescriberId: number }).PrescriberId =
         this.prescriberId == null
-          ? Number(this.prescribers()[this.selectedPrescriberIdx()!]?.providerId)
+          ? Number(
+              (this.prescribers()[this.selectedPrescriberIdx()!] as { providerId?: string })
+                ?.providerId
+            )
           : Number(this.prescriberId);
     }
 

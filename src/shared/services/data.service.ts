@@ -2,7 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { CaseData, CaseDataReq } from '../../app/pages/home/dashboard/dashboard.model';
 import { API } from '@constants/endpoints';
 import { ApiService } from '@shared/services/api.service';
-import { sanitizeArrayResponse } from '@shared/utils/utility.funtions';
+import { sanitizeArrayResponse } from '@shared/utils/utility.functions';
 import { ProfileInfo } from '../../app/pages/profile/profile.model';
 import { ENDPOINTS } from '@constants/profile';
 
@@ -96,18 +96,6 @@ export class DataService {
         return bId - aId;
       })
   );
-  getProviderDetailsById(providerId: number): { fullName: string; npi: string } | null {
-    const provider = this.accountInfoRs
-      .value()
-      ?.Payload.Providers.find(p => p.ProviderId === providerId);
-    if (provider) {
-      return {
-        fullName: `${provider.FirstName} ${provider.LastName}`,
-        npi: provider.NPI
-      };
-    }
-    return null;
-  }
 
   patientsData = computed(() =>
     this.caseData()
@@ -138,28 +126,25 @@ export class DataService {
 
   selectedPatient = signal<CaseData | null>(null);
 
-  private getFormattedDate(d: string | undefined) {
-    if (d === undefined) {
-      // Handle undefined case
-      return 'Invalid date';
-    }
-    const date = new Date(d);
-    const year = date.getFullYear();
-
-    let month = (1 + date.getMonth()).toString();
-    month = month.length > 1 ? month : '0' + month;
-
-    let day = date.getDate().toString();
-    day = day.length > 1 ? day : '0' + day;
-
-    return month + '/' + day + '/' + year;
-  }
-
   // Check Idle State
   constructor() {
     this.initListener();
     this.initInterval();
   }
+
+  getProviderDetailsById(providerId: number): { fullName: string; npi: string } | null {
+    const provider = this.accountInfoRs
+      .value()
+      ?.Payload.Providers.find(p => p.ProviderId === providerId);
+    if (provider) {
+      return {
+        fullName: `${provider.FirstName} ${provider.LastName}`,
+        npi: provider.NPI
+      };
+    }
+    return null;
+  }
+
   private get lastAction() {
     return sessionStorage.getItem(STORE_KEY)
       ? parseInt(sessionStorage.getItem(STORE_KEY)!, 10)
@@ -194,5 +179,22 @@ export class DataService {
       const timeleft = (this.lastAction || 0) + MINUTES_UNITL_AUTO_LOGOUT * 60 * 1000;
       if (timeleft - Date.now() < 0) this.api.logout();
     }
+  }
+
+  private getFormattedDate(d: string | undefined) {
+    if (d === undefined) {
+      // Handle undefined case
+      return 'Invalid date';
+    }
+    const date = new Date(d);
+    const year = date.getFullYear();
+
+    let month = (1 + date.getMonth()).toString();
+    month = month.length > 1 ? month : '0' + month;
+
+    let day = date.getDate().toString();
+    day = day.length > 1 ? day : '0' + day;
+
+    return month + '/' + day + '/' + year;
   }
 }

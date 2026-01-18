@@ -19,9 +19,9 @@ import { DynamicFieldDirective } from '@shared/utils/dynamic-field.directive';
 import { UtilityService } from '@shared/services/utility.service';
 import { ApiService } from '@shared/services/api.service';
 import { matchPassword } from '@shared/utils/password-validations';
-import { AdressPipe } from '@shared/utils/address.pipe';
+import { AddressPipe } from '@shared/utils/address.pipe';
 import { PhonePipe } from '@shared/utils/phone.pipe';
-import { formatPhoneInObj, sanitizeObj, sanitizePhone } from '@shared/utils/utility.funtions';
+import { formatPhoneInObj, sanitizeObj, sanitizePhone } from '@shared/utils/utility.functions';
 import { ToastrService } from 'ngx-toastr';
 import { FacilityContact } from 'app/pages/home/settings/settings.component';
 import { AlertService } from '@shared/services/alert.service';
@@ -43,7 +43,7 @@ const NPI_ERROR_MSG = `One or more pieces of information entered do not match ou
     FullpageAlertsComponent,
     SeperatorComponent
   ],
-  providers: [AdressPipe, PhonePipe],
+  providers: [AddressPipe, PhonePipe],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -454,8 +454,8 @@ export class RegisterComponent {
       EmailAddress: '',
       Password: '',
       PasswordConfirmation: '',
-      PrescriberId: (step1Form?.value?.prescriberNPI
-        ? Number(step1Form?.value?.prescriberNPI)
+      PrescriberId: ((step1Form?.value as { prescriberNPI?: string })?.prescriberNPI
+        ? Number((step1Form?.value as { prescriberNPI?: string })?.prescriberNPI)
         : undefined) as number,
       IsNewUser: true,
       Role: { RolePkId: 4 },

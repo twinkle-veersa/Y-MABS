@@ -1,6 +1,6 @@
-import { AfterViewInit, Directive, inject, input, OnDestroy } from '@angular/core';
+import { AfterViewInit, Directive, inject, input, DestroyRef } from '@angular/core';
 import { NgControl } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export const VAL_TYPES = ['charOnly', 'numberOnly', 'alphaNum', 'phone'] as const;
 export type ValType = (typeof VAL_TYPES)[number];
@@ -9,9 +9,9 @@ export type ValType = (typeof VAL_TYPES)[number];
   selector: '[appFormatValue]',
   host: { '(input)': 'onInput($event)' }
 })
-export class InputDirective implements AfterViewInit, OnDestroy {
+export class InputDirective implements AfterViewInit {
   private el = inject(NgControl);
-  destroyed$ = new Subject();
+  private destroyRef = inject(DestroyRef);
 
   readonly valType = input<ValType | null>();
 
@@ -41,14 +41,10 @@ export class InputDirective implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     if (this.valType() === 'phone') {
       this.el.control?.valueChanges
-        .pipe(takeUntil(this.destroyed$))
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((v: string) =>
           v && v.slice(-1) === '-' ? this.el.control?.setValue(v.slice(0, -1)) : null
         );
     }
-  }
-  ngOnDestroy(): void {
-    this.destroyed$.next(null);
-    this.destroyed$.complete();
   }
 }

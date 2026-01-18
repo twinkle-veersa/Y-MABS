@@ -217,7 +217,11 @@ export class ApiService {
       const msg = errs[0].Message;
       try {
         return (
-          JSON.parse(msg.substring(msg.indexOf('{'), msg.indexOf('}') + 1))?.errorMessage ?? ''
+          (
+            JSON.parse(msg.substring(msg.indexOf('{'), msg.indexOf('}') + 1)) as {
+              errorMessage?: string;
+            }
+          )?.errorMessage ?? ''
         );
       } catch {
         return 'Invalid inputs';
