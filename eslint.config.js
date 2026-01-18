@@ -14,7 +14,7 @@ module.exports = tseslint.config(
     ],
     processor: angular.processInlineTemplates,
     languageOptions: {
-      parserOptions: { project: './tsconfig.json' }
+      parserOptions: { projectService: true }
     },
     rules: {
       '@angular-eslint/directive-selector': [

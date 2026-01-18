@@ -317,7 +317,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/build@npm:^21.0.0":
+"@angular/build@npm:^21.1.0":
   version: 21.1.0
   resolution: "@angular/build@npm:21.1.0"
   dependencies:
@@ -398,7 +398,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/cli@npm:^21.0.0":
+"@angular/cli@npm:^21.1.0":
   version: 21.1.0
   resolution: "@angular/cli@npm:21.1.0"
   dependencies:
@@ -427,7 +427,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/common@npm:^21.0.0":
+"@angular/common@npm:^21.1.0":
   version: 21.1.0
   resolution: "@angular/common@npm:21.1.0"
   dependencies:
@@ -439,7 +439,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/compiler-cli@npm:^21.0.0":
+"@angular/compiler-cli@npm:^21.1.0":
   version: 21.1.0
   resolution: "@angular/compiler-cli@npm:21.1.0"
   dependencies:
@@ -464,7 +464,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/compiler@npm:^21.0.0":
+"@angular/compiler@npm:^21.1.0":
   version: 21.1.0
   resolution: "@angular/compiler@npm:21.1.0"
   dependencies:
@@ -473,7 +473,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/core@npm:^21.0.0":
+"@angular/core@npm:^21.1.0":
   version: 21.1.0
   resolution: "@angular/core@npm:21.1.0"
   dependencies:
@@ -491,7 +491,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/forms@npm:^21.0.0":
+"@angular/forms@npm:^21.1.0":
   version: 21.1.0
   resolution: "@angular/forms@npm:21.1.0"
   dependencies:
@@ -506,7 +506,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/platform-browser@npm:^21.0.0":
+"@angular/platform-browser@npm:^21.1.0":
   version: 21.1.0
   resolution: "@angular/platform-browser@npm:21.1.0"
   dependencies:
@@ -522,7 +522,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/router@npm:^21.0.0":
+"@angular/router@npm:^21.1.0":
   version: 21.1.0
   resolution: "@angular/router@npm:21.1.0"
   dependencies:
@@ -6011,15 +6011,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "merck-hcp@workspace:."
   dependencies:
-    "@angular/build": "npm:^21.0.0"
-    "@angular/cli": "npm:^21.0.0"
-    "@angular/common": "npm:^21.0.0"
-    "@angular/compiler": "npm:^21.0.0"
-    "@angular/compiler-cli": "npm:^21.0.0"
-    "@angular/core": "npm:^21.0.0"
-    "@angular/forms": "npm:^21.0.0"
-    "@angular/platform-browser": "npm:^21.0.0"
-    "@angular/router": "npm:^21.0.0"
+    "@angular/build": "npm:^21.1.0"
+    "@angular/cli": "npm:^21.1.0"
+    "@angular/common": "npm:^21.1.0"
+    "@angular/compiler": "npm:^21.1.0"
+    "@angular/compiler-cli": "npm:^21.1.0"
+    "@angular/core": "npm:^21.1.0"
+    "@angular/forms": "npm:^21.1.0"
+    "@angular/platform-browser": "npm:^21.1.0"
+    "@angular/router": "npm:^21.1.0"
     "@commitlint/cli": "npm:^20.3.1"
     "@commitlint/config-conventional": "npm:^20.3.1"
     "@primeng/themes": "npm:^21.0.3"
@@ -6040,12 +6040,12 @@ __metadata:
     ngx-toastr: "npm:^19.1.0"
     prettier: "npm:^3.8.0"
     primeng: "npm:^21.0.3"
-    rxjs: "npm:~7.8.0"
-    tslib: "npm:^2.3.0"
-    typescript: "npm:~5.9.2"
-    typescript-eslint: "npm:^8.29.0"
+    rxjs: "npm:~7.8.2"
+    tslib: "npm:^2.8.1"
+    typescript: "npm:~5.9.3"
+    typescript-eslint: "npm:^8.53.0"
     vite-plugin-svg-spritemap: "npm:^1.0.13"
-    vitest: "npm:^4.0.8"
+    vitest: "npm:^4.0.17"
   languageName: unknown
   linkType: soft
 
@@ -7320,7 +7320,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rxjs@npm:7.8.2, rxjs@npm:^7.5.5, rxjs@npm:~7.8.0":
+"rxjs@npm:7.8.2, rxjs@npm:^7.5.5, rxjs@npm:~7.8.2":
   version: 7.8.2
   resolution: "rxjs@npm:7.8.2"
   dependencies:
@@ -7928,7 +7928,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.4.0":
+"tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.4.0, tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62
@@ -7973,7 +7973,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript-eslint@npm:^8.29.0":
+"typescript-eslint@npm:^8.53.0":
   version: 8.53.0
   resolution: "typescript-eslint@npm:8.53.0"
   dependencies:
@@ -7988,7 +7988,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:~5.9.2":
+"typescript@npm:~5.9.3":
   version: 5.9.3
   resolution: "typescript@npm:5.9.3"
   bin:
@@ -7998,7 +7998,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A~5.9.2#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A~5.9.3#optional!builtin<compat/typescript>":
   version: 5.9.3
   resolution: "typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=5786d5"
   bin:
@@ -8240,7 +8240,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest@npm:^4.0.8":
+"vitest@npm:^4.0.17":
   version: 4.0.17
   resolution: "vitest@npm:4.0.17"
   dependencies:
