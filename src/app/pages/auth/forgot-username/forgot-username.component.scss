@@ -1,0 +1,21 @@
+@use 'mixins' as mix;
+@use 'variables' as var;
+
+:host {
+  @include mix.hostContainer;
+  flex-direction: column;
+
+  .error {
+    color: var.$error;
+    padding: 1rem 0rem 1.5rem 0rem;
+    font-weight: 500;
+  }
+
+  .register {
+    background: none;
+    border: none;
+    color: var.$primary-color;
+    text-decoration: underline;
+    font-size: 1rem;
+  }
+}

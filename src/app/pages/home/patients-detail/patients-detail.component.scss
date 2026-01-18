@@ -1,0 +1,40 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+.top-bar {
+  @include mix.flexCentered(space-between);
+  padding: 0.75rem 1rem;
+}
+
+.title {
+  @include mix.flexCentered(flex-start);
+  padding: 0.5rem;
+  gap: 0.5rem;
+
+  span {
+    color: var.$dark;
+    font-size: 1.125rem;
+  }
+
+  img {
+    max-width: 1.85rem;
+  }
+}
+
+.card {
+  background: white;
+  border-radius: var.$container-radius;
+}
+
+.content {
+  padding: 1rem;
+
+  .heading {
+    background-color: var.$dark;
+    border-radius: var.$container-radius;
+    margin-bottom: 1.5rem;
+    padding: 1rem 0.75rem;
+    font-weight: bold;
+    color: #fff;
+  }
+}

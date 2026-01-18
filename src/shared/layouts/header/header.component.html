@@ -1,0 +1,37 @@
+<header>
+  <div class="logo">
+    @if (api.isLoggedIn() && util.screenWidth() <= 768) {
+      <app-hamburger [navs]="nav" />
+    }
+    <a [href]="content.logoHref" target="_blank">
+      <img ngSrc="logo.png" [alt]="content.logoAlt" width="280" height="74" />
+    </a>
+  </div>
+
+  <div class="side">
+    @if (!api.isLoggedIn() || api.isFirstTimeLoginFlow() !== null) {
+      <h3 [innerHTML]="content.for" class="mobile-font"></h3>
+      <span class="line"></span>
+    }
+    <div class="call mobile-font">
+      <app-icon icon="call" />
+      {{ content.phone }}
+    </div>
+    @if (api.isLoggedIn() && !api.isFirstTimeLoginFlow()) {
+      <span class="line mobile-none"></span>
+      <div class="profile-section mobile-none">
+        <app-icon class="mt-1" icon="user" />
+        <a [routerLink]="['home', 'profile']" class="profile-name">
+          <span>Welcome</span>
+          {{ api.tokenInfo()!.acctname }}
+        </a>
+      </div>
+
+      <span class="line mobile-none"></span>
+      <button class="light transparent logout mobile-none" type="submit" (click)="api.logout()">
+        <app-icon icon="logout" />
+        Logout
+      </button>
+    }
+  </div>
+</header>

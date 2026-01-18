@@ -1,0 +1,661 @@
+<div class="stepper-wrap">
+  <div class="enrollment-header">
+    @if (currentStep() === 0) {
+      <div class="w-100 prescriber">
+        <h2>
+          Submit <span class="text-nowrap">LANTHEUS<sup>TM</sup></span> Enrollment Form
+        </h2>
+        <div>
+          <img src="doctor.png" alt="doctor-icon" width="59" />
+          <div class="wrap">
+            <app-select
+              class="select-prescriber"
+              [field]="forms.prescriberSelected[0]"
+              [group]="groups.prescriberSelected" />
+          </div>
+        </div>
+      </div>
+    }
+    @if (currentStep() > 0 && selectedPrescriber()) {
+      <img src="doctor.png" alt="doctor-icon" width="59" />
+      <h3 class="name mobile-none">
+        {{ selectedPrescriber()?.FirstName }} {{ selectedPrescriber()?.LastName }}
+      </h3>
+      <app-stepper class="stepper" [steps]="stepperSteps" [currentStep]="currentStep()" />
+    }
+  </div>
+
+  <div>
+    @if (!hasAlert()) {
+      @if (currentStep() === 0) {
+        @if (groups.prescriberSelected.get('prescriberSelected')?.value) {
+          <app-header-wrap [noContentPadding]="true" [bordered]="true">
+            <div class="title">
+              <h2>
+                Locations for {{ selectedPrescriber()?.FirstName }}
+                {{ selectedPrescriber()?.LastName }}
+              </h2>
+              <h4>
+                Please select the practice/facility that will be associated with this enrollment
+                form.
+              </h4>
+            </div>
+            <app-table
+              [tableData]="tableData() ?? []"
+              [columnConfigs]="colConfig"
+              [paginated]="true"
+              [selection]="'single'"
+              [preSelectedRows]="[selectedFacility]"
+              (emitSelection)="onRowSelection($event)" />
+          </app-header-wrap>
+        }
+      } @else {
+        <app-header-wrap>
+          @if (currentStep() === 1) {
+            <div class="step-wrap">
+              <app-form-title
+                [highlight]="true"
+                [required]="false"
+                title="Services Requested"
+                subtitle="Please select that apply." />
+              <form class="mt-4">
+                @for (field of forms.servicesRequested; track field.name) {
+                  <ng-container
+                    appDynamicField
+                    [field]="field"
+                    [group]="groups.servicesRequested"
+                    [flex]="true" />
+                }
+              </form>
+              <div class="info-box">
+                <ul>
+                  <li>
+                    Patient support may include identifying an imaging center, appointment
+                    reminders, patient education, options for transportation assistance and
+                    foundation assistance.
+                  </li>
+                  <li>
+                    Insurance navigation may include benefits verification, prior authorization
+                    assistance, appeal and/or claims assistance.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          }
+
+          @if (currentStep() === 2) {
+            <div
+              style="position: relative"
+              [style]="util.screenWidth() < 768 ? { 'padding-top': '4rem' } : {}">
+              <div class="toggle-button">
+                <button
+                  class="option"
+                  [class.active]="pageValue() === 'newPatient'"
+                  (click)="toggleSelection()">
+                  New Patient
+                </button>
+                <button
+                  class="option"
+                  [class.active]="pageValue() === 'existingPatient'"
+                  (click)="toggleSelection()">
+                  Existing Patient
+                </button>
+              </div>
+            </div>
+            <app-form-title
+              [highlight]="true"
+              title="Patient Information"
+              subtitle="Please enter the patient's information." />
+            @if (pageValue() === 'newPatient') {
+              <form>
+                <div class="row">
+                  @let ctx =
+                    {
+                      form: forms.patientInformation.newPatient,
+                      group: groups.patientInformation.newPatient
+                    };
+                  <div class="col-md-6 border-right">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'left' }" />
+                  </div>
+                  <div class="col-md-6">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'right' }" />
+                  </div>
+                </div>
+              </form>
+            }
+            @if (pageValue() === 'existingPatient') {
+              <form>
+                <div class="row">
+                  @let ctx =
+                    {
+                      form: forms.patientInformation.existingPatient,
+                      group: groups.patientInformation.existingPatient
+                    };
+                  <div class="col-md-6 border-right">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'left' }" />
+                  </div>
+                  <div class="col-md-6">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'right' }" />
+                  </div>
+                </div>
+              </form>
+            }
+          }
+
+          @if (currentStep() === 3) {
+            <div class="insurance-toggle">
+              <h2>Primary Insurance</h2>
+              <div class="toggle">
+                <p>Does the Patient have primary medical insurance?</p>
+                <app-toggle
+                  (change)="togglePrimary()"
+                  [toggleDisabled]="disableInsuranceToggle()"
+                  [toggleChecked]="isPrimaryInsuranceVisible()"></app-toggle>
+              </div>
+            </div>
+            @if (this.isPrimaryInsuranceVisible()) {
+              @let group = groups.insuranceInformation.primaryInsurance;
+              <span class="red">* Required field</span>
+              <form>
+                <div class="row">
+                  @let ctx = { form: forms.insuranceInformation.primaryInsurance, group };
+                  <div class="col-md-6 border-right">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'left' }" />
+                  </div>
+                  <div class="col-md-6">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'right' }" />
+                  </div>
+                </div>
+              </form>
+              <app-seperator />
+              <div class="row my-5 mobile-row">
+                <div class="col-md-6">
+                  <app-file-upload
+                    [multiple]="true"
+                    fileTypes="application/pdf"
+                    label="Attach front and back Copy of insurance card (Only pdf, up to 10 MB)"
+                    [disabled]="selectedFilesPrimary().length >= 2"
+                    (emitFiles)="
+                      handleFiles(
+                        $event,
+                        selectedFilesPrimary,
+                        groups.insuranceInformation.primaryInsurance
+                      )
+                    ">
+                  </app-file-upload>
+                </div>
+                <div class="col-md-6">
+                  @if (this.selectedFilesPrimary().length > 0) {
+                    <app-file-upload-table
+                      [selectedFiles]="selectedFilesPrimary()"
+                      (deleteFile)="deleteFile($event, selectedFilesPrimary, group)" />
+                  }
+                </div>
+              </div>
+            }
+            <div class="insurance-toggle mt-4">
+              <h2>Secondary Insurance</h2>
+              <div class="toggle">
+                <p>Does the Patient have secondary medical insurance?</p>
+                <app-toggle
+                  (change)="toggleSecondary()"
+                  [toggleDisabled]="disableInsuranceToggle()"
+                  [toggleChecked]="isSecondaryInsuranceVisible()"></app-toggle>
+              </div>
+            </div>
+            @if (isSecondaryInsuranceVisible()) {
+              @let group = groups.insuranceInformation.secondaryInsurance;
+              <span class="red">* Required field</span>
+              <form>
+                <div class="row">
+                  @let ctx = { form: forms.insuranceInformation.secondaryInsurance, group };
+                  <div class="col-md-6 border-right">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'left' }" />
+                  </div>
+                  <div class="col-md-6">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'right' }" />
+                  </div>
+                </div>
+              </form>
+              <app-seperator />
+              <div class="row my-5 mobile-row">
+                <div class="col-md-6">
+                  <app-file-upload
+                    [multiple]="true"
+                    fileTypes="application/pdf"
+                    [disabled]="selectedFilesSecondary().length >= 2"
+                    label="Attach front and back Copy of insurance card (Only pdf, up to 10 MB)"
+                    (emitFiles)="handleFiles($event, selectedFilesSecondary, group)" />
+                </div>
+                <div class="col-md-6">
+                  @if (this.selectedFilesSecondary().length > 0) {
+                    <app-file-upload-table
+                      [selectedFiles]="selectedFilesSecondary()"
+                      (deleteFile)="deleteFile($event, selectedFilesSecondary, group)" />
+                  }
+                </div>
+              </div>
+            }
+            <form class="mt-4">
+              @for (field of forms.insuranceInformation.noInsurance; track field.name) {
+                <ng-container
+                  appDynamicField
+                  [field]="field"
+                  [group]="groups.insuranceInformation.noInsurance"
+                  [flex]="true" />
+              }
+            </form>
+          }
+
+          @if (currentStep() === 4) {
+            <app-form-title
+              [highlight]="true"
+              title="Prescriber Information"
+              subtitle="Please provide the prescriber information." />
+            @if (forms.prescriberInformation.prescriberInfo) {
+              <form>
+                <div class="row">
+                  @let ctx =
+                    {
+                      form: forms.prescriberInformation.prescriberInfo,
+                      group: groups.prescriberInformation.prescriberInfo
+                    };
+                  <div class="col-md-6 border-right">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'left' }" />
+                  </div>
+                  <div class="col-md-6">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'right' }" />
+                  </div>
+                </div>
+              </form>
+            }
+            <app-form-title
+              [highlight]="true"
+              title="Imaging Location Information"
+              subtitle="Please leave this section blank if you would like Lantheus Link to assist in finding an
+                        in-network imaging center in patient’s area."
+              [required]="false" />
+            <form class="imaging">
+              <div class="row">
+                @let ctx =
+                  {
+                    form: forms.prescriberInformation.imagingLocation,
+                    group: groups.prescriberInformation.imagingLocation
+                  };
+                <div class="col-md-6 border-right">
+                  <ng-container
+                    *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'left' }" />
+                </div>
+                <div class="col-md-6">
+                  <ng-container
+                    *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'right' }" />
+                </div>
+              </div>
+            </form>
+          }
+
+          @if (currentStep() === 5) {
+            <app-form-title
+              [highlight]="true"
+              title="Clinical Information"
+              subtitle="Please provide the clinical information." />
+            <form>
+              <div class="row">
+                @let ctx =
+                  {
+                    form: forms.clinicalInformation,
+                    group: groups.clinicalInformation
+                  };
+                <div class="col-md-6 border-right">
+                  <ng-container
+                    *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'left' }" />
+                </div>
+                <div class="col-md-6">
+                  <ng-container
+                    *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'right' }" />
+                </div>
+              </div>
+            </form>
+          }
+
+          @if (currentStep() === 6) {
+            <p class="red float-end">* Required field</p>
+            <h1 class="heading">Attestation</h1>
+            <form class="attest">
+              <div class="input-wrap radio">
+                <input
+                  type="checkbox"
+                  name="attestation"
+                  [value]="true"
+                  [formControl]="attestation"
+                  id="attestation" />
+
+                <label [for]="'attestation'">
+                  <app-req /> I certify that the information I have entered is complete and accurate
+                  to the best of my knowledge. By selecting this option, an email will be sent to
+                  the patient for the purpose of obtaining an electronic signature, and the
+                  Prescriber identified on this Enrollment Form attests to having received the
+                  patient's consent and approval to send emails to the email address entered below.
+                </label>
+              </div>
+
+              <h1 class="heading">Prescriber Signature</h1>
+              <p>
+                Please review the consent by opening the link and confirming to add your consent.
+              </p>
+
+              <div class="row">
+                <div class="col-md-7">
+                  <div class="input-wrap radio">
+                    <input
+                      type="checkbox"
+                      name="signature"
+                      [value]="true"
+                      [formControl]="signature"
+                      id="signature" />
+
+                    <label [for]="'signature'">
+                      <app-req /> I have read and agree to the
+                      <a routerLink="" (click)="popups.prescriberLegalContent.open = true"
+                        >Prescriber Legal Content/Agreement</a
+                      >
+                    </label>
+                  </div>
+                  <app-select
+                    class="wrap flex-field"
+                    [field]="signatureOptionsField"
+                    [group]="attestationGroup" />
+                </div>
+              </div>
+
+              @if (signatureOptions.value !== 'download') {
+                <h1 class="heading">Patient Signature</h1>
+                <p>Please select the submission method below for the patient authorization.</p>
+                <div class="row">
+                  <div class="col-md-7">
+                    <app-select
+                      class="wrap flex-field"
+                      [field]="patientSignatureOptionsField"
+                      [group]="attestationGroup" />
+                  </div>
+                </div>
+
+                @if (patientSignatureOptions.value === 'docusign') {
+                  <div class="input-wrap">
+                    <label [for]="'patientSignSupport'">
+                      <input
+                        type="checkbox"
+                        name="patientSignSupport"
+                        [value]="true"
+                        [formControl]="patientSignSupport"
+                        id="patientSignSupport" />
+                      <app-req /> Patient will read and agree to the
+                      <a routerLink="" (click)="popups.patientSignSupport.open = true"
+                        >Patient Support Services</a
+                      >
+                      prior to services.
+                    </label>
+                  </div>
+                  <div class="input-wrap">
+                    <label [for]="'patientSignHealthInfo'">
+                      <input
+                        type="checkbox"
+                        name="patientSignHealthInfo"
+                        [value]="true"
+                        [formControl]="patientSignHealthInfo"
+                        id="patientSignHealthInfo" />
+                      <app-req /> Patient will read and agree to the
+                      <a routerLink="" (click)="popups.patientSignHealthInfo.open = true"
+                        >Permission to Share Health Information</a
+                      >
+                      prior to services.
+                    </label>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-7">
+                      <app-input
+                        class="wrap flex-field"
+                        [field]="patientNameField"
+                        [group]="attestationGroup" />
+                      <app-input
+                        class="wrap flex-field"
+                        [field]="patientEmailField"
+                        [group]="attestationGroup" />
+                    </div>
+                  </div>
+                }
+                <div class="row">
+                  <div class="col-md-7">
+                    @if (patientSignatureOptions.value === 'lantheus') {
+                      <app-input
+                        class="wrap flex-field"
+                        [field]="patientNameField"
+                        [group]="attestationGroup" />
+                      <app-input
+                        class="wrap flex-field"
+                        [field]="patientEmailField"
+                        [group]="attestationGroup" />
+                    }
+                  </div>
+                </div>
+
+                @if (patientSignatureOptions.value === 'guardian') {
+                  <div class="row">
+                    <div class="col-md-7">
+                      <app-radio
+                        class="flex-field"
+                        [field]="guadianField"
+                        [group]="attestationGroup" />
+                      @if (attestationGroup.controls.guardian.value === 'upload-poa') {
+                        <app-file-upload
+                          label="Attach POA documents"
+                          fileTypes="application/pdf"
+                          [isRequired]="true"
+                          [existingFiles]="existingPOAFiles()"
+                          (emitFiles)="handleFiles($event, attachPOAFile)" />
+                      }
+                      <app-input
+                        class="wrap flex-field"
+                        [field]="legalGuardianNameField"
+                        [group]="attestationGroup" />
+                      <app-input
+                        class="wrap flex-field"
+                        [field]="legalGuardianEmailField"
+                        [group]="attestationGroup" />
+                    </div>
+                  </div>
+                }
+              }
+            </form>
+          }
+        </app-header-wrap>
+      }
+    } @else {
+      @if (showPdfViewer() || hasAlert() === 'showPdfViewer') {
+        <app-header-wrap [bordered]="true">
+          <div style="height: 100%">
+            <app-pdf-viewer [pdfSrc]="pdfSrc()" style="min-height: 400px" />
+          </div>
+        </app-header-wrap>
+      }
+      @if (hasAlert() === 'enrollmentFailScreen') {
+        <app-fullpage-alerts>
+          <img src="warning.svg" alt="" srcset="" />
+          <h1>Uh oh... Something went wrong!</h1>
+          <p>
+            We could not process your electronic signature at this time. Please select the 'Back'
+            button below to return to step 6 and change your 'Prescriber Signature' preference to
+            'Download to print and sign' to complete your enrollment.
+          </p>
+        </app-fullpage-alerts>
+      }
+      @if (hasAlert() === 'docuSignMultipleApiCalls') {
+        <app-fullpage-alerts>
+          <h3>Please Wait...</h3>
+          <p>The enrollment submission is in progress</p>
+          Do not refresh this page or click the back button
+        </app-fullpage-alerts>
+      }
+      @if (hasAlert() === 'downloadDocument') {
+        <app-fullpage-alerts [title]="download.title" [content]="download.content">
+          <button (click)="downloadPdf()"><app-icon icon="print" /> View/print PDF</button>
+        </app-fullpage-alerts>
+      }
+
+      @if (hasAlert() === 'docuSignSuccess') {
+        <app-fullpage-alerts
+          [title]="`Your enrollment has been successfully submitted!`"
+          [content]="`The Lantheus Link Enrollment Form for <b>${patientName}</b> has been submitted.<br />Lantheus Link will contact you with next steps within 1 business day.
+                      <br /> <br />If you have any questions, please contact us at 1-844-339-8514.`">
+          <button (click)="downloadPdf()"><app-icon icon="print" /> View/print PDF</button>
+        </app-fullpage-alerts>
+      }
+
+      @if (hasAlert() === 'showIframe') {
+        <app-header-wrap>
+          <div style="height: 650px">
+            <iframe
+              #docusignFrame
+              [src]="srcIframe"
+              title="docusign frame"
+              style="height: 600px; width: 100%"
+              id="iframe_id"></iframe>
+          </div>
+        </app-header-wrap>
+      }
+    }
+
+    @if (
+      groups.prescriberSelected.get('prescriberSelected')?.value &&
+      hasAlert() !== 'showIframe' &&
+      hasAlert() !== 'docuScreen' &&
+      hasAlert() !== 'docuSignSuccess' &&
+      hasAlert() !== 'downloadDocument' &&
+      hasAlert() !== 'docuSignSuccess' &&
+      hasAlert() !== 'docuSignMultipleApiCalls'
+    ) {
+      <div class="container inner page-actions">
+        <button (click)="prevPage()" class="outline" type="button">
+          <app-icon icon="chevron-left" /> Back
+        </button>
+        @if (hasAlert() !== 'enrollmentFailScreen') {
+          <button
+            (click)="eSignatureScreen() ? handleESign() : nextPage()"
+            [class]="{ 'e-sign': eSignatureScreen() }"
+            [disabled]="!isValid"
+            type="button">
+            @if (
+              currentStep() === 6 && !eSignatureScreen() && signatureOptions.value === 'download'
+            ) {
+              Submit
+            } @else if (eSignatureScreen()) {
+              <app-icon icon="e-signature" /> E-Signature
+            } @else {
+              Next <app-icon icon="chevron-right" />
+            }
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  @for (item of popups | keyvalue: null; track item.key) {
+    @let popup = item.value;
+    @if (popup.content) {
+      <app-popup
+        [heading]="popup.title"
+        [type]="popup.type"
+        [buttons]="popup.action"
+        [isVisible]="popup.open"
+        [content]="popup.content || ''"
+        (buttonClick)="onPopupButtonClick($event, item.key)"
+        (closePopup)="popup.open = false"
+        [noContentPadding]="true">
+      </app-popup>
+    } @else {
+      <app-popup
+        [heading]="popup.title"
+        [type]="'custom'"
+        [buttons]="popup.action"
+        [isVisible]="popup.open"
+        [content]="popup.content || ''"
+        (closePopup)="popup.open = false">
+        <p>
+          By signing, I enroll in Lantheus Link patient support services (“Services”) related to my
+          ordered PET imaging scan using PYLARIFY®, which may include educational resources, case
+          management support, and information on potentially available out-of-pocket cost support.
+          Lantheus Link will gather information about me, including information related to my
+          medical condition and treatment, care management, health insurance and coverage claims,
+          and order for PYLARIFY® and the related PET scan, as well as all information provided on
+          this form (together “My Information”). I understand that Lantheus Link may:
+        </p>
+        <ul>
+          <li>Review and verify my insurance coverage for my ordered scan.</li>
+          <li>
+            Inform me about potentially available transportation and financial assistance options.
+          </li>
+          <li>Provide appointment reminders for my ordered scan.</li>
+          <li>
+            Share educational and promotional materials about the Services which may be based on the
+            information I provide, including any health information I share on the form above.
+          </li>
+          <li>Conduct quality assurance and seek feedback related to the Services.</li>
+          <li>Use de-identified information for research and business improvements.</li>
+        </ul>
+        <p>
+          Lantheus Link Services may change at any time. For more information on how we use personal
+          information, please visit Lantheus’ Privacy Policy
+          <a href="https://www.lantheus.com/legal/privacy-policy/" target="_blank">
+            https://www.lantheus.com/legal/privacy-policy/
+          </a>
+        </p>
+        <p
+          [innerHTML]="`I can opt out of communications or services at any time by calling 844-339-8514 or emailing support@lantheuslink.com. This will not apply to any prior use of My Information.`"></p>
+        <div style="display: flex">
+          <input type="checkbox" id="check" #consent />
+          <label for="check"
+            >I agree to receive text messages from Lantheus as part of Lantheus Link Patient Support
+            Services.</label
+          >
+        </div>
+        <p>
+          By opting in, I consent to receive text messages at the number I provided on this form.
+          Standard message and data rates may apply. Text “STOP” to opt out at any time.
+        </p>
+        <button
+          class="action right-btn"
+          (click)="onPopupButtonClick(consent.checked, item.key)"
+          [disabled]="!consent.checked">
+          OK
+        </button>
+      </app-popup>
+    }
+  }
+</div>
+
+@if (hasAlert() === 'docuScreen') {
+  <app-fullpage-alerts
+    class="docuSignScreenFail"
+    [title]="`The enrollment is being submitted`"
+    [content]="`The LANTHEUS LINK<sup>TM</sup> Enrollment Form for <b>${patientName}</b> is being submitted.<br/>
+              The provider portion of this enrollment form is complete. Lantheus Link will reach out to patient to obtain remaining information.<br/> <br/>If you have any questions, please contact us at 1-844-339-8514.`">
+  </app-fullpage-alerts>
+}
+
+<ng-template #tmp let-ctx let-position="position">
+  @for (field of ctx.form; track field.name) {
+    @if (position && field.position === position) {
+      <ng-container appDynamicField [field]="field" [group]="ctx.group" [flex]="true" />
+    }
+  }
+</ng-template>

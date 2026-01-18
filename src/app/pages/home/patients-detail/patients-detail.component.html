@@ -1,0 +1,40 @@
+<app-home-header [hasUpload]="!!selectedCaseId()" (upload)="onUploadPopup()" />
+<div class="container inner p-0">
+  <div class="card">
+    <div class="top-bar">
+      <div class="title">
+        <img src="my-patient.png" alt="patient-icon" />
+        <h3 class="m-0 ms-2">{{ patientData()?.PatientName }}</h3>
+        <span>(Patient ID: {{ patientData()?.PatientId }})</span>
+      </div>
+      <div class="actions">
+        <button class="sm outline" [routerLink]="['/home/my-patients']">
+          <app-icon [icon]="'chevron-left'" /> Back
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="heading">Patient Cases</div>
+      <app-table
+        [columnConfigs]="caseColumns"
+        [tableData]="caseData()"
+        [paginated]="true"
+        [selection]="'single'"
+        [pageSize]="10"
+        [preSelectedRows]="caseData()[0] ? [caseData()[0]] : []"
+        (emitSelection)="onSelect($event)" />
+
+      @if (selectedCaseId()) {
+        <app-patients
+          class="d-block mt-4"
+          [openPopUp]="popupOpen()"
+          (closePopup)="onClose()"
+          [data]="caseDetails()"
+          [selectedCaseId]="selectedCaseId()"
+          [patient]="patientData()"
+          (alertAcknowledged)="onAlertAcknowledged()" />
+      }
+    </div>
+  </div>
+</div>

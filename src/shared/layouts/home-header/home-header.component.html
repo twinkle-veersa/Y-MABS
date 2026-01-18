@@ -1,0 +1,30 @@
+<div class="header">
+  <div class="header-left">
+    <div class="trademark">
+      <span>PYLARIFY</span>
+      <span class="tm">TM</span>
+    </div>
+    <span>{{ today | date: 'MMM d, y' }}</span>
+  </div>
+  <div class="actions">
+    @if (hasUpload()) {
+      <div class="submit-container">
+        <button class="submit-enrollment" (click)="emitUpload()">
+          <img src="upload_document.png" alt="upload-icon" width="24" />
+          <span class="mobile-none">Upload Supplemental Documents </span>
+        </button>
+        <span class="enroll">Upload</span>
+      </div>
+    }
+    <div class="submit-container">
+      <button
+        class="submit-enrollment"
+        [routerLink]="['/home/enrollment']"
+        [disabled]="!hasEnrollment()">
+        <img src="submit-enrollment.png" alt="doctor-icon" width="24" />
+        <span class="mobile-none">Submit Enrollment Form</span>
+      </button>
+      <span class="enroll">Enroll</span>
+    </div>
+  </div>
+</div>

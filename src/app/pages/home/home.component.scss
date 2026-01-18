@@ -1,0 +1,24 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+:host {
+  flex-grow: 1;
+  display: grid;
+}
+.wrap {
+  display: grid;
+  grid-template-columns: var.$side-nav-width auto;
+  &.full {
+    grid-template-columns: auto;
+  }
+}
+@include mix.responsive(medium) {
+  aside {
+    display: none;
+  }
+  :host {
+    .wrap {
+      grid-template-columns: 100% auto;
+    }
+  }
+}

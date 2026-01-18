@@ -1,0 +1,39 @@
+@if (showInfobar()) {
+  <div class="infobar">
+    <app-icon icon="bell" />
+    Permanent J-Code J2782 for PYLARIFY: Effective April 1, 2024. Click
+    <a routerLink="">here</a>
+    for more information.
+    <app-icon class="close-btn" icon="cross" (click)="showInfobar.set(false)" />
+  </div>
+}
+
+<div class="support">
+  <h3>{{ content.supportTitle }}</h3>
+  <ul>
+    @for (item of content.list; track $index) {
+      <li [innerHTML]="item"></li>
+    }
+  </ul>
+</div>
+<div class="login-box">
+  <h2>{{ content.loginBoxTitle }}</h2>
+  <form [formGroup]="group" (ngSubmit)="login()">
+    <app-input [field]="content.form[0]" [group]="group" />
+    <a routerLink="/auth/forgot-username">Forgot Username?</a>
+
+    <app-input [field]="content.form[1]" [group]="group" />
+    <a routerLink="/auth/forgot-password">Forgot Password?</a>
+
+    <button
+      type="submit"
+      class="light mt-4"
+      [disabled]="!(group.controls.Email.value && group.controls.Password.value)">
+      Login
+    </button>
+  </form>
+  <div class="actions">
+    <button class="transparent" type="button" routerLink="/auth/register">Not Registered?</button>
+    <button class="secondary" type="button" routerLink="/auth/register">Create Account</button>
+  </div>
+</div>

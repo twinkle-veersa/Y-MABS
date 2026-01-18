@@ -1,0 +1,86 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+.tab {
+  @include mix.tabStyle;
+  flex-grow: unset;
+}
+
+.wrap {
+  padding: 1.5rem;
+  background-color: var.$panel-color;
+}
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding: 0.5rem;
+  border: 0.125rem solid var.$panel-color;
+}
+
+.popup-header {
+  @include mix.flexCentered(space-between, center);
+  margin-bottom: 1rem;
+  .header-left {
+    p {
+      font-weight: 500;
+    }
+  }
+
+  .header-right {
+    @include mix.flexCentered(center);
+    gap: 0.625rem;
+
+    .search-bar {
+      position: relative;
+      app-icon {
+        color: var.$grey;
+        position: absolute;
+        left: 0.5rem;
+        top: 0.5rem;
+      }
+      input {
+        width: 15rem;
+        padding: 0.5rem 1rem 0.5rem 2rem;
+        border: var.$field-border;
+        border-radius: 0.25rem;
+      }
+    }
+  }
+}
+.row.center {
+  align-items: center;
+}
+.err-msg {
+  margin-top: -0.5rem;
+}
+app-accordion {
+  display: block;
+  margin-block: 1.5rem;
+}
+.add-btn {
+  width: 100%;
+  min-width: unset;
+  padding: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+app-icon[icon='edit'] {
+  color: var.$primary-color;
+}
+app-icon[icon='delete'] {
+  color: var.$red;
+}
+app-accordion button.sm > app-icon {
+  display: none;
+}
+
+@include mix.responsive(medium) {
+  app-accordion button.sm {
+    background-color: transparent;
+    font-size: 1.25rem;
+    border: none;
+    & > app-icon {
+      display: inline-block;
+    }
+  }
+}

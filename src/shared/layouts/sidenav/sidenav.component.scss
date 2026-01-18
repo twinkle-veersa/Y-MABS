@@ -1,0 +1,32 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+nav {
+  background-color: var.$dark;
+  height: 100%;
+
+  a {
+    height: 6.875rem;
+    color: white;
+    @include mix.flexCentered;
+    flex-direction: column;
+    text-decoration: none;
+    border-bottom: 1px solid var.$primary-color;
+
+    img {
+      width: 3.125rem;
+    }
+
+    // app-icon {
+    //   font-size: 2.5rem;
+    // }
+    span {
+      padding: 0.5rem;
+      text-align: center;
+    }
+
+    &.active {
+      background-color: var.$primary-color;
+    }
+  }
+}

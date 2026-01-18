@@ -1,0 +1,216 @@
+@if (showPopup()) {
+  <div class="overlay">
+    <div class="popup">
+      <div class="popup-header">
+        <div>
+          <span class="popup-heading">Upload Supplemental Documents</span>
+          <span class="description">{{ patientDocumentPrompt() }}</span>
+        </div>
+        <button class="close-btn" (click)="onClosePopUp()">
+          <app-icon icon="cross" />
+        </button>
+      </div>
+
+      <div
+        class="drop-zone"
+        (dragover)="onDragOver($event)"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()"
+        (keydown.enter)="fileInput.click()"
+        (keydown.space)="fileInput.click()"
+        tabindex="0"
+        role="button">
+        <input
+          type="file"
+          #fileInput
+          hidden
+          (change)="onFileSelected($event)"
+          accept="application/pdf" />
+        <img src="Upload.png" alt="upload" height="50" width="50" />
+        <span class="drag-label">Drag and drop file here</span>
+        @if (errorMessage) {
+          <span class="error-message file-restriction">{{ errorMessage }}</span>
+        }
+      </div>
+
+      <div class="bottom-text">
+        <p class="drag-label mt-0 mb-3">or</p>
+        <button class="browse-btn" (click)="fileInput.click()">Browse Files</button>
+      </div>
+    </div>
+  </div>
+}
+<div class="bottom-container">
+  <div class="stepper-container">
+    <button class="arrow left" [class.active]="canScrollLeft()" (click)="scrollLeft()">
+      <app-icon icon="chevron-left" />
+    </button>
+
+    <div class="stepper" #stepper>
+      @for (item of steps() | keyvalue: null; track item.key) {
+        @let step = item.value;
+        <div
+          class="step"
+          (click)="currentStep.set(step)"
+          [class.active]="currentStep() === step"
+          (keydown)="onKeydown($event)"
+          tabindex="0">
+          {{ step }}
+        </div>
+      }
+    </div>
+
+    <button class="arrow right" [class.active]="canScrollRight()" (click)="scrollRight()">
+      <app-icon icon="chevron-right" />
+    </button>
+  </div>
+
+  @if (currentStep() === 'Case Info') {
+    <div class="stepper-content">
+      <h3>Case Information</h3>
+      <ng-container *ngTemplateOutlet="tmp; context: { form: caseDetails().CaseInfo }" />
+    </div>
+  }
+  @if (currentStep() === 'Alerts') {
+    <div class="stepper-content">
+      @if (alertsData()?.length) {
+        <h3>Case Alerts</h3>
+        <app-table
+          [tableData]="alertsData() || []"
+          [columnConfigs]="alertColumns"
+          [actions]="alertRowActions"
+          (emitAction)="onAlertAction($event)" />
+      } @else {
+        <ng-container *ngTemplateOutlet="empty" />
+      }
+    </div>
+  }
+  @if (currentStep() === 'Patient Info') {
+    <div class="stepper-content">
+      <h3>Patient Information</h3>
+      <ng-container *ngTemplateOutlet="tmp; context: { form: caseDetails().patientInfo }" />
+    </div>
+  }
+  @if (currentStep() === 'Prescriber Info') {
+    <div class="stepper-content">
+      <h3>Prescriber Information</h3>
+      <ng-container *ngTemplateOutlet="tmp; context: { form: caseDetails().prescriberInfo }" />
+    </div>
+  }
+  @if (currentStep() === 'Prescription Info') {
+    <div class="stepper-content">
+      @if (prescriptionData()?.length) {
+        <h3>Prescription Info</h3>
+        <app-table
+          [tableData]="prescriptionData() || []"
+          [columnConfigs]="prescriptionColumns"
+          [paginated]="true" />
+      } @else {
+        <ng-container *ngTemplateOutlet="empty" />
+      }
+    </div>
+  }
+  @if (currentStep() === 'Medical Insurance Info') {
+    @if (
+      caseDetails().medicalInsuranceInfo.adminstration.left.at(0)?.value ||
+      buyBillData().length ||
+      adminData().length
+    ) {
+      <div class="stepper-content">
+        @let section = caseDetails().medicalInsuranceInfo;
+        <h3>Medical Insurance Information</h3>
+        <ng-container *ngTemplateOutlet="tmp; context: { form: section.medicalInfo }" />
+        <h3>Buy and Bill Product Coverage Details</h3>
+        <ng-container *ngTemplateOutlet="tmp; context: { form: section.buyAndBill }" />
+        <app-table
+          class="d-block my-3"
+          [tableData]="buyBillData() || []"
+          [columnConfigs]="medicalCols" />
+        @if (adminData().length > 0) {
+          <h2>Administration</h2>
+          <ng-container *ngTemplateOutlet="tmp; context: { form: section.adminstration }" />
+          <app-table
+            class="d-block my-3"
+            [tableData]="adminData() || []"
+            [columnConfigs]="medicalCols" />
+        }
+      </div>
+    } @else {
+      <ng-container *ngTemplateOutlet="empty" />
+    }
+  }
+  @if (currentStep() === 'Pharmacy Insurance Info') {
+    @if (false) {
+      <!-- No Data available for this section yet -->
+      <div class="stepper-content">
+        @let section = caseDetails().pharmacyInsuranceInfo;
+        <h3>Prescription Insurance Information</h3>
+        <ng-container
+          *ngTemplateOutlet="tmp; context: { form: section.prescriptionInsuranceInfo }" />
+      </div>
+      <div class="stepper-content">
+        <h3>Medicare Coverage Information</h3>
+        <ng-container
+          *ngTemplateOutlet="tmp; context: { form: section.medicareCoverageInformation }" />
+      </div>
+      @if (iaData().length) {
+        <div class="stepper-content">
+          <h3>Insurance Authorization (IA) Information</h3>
+          <app-table
+            class="d-block my-3"
+            [tableData]="iaData() || []"
+            [columnConfigs]="insColumns" />
+        </div>
+      }
+    } @else {
+      <ng-container *ngTemplateOutlet="empty" />
+    }
+  }
+
+  @if (currentStep() === 'Documents') {
+    <div class="stepper-content">
+      @if (documents()?.length) {
+        <h3>Documents</h3>
+        <app-table
+          class="d-block my-3"
+          [pageSize]="5"
+          [rowsWithPdf]="true"
+          [pdfSrc]="pdfSrc()"
+          [tableData]="documents() || []"
+          (emitSelection)="handlePdfSrc($event)"
+          [columnConfigs]="documentColumns" />
+      } @else {
+        <ng-container *ngTemplateOutlet="empty" />
+      }
+    </div>
+  }
+</div>
+
+<ng-template #tmp let-form="form">
+  <div class="row">
+    <div class="col-md-6">
+      <ng-container *ngTemplateOutlet="innerLabels; context: { form: form.left }" />
+    </div>
+    <div class="col-md-6">
+      <ng-container *ngTemplateOutlet="innerLabels; context: { form: form.right }" />
+    </div>
+  </div>
+</ng-template>
+<ng-template #innerLabels let-form="form">
+  @for (field of form; track $index) {
+    @if (field.field) {
+      <ng-container appDynamicField [field]="field.field" [group]="group" [flex]="true" />
+    } @else {
+      @if (field.value) {
+        <div class="label-info">
+          <label [for]="field.label">{{ field.label }}</label>
+          <span> {{ field.value }}</span>
+        </div>
+      }
+    }
+  }
+</ng-template>
+
+<ng-template #empty>
+  <div class="p-5 text-center">No Information available</div>
+</ng-template>

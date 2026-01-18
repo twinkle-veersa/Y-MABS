@@ -1,0 +1,20 @@
+<div class="overlay">
+  <div class="modal">
+    <div class="header">
+      <span>{{ config().heading }}</span>
+      <app-icon icon="cross" (click)="close()" tabindex="1" (keyup.enter)="close()" />
+    </div>
+    <div class="body">
+      <div class="wrap">
+        @if (config().showIcon) {
+          <app-icon class="alertIcon" [icon]="config().alertIcon" />
+        }
+        <p [innerHTML]="message()"></p>
+      </div>
+    </div>
+    <div class="footer pt-0">
+      <button class="outline" (click)="close()">{{ config().firstButton }}</button>
+      <button (click)="confirmation.emit(true)">{{ config().secondButton }}</button>
+    </div>
+  </div>
+</div>

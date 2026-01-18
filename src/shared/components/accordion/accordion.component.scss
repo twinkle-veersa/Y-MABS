@@ -1,0 +1,112 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+.accordion {
+  overflow: hidden;
+  border: var.$field-border;
+  border-radius: var.$container-radius;
+  .accordion-header {
+    @include mix.flexCentered(space-between, center);
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 1rem;
+    border-bottom: var.$field-border;
+    background-color: var.$panel-color;
+    font-weight: bold;
+    .header-left {
+      @include mix.flexCentered;
+      gap: 0.5rem;
+      app-icon {
+        cursor: pointer;
+        margin-right: 0.625;
+        transition: transform 0.2s ease-in-out;
+
+        &.flipped {
+          transform: rotate(90deg);
+        }
+      }
+    }
+    .header-right {
+      @include mix.flexCentered(center);
+      gap: 0.625rem;
+      .search-bar {
+        position: relative;
+        app-icon {
+          color: var.$grey;
+          position: absolute;
+          left: 0.5rem;
+          top: 0.5rem;
+        }
+
+        input {
+          width: 15rem;
+          padding: 0.5rem 1rem 0.5rem 2rem;
+          border: var.$field-border;
+          border-radius: 0.315rem;
+        }
+      }
+      button {
+        padding: 0.5rem 1.5rem;
+        min-width: fit-content;
+        border: none;
+        background-color: var.$primary-color;
+
+        &:disabled {
+          background-color: #c2dad7;
+        }
+      }
+    }
+  }
+  .accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+
+    &.open {
+      max-height: 15rem;
+      overflow: auto;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      th,
+      td {
+        text-align: left;
+        padding: 0.75rem;
+      }
+      th {
+        background-color: #ffffff;
+        border-bottom: 0.25rem solid var.$row-odd;
+        font-weight: bold;
+      }
+      tr:not(.selected) {
+        &:nth-child(odd) {
+          background-color: var.$row-odd;
+        }
+
+        &:hover {
+          background-color: var.$row-hover;
+        }
+      }
+      tr.selected {
+        background-color: rgba(var.$light, 0.5);
+      }
+    }
+
+    @include mix.scrollbars(0.25rem);
+  }
+}
+.mobile-title {
+  display: none;
+}
+
+@include mix.responsive(medium) {
+  .mobile-title {
+    @include mix.flexCentered(start, start);
+    flex-direction: column;
+    .name {
+      font-size: small;
+      font-weight: 500;
+    }
+  }
+}

@@ -1,0 +1,34 @@
+<app-home-header />
+<app-header-wrap>
+  <div class="heading">
+    <img src="tools.png" alt="tools" height="30" class="me-2" />
+    <h3 class="m-0">{{ content.title }}</h3>
+  </div>
+  <h3 class="m-0 mt-3 head">{{ content.header }}</h3>
+  <div class="row">
+    @for (col of content.columns; track $index) {
+      <div class="col-md-3">
+        <h4>{{ col.head }}</h4>
+        <ul>
+          @for (link of col.links; track $index) {
+            <li>
+              @if (link.href) {
+                <a routerLink="" (click)="navigateWithAlert(link.href)">{{ link.label }}</a>
+              } @else {
+                <a routerLink="" (click)="link.popupOpen = true">{{ link.label }}</a>
+                <app-popup
+                  [heading]="link.label"
+                  [content]="link.content ?? ''"
+                  [pdfSrc]="link.pdfSrc ?? ''"
+                  [type]="link.pdfSrc ? 'pdf' : 'default'"
+                  (buttonClick)="handlePopupButtonClick(link)"
+                  [isVisible]="link.popupOpen ?? false"
+                  (closePopup)="link.popupOpen = false" />
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+</app-header-wrap>

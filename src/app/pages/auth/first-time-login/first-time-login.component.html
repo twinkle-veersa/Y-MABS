@@ -1,0 +1,25 @@
+<form [formGroup]="group" (ngSubmit)="submit()">
+  <app-header-wrap [heading]="content.title">
+    <app-form-title [title]="content.head" [subtitle]="content.subhead" />
+    <div class="row">
+      <div class="col-md-6">
+        @for (field of securityForm(); track field.name; let i = $index) {
+          @if (field.position === 'left') {
+            @if (i === 1) {
+              <hr class="horizontal-line" />
+            }
+            <ng-container appDynamicField [field]="field" [group]="group" />
+          }
+        }
+      </div>
+      <div class="col-md-6">
+        @for (field of form; track field.name) {
+          @if (field.position === 'right') {
+            <ng-container appDynamicField [field]="field" [group]="group" />
+          }
+        }
+      </div>
+    </div>
+    <button action class="ms-auto" type="submit" [disabled]="!group.valid">Continue</button>
+  </app-header-wrap>
+</form>

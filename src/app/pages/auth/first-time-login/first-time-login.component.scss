@@ -1,0 +1,8 @@
+@use 'mixins' as mx;
+
+:host {
+  @include mx.hostContainer;
+  hr {
+    margin-block: 3rem;
+  }
+}

@@ -1,0 +1,33 @@
+@if (field(); as f) {
+  <app-input-label [field]="f" [isRequired]="isRequired" />
+
+  <div class="input-wrap">
+    <!-- <select
+      [id]="f.name"
+      [formControl]="control"
+      [ngClass]="control.invalid && control.touched ? 'invalid' : ''">
+      <option value="">
+        {{ f.placeholder ? f.placeholder : 'Select ' + f.label }}
+      </option>
+      @for (item of f.options; track $index) {
+        <option [value]="item.value">
+          {{ item.option }}
+        </option>
+      }
+    </select> -->
+    <p-select
+      [id]="f.name"
+      class="w-100"
+      [dropdownIcon]="'icon'"
+      optionValue="value"
+      optionLabel="option"
+      [options]="f.options"
+      [formControl]="control"
+      [placeholder]="f.placeholder ? f.placeholder : 'Select ' + f.label"
+      [class.ng-dirty]="control.touched" />
+
+    @if (control.touched && control.invalid) {
+      <app-error-msg [control]="control" [label]="f.label" />
+    }
+  </div>
+}

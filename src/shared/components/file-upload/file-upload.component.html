@@ -1,0 +1,48 @@
+<div class="field-wrap flex-field">
+  <label for="file-upload">
+    {{ label() }}
+    @if (isRequired()) {
+      <app-req />
+    }
+  </label>
+
+  <div class="upload-input input-wrap">
+    <span class="text-truncate">
+      @if (!multiple() && files().length) {
+        {{ files()[0].name }}
+      }
+    </span>
+
+    <div>
+      <input
+        type="file"
+        id="file-upload"
+        #fileInput
+        (change)="handleFileInput($event)"
+        [accept]="fileTypes()"
+        [disabled]="disabled()" />
+
+      @if (!multiple() && files().length) {
+        <button class="remove" (click)="removeFile(0)" type="button">Remove</button>
+      } @else {
+        <button (click)="fileInput.click()" type="button" [disabled]="disabled()">
+          {{ buttonText() }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Multiple file list rendering -->
+  <!-- @if (multiple() && files().length) {
+    <ul class="uploaded-files-list">
+      @for (let file of files(); track: file.name) {
+        <li>
+          {{ file.name }}
+          <button class="remove" type="button" (click)="removeFile(files().indexOf(file))">
+            ✕
+          </button>
+        </li>
+      }
+    </ul>
+  } -->
+</div>

@@ -1,0 +1,36 @@
+<div class="hamburger-container">
+  <button class="hamburger-btn" (click)="toggleSidebar()">
+    <app-icon icon="bars" />
+    <span>MENU</span>
+  </button>
+  <div class="sidebar" [class.open]="sidebarOpen">
+    <div class="hamburger-header">
+      <button class="hamburger-btn" (click)="toggleSidebar()">
+        <app-icon icon="cross" />
+      </button>
+      <a [href]="content.logoHref" target="_blank">
+        <img ngSrc="logo.png" [alt]="content.logoAlt" width="180" height="50" />
+      </a>
+    </div>
+    <nav class="nav-links">
+      @for (nav of navs(); track $index) {
+        <a
+          [routerLink]="['/'].concat(nav.link)"
+          routerLinkActive="active"
+          (click)="toggleSidebar()">
+          <img src="{{ nav.icon }}" alt="" class="nav-icon" />
+          <span>{{ nav.label }}</span>
+        </a>
+      }
+      <a
+        class="logout"
+        role="button"
+        tabindex="0"
+        (click)="logout()"
+        (keydown.enter)="api.logout()">
+        <app-icon icon="logout" />
+        Logout
+      </a>
+    </nav>
+  </div>
+</div>

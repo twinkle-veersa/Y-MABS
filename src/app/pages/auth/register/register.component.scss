@@ -1,0 +1,101 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+:host {
+  @include mix.hostContainer;
+}
+
+.account-options {
+  @include mix.flexCentered;
+  font-weight: 500;
+
+  > div {
+    position: relative;
+    cursor: pointer;
+
+    .icon-box {
+      margin: 1rem;
+      font-size: 4rem;
+      padding: 1.5rem;
+      border-radius: 0.65rem;
+      color: var.$primary-color;
+      border: 1px solid;
+      line-height: 3rem;
+    }
+
+    label {
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    &.selected {
+      .icon-box {
+        color: #fff;
+        background-color: var.$primary-color;
+      }
+
+      label {
+        font-weight: 700;
+      }
+    }
+
+    .checked {
+      position: absolute;
+      border-radius: 50%;
+      background-color: var.$secondary-color;
+      align-content: center;
+      width: 2rem;
+      height: 2rem;
+      font-size: 1rem;
+      line-height: 0.5rem;
+      color: #fff;
+      right: 0;
+      top: 0;
+    }
+  }
+}
+
+.find {
+  margin: 0;
+  border: none;
+  margin-top: 1.5rem;
+  background-color: var.$dark;
+  border-color: var.$dark;
+}
+
+.form-actions {
+  @include mix.flexCentered;
+  gap: 0.5rem;
+
+  button.sm {
+    flex: 1;
+    max-height: fit-content;
+  }
+}
+
+.seperator {
+  @include mix.flexCentered;
+  margin-block: 2rem;
+  gap: 1rem;
+
+  & > * {
+    flex: 1;
+  }
+}
+
+app-accordion {
+  display: block;
+  margin-block: 1rem;
+}
+
+.table-wrap {
+  border: var.$field-border;
+  border-radius: var.$field-border-radius;
+  overflow: hidden;
+  display: block;
+  margin-block: 1rem;
+}
+
+.step2 {
+  border-left: 1px solid var.$border-color;
+}

@@ -1,0 +1,5 @@
+<h2 [class.highlight]="highlight()">{{ title() }}</h2>
+<h3 [class.normal]="emphasis() === 'low'">{{ subtitle() }}</h3>
+@if (required()) {
+  <p>* Required field</p>
+}

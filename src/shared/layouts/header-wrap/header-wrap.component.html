@@ -1,0 +1,33 @@
+<div class="container inner">
+  <div class="tabs-group">
+    <ng-content select=".tab"></ng-content>
+  </div>
+  <div class="card" [class.border]="bordered()">
+    @if (heading()) {
+      <div class="header-wrap">
+        <div>
+          <div class="head">{{ heading() }}</div>
+          @if (steps().steps.length) {
+            <div class="stepper ms-3 desktop-stepper">
+              @for (item of steps().steps; let i = $index; track i) {
+                <span [class]="{ complete: i <= steps().complete }">{{ item }}</span>
+              }
+            </div>
+          }
+        </div>
+        <div class="subhead">{{ subheading() }}</div>
+        <div class="stepper ms-3 mobile-stepper">
+          @for (item of steps().steps; let i = $index; track i) {
+            <span [class]="{ complete: i <= steps().complete }">{{ item }}</span>
+          }
+        </div>
+      </div>
+    }
+    <div class="content" [class.no-padding]="noContentPadding()">
+      <ng-content></ng-content>
+      <div class="page-actions">
+        <ng-content select="[action]"></ng-content>
+      </div>
+    </div>
+  </div>
+</div>

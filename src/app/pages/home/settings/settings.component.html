@@ -1,0 +1,172 @@
+<form [formGroup]="groups[activeTab]">
+  <app-header-wrap>
+    @for (tab of tabs; track $index) {
+      <button
+        class="tab"
+        type="button"
+        [class.active]="tab === activeTab"
+        (click)="activeTab = tab">
+        {{ tab }}
+      </button>
+    }
+    @switch (activeTab) {
+      @case ('practice') {
+        <div class="wrap">
+          <app-form-title
+            [title]="content[activeTab].title"
+            [subtitle]="content[activeTab].subtitle" />
+          <div class="row">
+            @for (field of forms[activeTab]; track field.name) {
+              <ng-container appDynamicField [field]="field" [group]="groups[activeTab]" />
+            }
+          </div>
+          <!-- <app-form-title title="Office Contact Information" [required]="false" />
+          <div class="row">
+            @for (field of forms.officeContact; track field.name) {
+              <ng-container appDynamicField [field]="field" [group]="groups.officeContact" />
+            }
+          </div> -->
+        </div>
+        <div class="actions mb-5">
+          @if (updateData) {
+            <button class="outline" type="button" (click)="cancelUpdateFacility()">Cancel</button>
+          }
+          <button
+            type="button"
+            (click)="updateData ? updateFacility() : addFacility(); hasUnsavedChanges.set(true)"
+            [disabled]="groups[activeTab].invalid">
+            {{ updateData ? 'Update' : 'Add' }}
+          </button>
+        </div>
+        <app-table
+          [tableData]="practiceData()"
+          [columnConfigs]="practiceCols"
+          [actions]="practiceRowActions"
+          [disabledRow]="updateData"
+          [paginated]="true"
+          (emitAction)="onRowAction($event)"
+          [pageSize]="5" />
+
+        <button
+          type="button"
+          (click)="onSave()"
+          class="d-block ms-auto mt-4"
+          [disabled]="(activeTab === 'practice' && !practiceData().length) || updateData">
+          Save
+        </button>
+      }
+      @case ('prescriber') {
+        <app-form-title
+          [title]="content[activeTab].title"
+          [subtitle]="content[activeTab].subtitle" />
+        <div class="row center">
+          @for (field of forms[activeTab]; track field.name) {
+            <ng-container appDynamicField [field]="field" [group]="groups[activeTab]" />
+          }
+          <div class="col-md-1">
+            <button
+              class="add-btn"
+              type="button"
+              (click)="addFacilityByNPI()"
+              [disabled]="groups[activeTab].invalid">
+              Add
+            </button>
+          </div>
+        </div>
+        @if (errMsg()) {
+          <p class="err-msg red">{{ errMsg() }}</p>
+        }
+        <app-form-title
+          class="d-block mt-4"
+          [required]="false"
+          [title]="'Associated Practice Office(s)'"
+          [subtitle]="'Please verify the practice offices that you and the prescriber(s) are both associated with.'" />
+        @if (prescribers().length) {
+          @for (prescriber of prescribers(); track $index) {
+            <app-accordion
+              [title]="`Prescriber Name`"
+              [name]="`${prescriber.firstName} ${prescriber.lastName}`">
+              <span class="mobile-none">
+                Confimation Status:
+                <span
+                  [class]="prescriber.AccountStatus === 'Active' ? '' : 'red'"
+                  [pTooltip]="
+                    prescriber.AccountStatus !== 'Active'
+                      ? `The Prescriber's consent to be added to this account`
+                      : ''
+                  "
+                  tooltipPosition="top">
+                  {{ prescriber.AccountStatus }}
+                </span>
+              </span>
+              <button
+                class="sm ms-4"
+                type="button"
+                (click)="editPrescriberFacilities($index); $event.stopPropagation()">
+                <app-icon icon="edit" />
+                <span class="mobile-none">Edit</span>
+              </button>
+              <button
+                class="sm"
+                type="button"
+                (click)="removePrescriber($index); $event.stopPropagation()">
+                <app-icon icon="delete" />
+                <span class="mobile-none">Delete</span>
+              </button>
+              <app-table
+                class="table"
+                [tableData]="prescriber.selectedFacilities"
+                [columnConfigs]="cols">
+              </app-table>
+            </app-accordion>
+          }
+        }
+        <button
+          type="button"
+          (click)="onSave()"
+          class="d-block ms-auto mt-4"
+          [disabled]="!toDelete.length && !prescribers().length">
+          Save
+        </button>
+      }
+    }
+  </app-header-wrap>
+</form>
+
+<app-popup
+  [type]="'custom'"
+  heading="Associate Practice Office(s)"
+  [noContentPadding]="true"
+  [isVisible]="assPopupOpen"
+  (closePopup)="closePrescriberPopup()">
+  <p class="mt-0">Please verify the practice offices prescriber is associated with.</p>
+  @let prescriber = prescribers()[selectedPrescriberIdx() || 0];
+  <div class="popup-header">
+    <div class="header-left">
+      @if (prescriber) {
+        <p>Prescriber Name: {{ prescriber.firstName }} {{ prescriber.lastName }}</p>
+      }
+    </div>
+    <div class="header-right">
+      <div class="search-bar">
+        <app-icon icon="search" />
+        <input
+          type="text"
+          placeholder="Search"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)" />
+      </div>
+      <!-- <button class="sm" (click)="search()">Search</button> -->
+    </div>
+  </div>
+  @if (updateTable()) {
+    <app-table
+      selection="multiple"
+      [idKey]="'Id'"
+      (emitSelection)="selectFacility($event)"
+      [preSelectedRows]="preSelectedRows()"
+      [tableData]="updateTable() ? allFacilitiesForTable() : []"
+      [columnConfigs]="cols">
+    </app-table>
+  }
+</app-popup>

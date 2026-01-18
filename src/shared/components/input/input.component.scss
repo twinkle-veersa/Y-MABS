@@ -1,0 +1,16 @@
+@use 'variables' as var;
+@use 'fields' as f;
+
+.input-wrap {
+  position: relative;
+  input {
+    @include f.input;
+  }
+  app-icon {
+    color: var.$dark-grey;
+    position: absolute;
+    cursor: pointer;
+    right: 0.8rem;
+    top: 0.8rem;
+  }
+}

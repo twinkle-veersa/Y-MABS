@@ -1,0 +1,137 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  @include mix.flexCentered(center, center);
+
+  .popup-content {
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 0;
+    // padding: 0.63rem;
+
+    min-width: 50rem;
+    width: auto;
+    max-width: 55rem;
+    @include mix.flexColumn;
+
+    .popup-header {
+      background: #058348;
+      color: #fff;
+      padding: 0.63rem 1.25rem;
+      @include mix.flexCentered(space-between, center);
+      margin: 0.5rem;
+
+      h2 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+    }
+
+    .popup-body {
+      @include mix.scrollbars(0.25rem, var.$primary-color);
+      margin-block: 0.5rem;
+      line-height: 1.25rem;
+      padding: 1.25rem;
+      max-height: 25rem;
+      overflow: auto;
+      flex: 1;
+      @include mix.flexColumn;
+      border-top: 1px solid rgba(var.$border-color, 0.5);
+
+      .popup-body-container {
+        // @include mix.flexCentered(flex-start, flex-start);
+        gap: 0.94rem;
+
+        .popup-image {
+          max-width: 40%;
+          max-height: 9.4rem;
+          object-fit: contain;
+        }
+
+        .popup-text {
+          flex: 1;
+
+          &.full-width {
+            width: 100%;
+          }
+        }
+      }
+    }
+
+    .popup-footer {
+      padding: 0.63rem 1.25rem;
+      border-top: 1px solid rgba(var.$border-color, 0.5);
+      @include mix.flexCentered(space-between, center);
+
+      .left-btn {
+        margin-right: auto;
+      }
+
+      .right-btn {
+        margin-left: auto;
+      }
+    }
+
+    &.no-padding {
+      border: 0.3rem solid var.$dark-grey;
+
+      .popup-header {
+        margin: 0;
+        border: none;
+      }
+    }
+  }
+}
+
+.pdf-header {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(var.$border-color, 0.5);
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+}
+
+.popup-body-alert {
+  @include mix.flexCentered;
+  gap: 2rem;
+}
+
+@include mix.responsive(medium) {
+  .popup-overlay {
+    align-items: flex-end;
+
+    .popup-content {
+      min-width: 100vw;
+
+      .popup-body {
+        padding: 2rem;
+      }
+    }
+
+    app-pdf-viewer {
+      min-height: 50rem;
+    }
+
+    .no-padding {
+      border: none !important;
+    }
+  }
+}

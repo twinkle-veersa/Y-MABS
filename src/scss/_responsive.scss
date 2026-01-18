@@ -1,0 +1,37 @@
+@use 'mixins' as mix;
+
+html {
+  font-size: 18px;
+
+  @include mix.responsive(xx-large) {
+    font-size: 18px;
+  }
+
+  @include mix.responsive(xx-large) {
+    font-size: 17px;
+  }
+
+  @include mix.responsive(x-large) {
+    font-size: 16px;
+  }
+
+  @include mix.responsive(m-large) {
+    font-size: 14px;
+  }
+
+  @include mix.responsive(large) {
+    font-size: 13px;
+  }
+
+  @include mix.responsive(bs-large) {
+    font-size: 12px;
+  }
+
+  @include mix.responsive(medium) {
+    font-size: 12px;
+  }
+
+  @include mix.responsive(small) {
+    font-size: 12px;
+  }
+}

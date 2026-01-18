@@ -1,0 +1,57 @@
+@use 'sass:color';
+@use 'mixins' as mix;
+@use 'variables' as var;
+
+.upload-input {
+  @include mix.flexCentered(space-between, center);
+  height: fit-content;
+  gap: 0.63rem;
+  border: 1px solid var.$border-color;
+  border-radius: 0.31rem;
+  span {
+    padding-inline: 0.5rem;
+  }
+  input[type='file'] {
+    display: none;
+  }
+
+  button {
+    min-width: 0 !important;
+    border-radius: 0 0.31rem 0.31rem 0;
+    background-color: var.$medium-grey;
+    color: var.$dark-grey;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-weight: 400;
+    font-size: 0.87rem;
+    cursor: pointer;
+    &.remove {
+      color: var.$error;
+      background-color: color.adjust(var.$error, $lightness: 40%);
+    }
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.flex-field {
+  align-items: center;
+}
+
+label {
+  width: 36%;
+}
+
+@include mix.responsive(medium) {
+  .flex-field {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  label {
+    width: 100%;
+    font-size: 1.25rem;
+  }
+}

@@ -1,0 +1,15 @@
+@if (field(); as f) {
+  <label [for]="f.name">
+    @if (f.label) {
+      <span>
+        {{ f.label }}
+        @if (isRequired() && f.label !== ' ') {
+          <app-req />
+        }
+      </span>
+      @if (f.hint) {
+        <div class="hint">{{ f.hint }}</div>
+      }
+    }
+  </label>
+}

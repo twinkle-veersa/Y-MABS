@@ -1,0 +1,179 @@
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        @if (selection() && selection() === 'multiple') {
+          <th class="selection-column">
+            @if (selectAllEnabled()) {
+              <input type="checkbox" />
+            }
+          </th>
+        }
+        @for (item of columnConfigs(); track $index) {
+          <th
+            [class.text-center]="item.key === 'action'"
+            [class.sortable]="sortingEnabled() && (item.sortable ?? true) && item.key !== 'action'"
+            (click)="
+              sortingEnabled() && (item.sortable ?? true) && item.key !== 'action'
+                ? toggleSort(item.key)
+                : null
+            ">
+            <div class="wrap">
+              <span class="column-head">
+                {{ item.title || item.key }}
+              </span>
+              @if (sortingEnabled() && (item.sortable ?? true) && item.key !== 'action') {
+                <span class="sort-icon" [class]="{ active: sortColumn() === item.key }">
+                  <app-icon
+                    class="up"
+                    [class]="{ active: sortDirection() === 'asc' }"
+                    icon="chevron-left" />
+                  <app-icon
+                    class="down"
+                    [class]="{ active: sortDirection() === 'desc' }"
+                    icon="chevron-right" />
+                </span>
+              }
+            </div>
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (data of paginatedData(); track $index) {
+        @let selected = isSelected(data);
+        <tr
+          [class.selected]="selected"
+          [class.disabled]="disabledRow() === data"
+          [class.pdf-open]="selectedPdf === data"
+          [class.clickable]="selection() || rowsWithPdf()"
+          (click)="onRowClick(data, $index)">
+          @if (selection() && selection() === 'multiple') {
+            <td class="selection-column">
+              <input type="checkbox" (change)="onSelection(data, $index)" [checked]="selected" />
+            </td>
+          }
+          @for (item of columnConfigs(); track item) {
+            <td>
+              @if (item.key !== 'action') {
+                @let context = { $implicit: data, key: item.key, col: item };
+                <ng-container *ngTemplateOutlet="rowValue; context: context" />
+              } @else {
+                <div class="row-action">
+                  @for (item of actions(); track $index) {
+                    <button
+                      class="sm"
+                      type="button"
+                      [disabled]="disabledRow() === data"
+                      (click)="rowAction(item.type, data, $index)">
+                      {{ item.name }}
+                    </button>
+                  }
+                </div>
+              }
+            </td>
+          }
+        </tr>
+        @if (rowsWithPdf() && data === selectedPdf) {
+          <ng-container
+            *ngTemplateOutlet="pdfRow; context: { $implicit: data, key: rowsWithPdf() }" />
+        }
+      }
+    </tbody>
+    @if (!tableData().length) {
+      <tfoot>
+        @let span = columnConfigs().length;
+        <td [attr.colspan]="selection() === 'multiple' ? span + 1 : span" class="text-center">
+          No data found.
+        </td>
+      </tfoot>
+    }
+  </table>
+</div>
+@if (paginated()) {
+  <div class="pagination">
+    <button
+      type="button"
+      class="sm transparent"
+      (click)="currentPage.set(1)"
+      [disabled]="currentPage() <= 1">
+      <app-icon icon="first-arrow" />
+    </button>
+    <button
+      type="button"
+      class="sm transparent"
+      (click)="currentPage.set(currentPage() - 1)"
+      [disabled]="currentPage() <= 1">
+      <app-icon icon="left-arrow" />
+    </button>
+    <span class="page">{{ currentPage() }}</span>
+    <button
+      type="button"
+      class="sm transparent"
+      (click)="currentPage.set(currentPage() + 1)"
+      [disabled]="currentPage() >= totalPages()">
+      <app-icon icon="right-arrow" />
+    </button>
+    <button
+      type="button"
+      class="sm transparent"
+      (click)="currentPage.set(totalPages())"
+      [disabled]="currentPage() >= totalPages()">
+      <app-icon icon="last-arrow" />
+    </button>
+    <select [formControl]="pageSizeControl">
+      @for (item of pageSizes(); track $index) {
+        <option [value]="item">{{ item }}</option>
+      }
+    </select>
+  </div>
+}
+<ng-template #rowValue let-data let-key="key" let-config="col">
+  @let value = config.isArray ? data[key][0] : data[key];
+  @if (config.pipeName) {
+    <span [class.text-nowrap]="config.pipeName === 'phone'">
+      {{ value | dynamicPipe: config.pipeName : config.pipeAttr }}
+    </span>
+  } @else {
+    <span [classList]="config.classList">
+      {{ value }}
+    </span>
+  }
+</ng-template>
+<!-- <ng-template #rowValue let-data let-key="key" let-config="col">
+  @if (config.isArray && isArray(data[key]) && data[key].length) {
+    @let firstItem = data[key][0];
+    @if (config.pipeName) {
+      <span [class.text-nowrap]="config.pipeName === 'phone'">
+        {{ firstItem | dynamicPipe: config.pipeName }}
+      </span>
+    } @else {
+      <span [classList]="config.classList">
+        {{ firstItem | json }}
+      </span>
+    }
+  } @else {
+    @let value = data[key];
+    @if (config.pipeName) {
+      <span [class.text-nowrap]="config.pipeName === 'phone'">
+        {{ value | dynamicPipe: config.pipeName }}
+      </span>
+    } @else {
+      <span [classList]="config.classList">
+        {{ value }}
+      </span>
+    }
+  }
+</ng-template> -->
+
+<ng-template #pdfRow let-data>
+  <tr style="min-height: 800px">
+    <td class="p-0" [attr.colspan]="columnConfigs().length">
+      @if (pdfSrc()) {
+        @defer {
+          <app-pdf-viewer [pdfSrc]="pdfSrc()!" />
+        }
+      }
+    </td>
+  </tr>
+</ng-template>

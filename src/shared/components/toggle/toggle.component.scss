@@ -1,0 +1,61 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+$toggle-color: var.$border-color;
+
+.toggle-container input[type='checkbox'] {
+  display: none;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 3.75rem;
+  height: 2rem;
+  border-radius: 1.5rem;
+  border: 0.125rem solid $toggle-color;
+  overflow: hidden;
+  &.disabled {
+    border-color: var.$disabled;
+    .slider {
+      cursor: not-allowed;
+      .knob {
+        background-color: var.$disabled;
+      }
+    }
+  }
+}
+
+.toggle-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  transition: 0.4s;
+  border-radius: 50%;
+  @include mix.flexCentered;
+}
+
+.toggle-switch .slider {
+  transition: 0.4s;
+  position: absolute;
+  left: -1.4rem;
+  top: 0.125rem;
+
+  .knob {
+    width: 1.5rem;
+    height: 1.5rem;
+    background-color: $toggle-color;
+    border-radius: 50%;
+  }
+}
+
+input[type='checkbox']:checked + .slider {
+  transform: translateX(1.65rem);
+
+  .knob {
+    background-color: var.$dark;
+  }
+}
+
+.toggle-switch:has(> input[type='checkbox']:checked) {
+  border-color: var.$dark;
+}

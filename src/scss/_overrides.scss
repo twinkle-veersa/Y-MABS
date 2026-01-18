@@ -1,0 +1,129 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+@use 'fields' as f;
+
+.input-wrap {
+  .p-datepicker .p-datepicker-panel {
+    min-width: unset;
+  }
+
+  .p-inputtext {
+    @include f.input;
+  }
+
+  .p-datepicker-panel {
+    padding: 0.5rem;
+    width: min-content;
+
+    .p-datepicker-calendar-container {
+      width: max-content;
+    }
+  }
+
+  .p-datepicker-day-view,
+  .p-datepicker-month-view,
+  .p-datepicker-year-view {
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  .p-datepicker-day-cell {
+    padding: none;
+  }
+
+  .p-datepicker-day {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .p-datepicker-year {
+    width: 50%;
+  }
+
+  .p-datepicker-month {
+    width: 33.33%;
+    padding: 0.6rem;
+  }
+
+  // .p-datepicker-month {
+  //   width: 16.66%;
+  // }
+
+  .p-datepicker-header {
+    padding: 0;
+  }
+
+  .p-button-icon-only.p-button-rounded {
+    height: unset;
+    right: 0;
+  }
+}
+
+.p-select-list-container {
+  @include mix.scrollbars;
+}
+.p-select.p-disabled {
+  --p-select-disabled-background: #{var.$field-bg-disabled};
+  --p-select-disabled-color: #{var.$field-input-color-disabled};
+}
+
+.p-overlay-content {
+  margin-top: -0.25rem;
+}
+
+.p-datepicker-input-icon-container {
+  opacity: 0;
+  z-index: 1;
+}
+
+.p-tooltip {
+  --p-tooltip-background: #fff;
+  --p-tooltip-color: var.$dark;
+  --p-tooltip-border-radius: 0.5rem;
+  --p-tooltip-gutter: 0.25rem;
+
+  .p-tooltip-text {
+    border: 1px solid #55565b;
+    text-align: center;
+    width: 12.5rem;
+    position: relative;
+    &::after {
+      content: '';
+      $arrow-size: 0.5rem;
+      width: $arrow-size;
+      height: $arrow-size;
+      position: absolute;
+      bottom: -0.28rem;
+      background-color: #fff;
+      border-right: 1px solid #55565b;
+      border-bottom: 1px solid #55565b;
+      transform: translateX(-50%) rotate(45deg);
+      z-index: 1;
+      left: 50%;
+    }
+  }
+
+  .p-tooltip-arrow {
+    background-color: transparent;
+    border-color: transparent;
+  }
+}
+
+$icon-size: 0.25rem;
+$icon-color: #1b1b1b;
+
+p-select .icon {
+  border-left: $icon-size solid transparent;
+  border-right: $icon-size solid transparent;
+  border-top: $icon-size solid $icon-color;
+}
+
+.select-prescriber .input-wrap {
+  width: 12.5rem;
+}
+
+@include mix.responsive(medium) {
+  .select-prescriber .input-wrap {
+    width: 45%;
+  }
+}

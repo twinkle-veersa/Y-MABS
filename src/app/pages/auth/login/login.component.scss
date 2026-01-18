@@ -1,0 +1,143 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+$box-width: 33rem;
+
+:host {
+  @include mix.hostContainer(flex-end, flex-start);
+  background-image: url('/login-background.webp');
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+  padding: 5rem 3rem 10rem;
+  color: #fff;
+  gap: 2rem;
+}
+
+.support {
+  background-color: var.$primary-color;
+  border-radius: 0 3.75rem;
+  padding: 1.5rem;
+
+  h3 {
+    font-size: 1.375rem;
+  }
+
+  ul {
+    list-style: none;
+    line-height: 1.5rem;
+    padding-left: 1.5rem;
+    list-style-image: url('/login-tick.svg');
+  }
+}
+
+.login-box {
+  max-width: $box-width;
+  background-color: var.$dark;
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+
+  h2 {
+    margin: 0;
+    font-size: 2.25rem;
+    font-weight: 700;
+  }
+
+  form {
+    background-color: var.$primary-color;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    margin-block: 1rem;
+    @include mix.flexColumn;
+    align-items: end;
+
+    a {
+      text-align: right;
+      padding-bottom: 0.5rem;
+      margin-top: -1.3rem;
+      color: white;
+      text-decoration: underline;
+      text-underline-position: under;
+      text-decoration-color: var.$light;
+
+      &:hover {
+        text-decoration-color: var.$secondary-color;
+      }
+    }
+
+    app-input,
+    button {
+      width: 100%;
+    }
+  }
+
+  .actions {
+    @include mix.flexCentered(space-between);
+    gap: 3rem;
+  }
+}
+
+.infobar {
+  position: absolute;
+  background-color: var.$primary-color;
+  box-shadow: 0 6px 4px rgba(#000, 0.4);
+  text-align: center;
+  padding: 0.5rem 1rem;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  a {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-position: under;
+    text-decoration-color: var.$light;
+
+    &:hover {
+      text-decoration-color: var.$secondary-color;
+    }
+  }
+
+  .close-btn {
+    position: absolute;
+    padding: 0.25rem;
+    cursor: pointer;
+    right: 0;
+  }
+}
+
+h2,
+h3 {
+  margin: 0;
+}
+
+@include mix.responsive(medium) {
+  :host {
+    flex-direction: column-reverse;
+    padding: 2rem 1rem;
+    gap: 1rem;
+    background: linear-gradient(
+      360deg,
+      rgba(243, 247, 220, 0.3) 0%,
+      rgba(115, 222, 71, 0.4) 39%,
+      rgba(5, 131, 72, 0.5) 100%
+    );
+    & > div {
+      margin-inline: auto;
+    }
+
+    .login-box {
+      width: 100%;
+
+      .transparent {
+        min-width: auto;
+      }
+    }
+
+    .support {
+      width: 100%;
+      max-width: $box-width;
+      border-radius: 1.75rem;
+    }
+  }
+}

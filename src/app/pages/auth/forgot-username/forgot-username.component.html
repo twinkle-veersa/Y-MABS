@@ -1,0 +1,39 @@
+<app-header-wrap [heading]="content.title">
+  <app-form-title [title]="content.head" [subtitle]="content.subhead" />
+  <form [formGroup]="group" (ngSubmit)="resetUsername()">
+    <div class="col-md-8 col-sm-12">
+      <div class="row">
+        @for (field of form; track field.name) {
+          <div class="col-md-5 col-sm-12">
+            <ng-container appDynamicField [field]="field" [group]="group" />
+          </div>
+        }
+      </div>
+    </div>
+    <button class="desktop-button" type="submit" [disabled]="group.invalid">Submit</button>
+  </form>
+  @if (status() === 'ERROR') {
+    <div class="error">
+      <div>{{ message.error.error }}</div>
+      <div>{{ message.error.subError }}</div>
+    </div>
+    <div>{{ message.error.flow }}</div>
+  } @else if (status() === 'SUCCESS') {
+    <div class="mt-4 fw-medium">{{ message.success }}</div>
+  }
+  <button action class="outline desktop-button" routerLink="/login" type="button">
+    <app-icon icon="chevron-left" /> Back to Login
+  </button>
+  @if (status() === 'ERROR') {
+    <button action class="me-auto desktop-button" routerLink="/auth/register">Register</button>
+  }
+</app-header-wrap>
+<div class="button-group">
+  <button type="button" [disabled]="group.invalid" (click)="resetUsername()">Submit</button>
+  <button action class="outline" routerLink="/login" type="button">
+    <app-icon icon="chevron-left" /> Back to Login
+  </button>
+  @if (status() === 'ERROR') {
+    <button action class="me-auto full-grid register" routerLink="/auth/register">Register</button>
+  }
+</div>

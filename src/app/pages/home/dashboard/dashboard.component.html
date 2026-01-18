@@ -1,0 +1,50 @@
+<app-home-header />
+<div class="dashboard container inner">
+  <div class="card">
+    <div class="patient-chart">
+      @if (chart()) {
+        @defer {
+          <app-chart [data]="chart()!.chartData" [options]="chart()!.chartOptions" />
+        }
+      }
+    </div>
+    <div class="specification-panel">
+      @for (status of claimStatusData; track $index) {
+        <div
+          class="status-type"
+          [class]="status.key"
+          (click)="redirectToSpecificCase(status.key)"
+          (keydown.space)="redirectToSpecificCase(status.key)"
+          tabindex="0">
+          <div>{{ status.type }}</div>
+          <div class="count">{{ status.value }}</div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="action card">
+    <div
+      class="header"
+      role="button"
+      tabindex="0"
+      (click)="toggleActionsList()"
+      (keydown.space)="toggleActionsList()">
+      <span>Actions Needed</span>
+      <div class="count-circle">{{ cases()?.length ?? 0 }}</div>
+    </div>
+    @if (!isCollapsed) {
+      <div class="actions-list">
+        <ul>
+          @for (item of cases(); track item.id) {
+            <li>
+              <a tabindex="1" (click)="navigateTo(item)" (keyup.enter)="navigateTo(item)"
+                >{{ item.id }} - {{ item.name }}</a
+              >
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+</div>

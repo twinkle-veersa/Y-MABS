@@ -1,0 +1,12 @@
+@use 'mixins' as mix;
+
+:host {
+  @include mix.hostContainer;
+}
+button {
+  margin-block: 2rem;
+}
+
+app-fullpage-alerts {
+  width: 80vw;
+}

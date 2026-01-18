@@ -1,0 +1,26 @@
+@use 'variables' as var;
+
+h2 {
+  margin: 0rem;
+  font-weight: 700;
+
+  &.highlight {
+    color: var.$dark;
+  }
+}
+
+h3 {
+  font-weight: 500;
+  margin-block: 0.25rem;
+  margin-inline: 0;
+
+  &.normal {
+    font-weight: normal;
+    font-size: 1.125rem;
+  }
+}
+
+p {
+  color: var.$error;
+  font-size: 0.75rem;
+}

@@ -1,0 +1,17 @@
+@if (field(); as f) {
+  <app-input-label [field]="f" [isRequired]="isRequired" />
+  <div class="input-wrap">
+    <p-datepicker
+      [formControl]="control"
+      [iconDisplay]="'input'"
+      [showIcon]="true"
+      [class.ng-dirty]="control.touched"
+      [minDate]="f.validation?.minDate ?? defaultMinDate"
+      [maxDate]="f.validation?.maxDate ?? null"
+      placeholder="mm/dd/yyyy" />
+    <app-icon icon="calendar" />
+    @if (control.touched && control.invalid) {
+      <app-error-msg [control]="control" [label]="f.label" />
+    }
+  </div>
+}

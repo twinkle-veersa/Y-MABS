@@ -1,0 +1,22 @@
+<div class="upload-file-table">
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (file of files(); track file.name; let i = $index) {
+        <tr>
+          <td class="text-truncate">{{ file.name }}</td>
+          <td>
+            <button class="delete-btn" (click)="removeFile(i)">
+              <img src="delete-icon.png" alt="delete-icon" />
+            </button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

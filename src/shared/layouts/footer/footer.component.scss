@@ -1,0 +1,68 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+footer {
+  gap: 1rem;
+  padding: 2rem 1rem;
+  @include mix.flexCentered;
+  border-top: 0.3rem solid var.$secondary-color;
+  background-color: #f2f2f2;
+
+  .content {
+    padding: 1.5rem 1rem 0;
+    flex: auto;
+
+    .links {
+      @include mix.flexCentered(start);
+      gap: 0.5rem;
+
+      a {
+        color: inherit;
+        text-decoration: underline;
+        text-underline-position: under;
+        text-decoration-color: var.$primary-color;
+
+        &:hover {
+          text-decoration-color: var.$secondary-color;
+        }
+      }
+    }
+  }
+
+  .logo {
+    margin-top: auto;
+    text-align: right;
+
+    img {
+      max-width: 15rem;
+      height: auto;
+      clip-path: xywh(3.5rem 0 100% 100%);
+    }
+
+    span {
+      white-space: nowrap;
+    }
+  }
+}
+
+@include mix.responsive(medium) {
+  footer {
+    flex-direction: column;
+    @include mix.flexCentered(center, flex-start);
+    padding-bottom: 0;
+
+    .logo {
+      text-align: left;
+      padding-left: 1rem;
+      transform: translateY(-2rem);
+
+      p {
+        transform: translateY(-1rem);
+      }
+
+      img {
+        transform: translateX(-3.5rem);
+      }
+    }
+  }
+}

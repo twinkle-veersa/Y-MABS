@@ -1,0 +1,10 @@
+<div class="wrap" [class]="{ full: isSidebarDisabled() }">
+  @if (!isSidebarDisabled()) {
+    <aside>
+      <app-sidenav [navs]="nav" />
+    </aside>
+  }
+  <section style="min-height: 600px">
+    <router-outlet />
+  </section>
+</div>

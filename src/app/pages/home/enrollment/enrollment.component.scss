@@ -1,0 +1,323 @@
+@use 'mixins' as mix;
+@use 'variables' as var;
+@use 'fields' as f;
+
+select,
+input:not([type='checkbox']) {
+  @include f.input;
+
+  & {
+    width: 25rem;
+  }
+}
+
+input[type='checkbox'] {
+  margin-right: 0.5rem;
+
+  &:disabled {
+    accent-color: var.$primary-color;
+  }
+}
+
+::ng-deep app-fullpage-alerts .content p {
+  font-size: 1.13rem;
+  font-weight: 400;
+}
+
+a {
+  cursor: pointer;
+  color: var.$primary-color;
+  text-decoration: underline;
+  text-underline-position: under;
+  text-decoration-color: var.$primary-color;
+}
+
+.wrap {
+  @include mix.flexCentered(space-between, baseline);
+  min-height: 2rem;
+  gap: 0.5rem;
+  margin-block: 0.5rem;
+}
+
+.enrollment-header {
+  @include mix.flexCentered(left);
+  background-color: var.$light-grey;
+  padding: 0.5rem 1.5rem;
+  gap: 1rem;
+
+  .prescriber {
+    @include mix.flexCentered(space-between);
+
+    div {
+      @include mix.flexCentered;
+      gap: 1rem;
+    }
+
+    .wrap {
+      @include mix.flexCentered;
+      background-color: white;
+      border: var.$field-border;
+      border-radius: 0.3rem;
+      padding: 0 1rem;
+      gap: 1rem;
+    }
+  }
+
+  .download-screen {
+    @include mix.flexCentered(center, center);
+    flex-direction: column;
+
+    .download-heading {
+      font-size: 2.15rem;
+      color: var.$dark-grey;
+      font-weight: 700;
+    }
+  }
+
+  .select-prescriber {
+    color: var.$primary-color;
+    align-items: center;
+    padding-block: 1rem;
+    display: flex;
+    width: 100%;
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .stepper {
+    @include mix.flexCentered();
+    width: 80%;
+  }
+
+  .name {
+    font-size: 1.625rem;
+    font-weight: 500;
+    white-space: nowrap;
+    color: var.$primary-color;
+  }
+}
+
+.button-group {
+  @include mix.flexCentered(space-between);
+  margin-top: 0;
+  gap: 2rem;
+}
+
+.toggle-button {
+  border-radius: 0.3rem;
+  overflow: hidden;
+  border: 0.15rem solid var.$dark;
+  position: absolute;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+
+  .option {
+    border-radius: 0;
+    border: none;
+    background: white;
+    color: black;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.75rem;
+    padding: 0.5rem 1.5rem;
+    width: 10rem;
+
+    &:hover {
+      background: #f2f2f2;
+    }
+
+    &.active {
+      background: var.$dark;
+      color: white;
+    }
+  }
+}
+
+.border-right {
+  padding-right: 2.5rem;
+  border-right: 1px solid var.$border-color;
+
+  + .col-md-6 {
+    padding-left: 2.5rem;
+  }
+}
+
+.insurance-toggle {
+  max-width: 50%;
+
+  h2 {
+    color: var.$dark;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  p {
+    font-size: 1.125rem;
+    margin-block: 0.5rem;
+  }
+
+  .toggle {
+    @include mix.flexCentered(space-between, center);
+    gap: 2rem;
+  }
+}
+
+.radio {
+  display: inline-flex;
+  align-items: flex-start;
+}
+
+.step-wrap {
+  display: flex;
+  flex-direction: column;
+  min-height: 25rem;
+}
+
+.imaging {
+  margin-top: 1rem;
+}
+
+.info-box {
+  background-color: rgba(var.$light, 0.25);
+  border-radius: var.$container-radius;
+  border: 1px solid #adadad;
+  padding: 1rem;
+  line-height: 1.5rem;
+
+  ul {
+    margin: 0;
+  }
+}
+
+.title {
+  padding: 1rem;
+
+  h2,
+  h4 {
+    margin: 0;
+    font-weight: 500;
+  }
+
+  h2 {
+    color: var.$dark;
+  }
+}
+
+span.red {
+  font-size: 0.75rem;
+}
+
+.attest {
+  min-height: 25rem;
+
+  .wrap {
+    justify-content: flex-start;
+
+    & > label {
+      width: 17rem;
+    }
+  }
+}
+
+button.e-sign {
+  padding: 0 1rem;
+
+  app-icon {
+    font-size: 2.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+.input-wrap {
+  margin-block: 0.5rem;
+}
+
+// app-fullpage-alerts {
+//   max-width: 85vw;
+
+//   display: flex;
+//   flex-direction: column;
+//   max-width: 65rem;
+// }
+.action.right-btn {
+  margin-left: auto;
+}
+app-file-upload {
+  .poa-documents {
+    padding-top: 4rem;
+  }
+}
+
+@include mix.responsive(medium) {
+  .table-container {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .enrollment-header {
+    .prescriber {
+      display: grid;
+      grid-template-columns: 40% auto;
+
+      h2 {
+        font-size: 1rem;
+      }
+    }
+
+    img {
+      display: none;
+    }
+  }
+
+  .enrollment-header {
+    .stepper {
+      width: 100%;
+    }
+  }
+
+  .info-box {
+    ul {
+      padding-left: 1rem;
+    }
+  }
+
+  .toggle-button {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 80%;
+    top: 0;
+
+    .option {
+      width: auto;
+    }
+  }
+
+  .border-right {
+    padding: 0;
+    border-right: none;
+
+    + .col-md-6 {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  .insurance-toggle {
+    max-width: 100%;
+  }
+
+  .mobile-row {
+    margin-top: 0 !important;
+  }
+
+  .row {
+    --bs-gutter-x: 0;
+  }
+}
+
+@include mix.responsive(small) {
+  .button-group button {
+    flex: 1;
+  }
+}

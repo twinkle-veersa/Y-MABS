@@ -1,0 +1,50 @@
+@use 'mixins' as mix;
+@use 'variables' as var;
+
+.header {
+  @include mix.flexCentered(space-between);
+  background-color: var.$light-grey;
+  font-weight: bold;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #dbdbdb;
+
+  .header-left {
+    @include mix.flexCentered(center);
+    gap: 1rem;
+
+    .trademark {
+      @include mix.flexCentered(center, flex-start);
+      background: var.$primary-color;
+      border-radius: 0.3125rem;
+      color: #fff;
+      padding: 1rem;
+      gap: 0.25rem;
+
+      .tm {
+        font-size: 0.625rem;
+      }
+    }
+  }
+
+  .actions,
+  .submit-enrollment {
+    @include mix.flexCentered(center);
+    gap: 0.25rem;
+
+    .enroll {
+      display: none;
+    }
+  }
+}
+
+@include mix.responsive(medium) {
+  .submit-enrollment {
+    min-width: 3.45rem;
+  }
+
+  .enroll {
+    @include mix.flexCentered(center, center);
+    display: flex !important;
+    color: var.$primary-color;
+  }
+}

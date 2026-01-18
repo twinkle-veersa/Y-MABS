@@ -1,0 +1,38 @@
+@let c = control();
+@let l = label() || 'This Field';
+@if (c.hasError('required')) {
+  {{ l }} is required.
+}
+@if (c.hasError('pattern')) {
+  {{ l }} is invalid.
+}
+@if (c.hasError('email')) {
+  Please enter a valid email.
+}
+@if (c.hasError('minlength')) {
+  {{ l }} must be atleast
+  {{ c.getError('minlength').requiredLength }}
+  characters.
+}
+@if (c.hasError('maxlength')) {
+  {{ l }} cannot be more than
+  {{ c.getError('maxlength').requiredLength }}
+  characters.
+}
+@if (c.hasError('min')) {
+  {{ l }} cannot be more than {{ c.getError('min').min }}.
+}
+@if (c.hasError('max')) {
+  {{ l }} cannot be less than {{ c.getError('max').max }}.
+}
+@if (c.hasError('MatchPassword')) {
+  {{ c.getError('MatchPassword') }}
+}
+<!-- For Custom Validations -->
+@if (c.hasError('invalid')) {
+  @if (errMsg()) {
+    {{ errMsg() }}
+  } @else {
+    {{ l }} is invalid.
+  }
+}

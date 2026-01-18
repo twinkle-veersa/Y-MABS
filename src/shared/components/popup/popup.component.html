@@ -1,0 +1,120 @@
+@if (isVisible()) {
+  <div class="popup-overlay" (click)="onClose()" (keyup.escape)="onClose()" tabindex="1">
+    <div
+      class="popup-content"
+      [class.no-padding]="noContentPadding()"
+      (click)="$event.stopPropagation()"
+      (keyup)="(null)"
+      tabindex="">
+      @if (type() === 'default') {
+        <div class="popup-header">
+          <h2>{{ heading() }}</h2>
+          <app-icon
+            icon="cross"
+            class="close-btn"
+            (click)="onClose()"
+            (keydown.enter)="onClose()"
+            (keydown.space)="onClose()"
+            tabindex="0" />
+        </div>
+
+        <div class="popup-body">
+          <div class="popup-body-container">
+            <ng-content>
+              @if (showIcon()) {
+                <app-icon icon="error" />
+              }
+              <div
+                class="popup-text"
+                [class]="{ 'full-width': !showIcon() }"
+                [innerHTML]="content()"></div>
+            </ng-content>
+          </div>
+        </div>
+        <ng-container *ngTemplateOutlet="footer" />
+      }
+      @if (type() === 'alert') {
+        <!-- TODO Not implemented yet -->
+        <div class="popup-header">
+          <h2>{{ heading() }}</h2>
+          <app-icon
+            icon="cross"
+            class="close-btn"
+            (click)="onClose()"
+            (keydown.enter)="onClose()"
+            (keydown.space)="onClose()"
+            tabindex="0" />
+        </div>
+
+        <div class="popup-body">
+          <div class="popup-body-alert">
+            <ng-content>
+              <app-icon icon="error" />
+              <div
+                class="popup-text"
+                [class]="{ 'full-width': !showIcon() }"
+                [innerHTML]="content()"></div>
+            </ng-content>
+          </div>
+        </div>
+        <ng-container *ngTemplateOutlet="footer" />
+      }
+      @if (type() === 'pdf') {
+        <div class="pdf-header">
+          <button class="outline" (click)="onButtonClick('download')">
+            <app-icon icon="download" />Download
+          </button>
+          <button (click)="onClose()">Close</button>
+        </div>
+        @defer {
+          <app-pdf-viewer [pdfSrc]="pdfSrc()" [sidebarVisible]="false" />
+        }
+      }
+      @if (type() === 'custom') {
+        <div class="popup-header">
+          <h2>{{ heading() }}</h2>
+          <app-icon
+            icon="cross"
+            class="close-btn"
+            (click)="onClose()"
+            (keydown.enter)="onClose()"
+            (keydown.space)="onClose()"
+            tabindex="0" />
+        </div>
+        <div class="popup-body">
+          <div class="popup-body-container">
+            @if (content()) {
+              {{ content() }}
+            } @else {
+              <ng-content></ng-content>
+            }
+          </div>
+        </div>
+        <ng-container *ngTemplateOutlet="footer" />
+      }
+    </div>
+  </div>
+}
+<ng-template #footer>
+  <div class="popup-footer">
+    @if (buttons().length) {
+      @for (button of buttons(); track button.index) {
+        <button
+          [class]="{
+            'left-btn': button.index === 0,
+            'right-btn': button.index === 1
+          }"
+          (click)="onButtonClick(button.action)">
+          {{ button.label }}
+        </button>
+      }
+    } @else if (type() === 'alert') {
+      <button class="outline" (click)="onClose()">No</button>
+      <button>Yes</button>
+    } @else if (type() === 'custom') {
+      <ng-content select=".action">
+        <button class="right-btn" (click)="onClose()">Done</button>
+      </ng-content>
+    }
+  </div>
+</ng-template>

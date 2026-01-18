@@ -1,0 +1,30 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+:host {
+  @include mix.hostContainer;
+
+  .container {
+    margin: var.$container-margin;
+    padding: var.$container-padding;
+    background: white;
+    border-radius: var.$container-radius;
+    text-align: center;
+    width: calc(100vw - 8rem);
+
+    @include mix.responsive(medium) {
+      padding: 2rem;
+      width: 90vw;
+    }
+
+    .content {
+      max-width: 50rem;
+      margin: auto;
+    }
+
+    h2 {
+      font-weight: 700;
+      margin: 0;
+    }
+  }
+}

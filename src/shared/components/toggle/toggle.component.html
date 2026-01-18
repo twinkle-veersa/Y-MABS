@@ -1,0 +1,9 @@
+<div class="toggle-container">
+  <label class="toggle-switch" [class]="{ disabled: toggleDisabled() }">
+    <input type="checkbox" [checked]="toggleChecked()" [disabled]="toggleDisabled()" />
+    <div class="slider">
+      <span> Yes </span> &nbsp; <span class="knob"></span> &nbsp;
+      <span> No </span>
+    </div>
+  </label>
+</div>

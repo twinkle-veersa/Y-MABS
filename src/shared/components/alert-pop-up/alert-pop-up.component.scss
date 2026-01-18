@@ -1,0 +1,96 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+
+  .modal {
+    background: var.$white;
+    border-radius: 0.375rem;
+    width: 35rem;
+    height: fit-content;
+    padding: 0;
+    box-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.3);
+    text-align: center;
+
+    .header {
+      background-color: var.$primary-color;
+      color: var.$white;
+      @include mix.flexCentered(space-between);
+      padding: 0.75rem 1rem;
+      font-size: 1.125rem;
+      font-weight: 700;
+
+      app-icon[icon='close'] {
+        background: transparent;
+        color: var.$white;
+        cursor: pointer;
+      }
+    }
+
+    .body {
+      margin: 1.5rem;
+
+      .alertIcon {
+        background: transparent;
+        font-size: 4rem;
+        color: var.$red;
+      }
+
+      .wrap {
+        @include mix.flexCentered;
+        font-weight: 500;
+        gap: 2rem;
+
+        p {
+          margin: 0;
+        }
+      }
+    }
+
+    .footer {
+      @include mix.flexCentered(space-between);
+      padding: 1rem;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    align-items: flex-end;
+
+    .modal {
+      width: 100%;
+      border-radius: 1rem 0 0 1rem;
+      margin: 0;
+      box-shadow: 0 -0.125rem 0.625rem rgba(0, 0, 0, 0.2);
+
+      .body {
+        margin: 4rem 1.5rem;
+
+        .wrap {
+          flex-direction: column;
+          line-height: 2rem;
+        }
+      }
+    }
+
+    .footer {
+      gap: 1rem;
+      margin-bottom: 1rem;
+
+      button {
+        width: 50%;
+      }
+    }
+  }
+}

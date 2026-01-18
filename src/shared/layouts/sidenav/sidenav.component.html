@@ -1,0 +1,9 @@
+<nav>
+  @for (nav of navs(); track $index) {
+    <a [routerLink]="['/'].concat(nav.link)" routerLinkActive="active">
+      <img src="{{ nav.icon }}" alt="" />
+      <!-- <app-icon [icon]="nav.icon"></app-icon> -->
+      <span>{{ nav.label }}</span>
+    </a>
+  }
+</nav>

@@ -1,0 +1,85 @@
+@use 'variables' as var;
+
+@mixin flexCentered($justify: center, $align: center) {
+  display: flex;
+  align-items: $align;
+  justify-content: $justify;
+}
+
+@mixin borderRadiusTop() {
+  border-top-left-radius: var.$container-radius;
+  border-top-right-radius: var.$container-radius;
+}
+
+@mixin flexColumn {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin hostContainer($justify: center, $align: flex-start) {
+  @include flexCentered($justify, $align);
+  flex-grow: 1;
+}
+
+@mixin tabStyle {
+  background-color: var.$dark-grey;
+  padding: 0.5rem 2rem;
+  font-size: 1.565rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: white;
+  border: none;
+  border-radius: 0;
+  @include borderRadiusTop;
+  flex: 0 0 auto;
+  text-transform: capitalize;
+  flex-grow: 1;
+  min-width: 0;
+
+  &.active {
+    padding-block: 0.75rem;
+    background-color: var.$primary-color;
+  }
+
+  @include responsive(medium) {
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 500;
+    flex: auto;
+  }
+}
+
+@mixin scrollbars($width: 0.4rem, $color: var.$dark) {
+  &::-webkit-scrollbar {
+    width: $width;
+    height: $width;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 1rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color;
+    border-radius: 1rem;
+  }
+}
+
+/// @param {String} $breakpoint - Breakpoint name
+/// @require $breakpoints
+@mixin responsive($breakpoint) {
+  // If the key exists in the map
+  @if map-has-key(var.$breakpoints, $breakpoint) {
+    // Prints a media query based on the value
+    @media #{inspect(map-get(var.$breakpoints, $breakpoint))} {
+      @content;
+    }
+  }
+
+  // If the key doesn't exist in the map
+  @else {
+    @warn "Unfortunately,`#{$breakpoint}` was not found. "
++ "Available breakpoints are: #{map-keys(var.$breakpoints)}.";
+  }
+}

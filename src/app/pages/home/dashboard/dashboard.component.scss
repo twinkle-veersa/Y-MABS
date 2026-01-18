@@ -1,0 +1,142 @@
+@use 'mixins' as mix;
+@use 'variables' as var;
+
+.card {
+  border-radius: 0.5rem;
+  background: #fff;
+  overflow: hidden;
+}
+
+.dashboard {
+  display: flex;
+  gap: 1rem;
+  padding: 0 2rem;
+  max-height: 60rem;
+
+  > .card:first-child {
+    display: flex;
+    flex: 1;
+
+    .patient-chart {
+      min-height: 35rem;
+      padding: 1rem;
+      display: flex;
+      flex: 1;
+    }
+
+    .specification-panel {
+      display: flex;
+      flex-direction: column;
+      max-width: 25%;
+
+      .status-type {
+        @include mix.flexCentered(space-between, center);
+        font-weight: 700;
+        padding: 1rem;
+        color: #fff;
+        cursor: pointer;
+        gap: 1rem;
+        flex: 1;
+
+        @include mix.responsive(large) {
+          flex-direction: column;
+          justify-content: center;
+          align-items: flex-start;
+        }
+
+        .count {
+          font-size: 2rem;
+        }
+      }
+
+      .intake {
+        background: var.$dark;
+      }
+
+      .benefitInvestigation {
+        background: var.$primary-color;
+      }
+
+      .insuranceAuthRequired {
+        background: var.$secondary-color;
+      }
+
+      .triage {
+        background: var.$light;
+        color: var.$dark;
+      }
+    }
+  }
+
+  .action.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 30%;
+
+    .header {
+      @include mix.flexCentered(space-between, center);
+      background-color: var.$dark;
+      padding: 1rem 1.5rem;
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 700;
+
+      .count-circle {
+        @include mix.flexCentered(center);
+        background-color: #fff;
+        border-radius: 50%;
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: var.$dark;
+        height: 3.5rem;
+        width: 3.5rem;
+      }
+    }
+
+    .actions-list {
+      overflow-y: auto;
+      height: calc(100% - 5.5rem);
+      padding: 0 0.5rem;
+
+      ul {
+        padding-inline-start: 1.5rem;
+
+        li {
+          margin-block: 0.5rem;
+          color: var.$dark;
+          font-weight: 600;
+          padding-left: 0.5rem;
+
+          a {
+            cursor: pointer;
+            color: var.$primary-color;
+          }
+        }
+      }
+    }
+  }
+}
+
+@include mix.responsive(medium) {
+  .dashboard {
+    flex-direction: column-reverse;
+    min-height: 50rem;
+
+    > .card:first-child {
+      min-height: 32rem;
+
+      .patient-chart {
+        min-height: 100%;
+      }
+
+      .specification-panel {
+        max-width: 0;
+      }
+    }
+
+    .action.card {
+      .actions-list {
+        min-height: 40vh;
+      }
+    }
+  }
+}

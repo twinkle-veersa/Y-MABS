@@ -1,0 +1,119 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+.hamburger-container {
+  position: relative;
+
+  .hamburger-btn {
+    min-width: auto;
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var.$primary-color;
+    z-index: 1000;
+    padding: 0.5rem;
+    gap: 0.25rem;
+    flex-direction: column;
+
+    span {
+      font-size: 0.5rem;
+      font-weight: lighter;
+    }
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -20rem;
+    width: 18rem;
+    height: 100%;
+    background: #fff;
+    box-shadow: 0.125rem 0 0.5rem rgba(0, 0, 0, 0.1);
+    transition: left 0.3s ease;
+    z-index: 1050;
+    padding: 1rem 0.5rem;
+
+    &.open {
+      left: 0;
+    }
+
+    .hamburger-header {
+      @include mix.flexCentered(flex-start);
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 1rem;
+
+      .close-btn {
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--primary-color);
+        min-width: auto;
+      }
+
+      a img {
+        display: block;
+        height: auto;
+        max-width: 100%;
+      }
+    }
+
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .nav-icon {
+        filter: brightness(0) saturate(100%) invert(12%) sepia(28%) saturate(3543%)
+          hue-rotate(107deg) brightness(93%) contrast(104%);
+      }
+
+      a {
+        display: flex;
+        cursor: pointer;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        color: #000;
+        font-weight: 500;
+        padding: 1rem;
+        border-radius: 0.3rem;
+        transition:
+          background 0.2s,
+          color 0.2s;
+
+        img {
+          width: auto;
+          height: 1.5rem;
+        }
+
+        &:hover,
+        &.active {
+          color: var.$white;
+          background-color: var.$primary-color;
+          .nav-icon {
+            filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%)
+              hue-rotate(296deg) brightness(105%) contrast(100%);
+          }
+        }
+
+        &.logout {
+          color: var.$error;
+
+          app-icon {
+            line-height: 0;
+            font-size: 1.25rem;
+            padding-left: 0.25rem;
+          }
+
+          &:hover {
+            color: var.$white;
+            background-color: var.$error;
+          }
+        }
+      }
+    }
+  }
+}

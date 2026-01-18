@@ -1,0 +1,61 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+.stepper {
+  @include mix.flexCentered(space-between);
+  flex: 1;
+
+  .step {
+    @include mix.flexColumn;
+    align-items: center;
+    position: relative;
+    flex: 1;
+
+    .circle {
+      width: 1.88rem;
+      height: 1.88rem;
+      font-weight: 700;
+      border-radius: 50%;
+      background-color: #d0d7d8;
+      @include mix.flexCentered(center);
+      transition: background-color 0.3s ease;
+      z-index: 1;
+    }
+
+    .title {
+      margin-top: 0.5rem;
+      text-align: center;
+      white-space: pre-line;
+    }
+
+    .line {
+      position: absolute;
+      width: calc(100% - 0.625rem);
+      background-color: #d0d7d8;
+      height: 0.125rem;
+      top: 20%;
+      left: 50%;
+
+      &.active {
+        background-color: var.$dark;
+      }
+    }
+
+    &.active {
+      .circle {
+        background-color: var.$dark;
+        color: white;
+      }
+
+      .title {
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+@include mix.responsive(medium) {
+  .title {
+    font-size: 0.75rem !important;
+  }
+}

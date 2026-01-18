@@ -1,0 +1,9 @@
+@use 'variables' as var;
+
+:host {
+  color: var.$error;
+  display: block;
+  font-size: smaller;
+  min-height: 1rem;
+  padding: 0.2rem 0.2rem 0;
+}

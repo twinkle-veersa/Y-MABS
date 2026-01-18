@@ -1,0 +1,18 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+:host {
+  @include mix.flexColumn;
+  min-height: 100vh;
+
+  main {
+    @include mix.flexColumn;
+    flex-grow: 1;
+    background: linear-gradient(
+      360deg,
+      rgba(var.$light, 0.3) 0%,
+      rgba(var.$secondary-color, 0.4) 39%,
+      rgba(var.$primary-color, 0.5) 100%
+    );
+  }
+}

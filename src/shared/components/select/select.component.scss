@@ -1,0 +1,14 @@
+@use 'fields' as f;
+
+label span {
+  position: relative;
+  app-req {
+    position: absolute;
+    right: -0.5rem;
+  }
+}
+p-select {
+  font-size: 0.8rem;
+  min-height: 2rem;
+  // @include f.input;
+}

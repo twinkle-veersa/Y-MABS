@@ -1,0 +1,10 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+.tab {
+  @include mix.tabStyle;
+}
+
+hr {
+  margin-block: 3rem;
+}

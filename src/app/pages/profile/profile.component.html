@@ -1,0 +1,71 @@
+@if (activeTab) {
+  <form [formGroup]="groups[activeTab]" (ngSubmit)="submitForm[activeTab]()">
+    <app-header-wrap>
+      @for (tab of tabs; track $index) {
+        <button
+          class="tab center"
+          type="button"
+          [class.active]="tab === activeTab"
+          (click)="activeTab = tab">
+          {{ content[tab].title }}
+        </button>
+      }
+      <app-form-title [title]="content[activeTab].head" />
+      <div class="row">
+        @switch (activeTab) {
+          @case ('password') {
+            <div class="col-lg-4 col-md-6 col-sm-12">
+              @for (field of forms[activeTab]; track field.name) {
+                <ng-container appDynamicField [field]="field" [group]="groups[activeTab]" />
+              }
+            </div>
+          }
+          @case ('security') {
+            @if (securityForm() && securityForm().length) {
+              <div class="col-md-6">
+                @for (field of securityForm(); track field.name; let i = $index) {
+                  @if (field.position === 'left') {
+                    @if (i === 1) {
+                      <hr class="mobile-none" />
+                    }
+                    <ng-container appDynamicField [field]="field" [group]="groups[activeTab]" />
+                  }
+                }
+              </div>
+              <div class="col-md-6">
+                @for (field of securityForm(); track field.name) {
+                  @if (field.position === 'right') {
+                    <ng-container appDynamicField [field]="field" [group]="groups[activeTab]" />
+                  }
+                }
+              </div>
+            }
+          }
+          @case ('info') {
+            @for (field of forms[activeTab]; track field.name) {
+              <ng-container appDynamicField [field]="field" [group]="groups[activeTab]" />
+            }
+          }
+        }
+      </div>
+      <button action class="outline desktop-button" routerLink="/home" type="button">
+        <app-icon icon="chevron-left" /> Back to Home
+      </button>
+      <button class="desktop-button" action type="submit" [disabled]="groups[activeTab].invalid">
+        Save
+      </button>
+    </app-header-wrap>
+  </form>
+  <div class="button-group">
+    <button action class="outline" routerLink="/home" type="button">
+      <app-icon icon="chevron-left" /> Back to Home
+    </button>
+    <button
+      action
+      type="button"
+      [disabled]="groups[activeTab].invalid"
+      (click)="submitForm[activeTab]()">
+      Save
+    </button>
+  </div>
+}

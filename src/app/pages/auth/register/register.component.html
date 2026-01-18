@@ -1,0 +1,266 @@
+@if (currentStep() !== 'success') {
+  <app-header-wrap [heading]="content.title" [subheading]="content.subtitle" [steps]="stepper()">
+    @switch (currentStep()) {
+      @case ('accountType') {
+        <div class="text-center mb-5">
+          <h2>{{ content.accountType.title }}</h2>
+          <h3>{{ content.accountType.subtitle }}</h3>
+          <div class="account-options">
+            @for (item of userTypes; track $index) {
+              <div
+                aria-hidden="true"
+                [class]="{ selected: selectedType() === item }"
+                (click)="selectedType.set(item)"
+                (keydown.enter)="selectedType.set(item)"
+                (keydown)="selectedType.set(item)">
+                @if (selectedType() === item) {
+                  <app-icon class="checked" icon="check"></app-icon>
+                }
+                <div [id]="item" class="icon-box">
+                  <app-icon [icon]="item"></app-icon>
+                </div>
+                <label for="item">{{ item }}</label>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="py-5"></div>
+      }
+      @case ('user') {
+        @if (selectedType() === 'prescriber') {
+          <div class="row">
+            <div class="col-md-8">
+              <app-form-title
+                [title]="content.prescriber.user.step1.title"
+                [subtitle]="content.prescriber.user.step1.subtitle" />
+              <form>
+                <div class="row">
+                  @for (field of forms.prescriber.user.step1; track field.name) {
+                    <ng-container
+                      [field]="field"
+                      appDynamicField
+                      [group]="groups.prescriber.user.step1" />
+                  }
+                  <div class="col-md-2">
+                    <button class="sm find" type="button" (click)="findPrescriber()">
+                      {{ prescriberSet() ? 'Reset' : 'Find' }}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="col-md-4">
+              <app-form-title [title]="content.prescriber.user.step2.title" [required]="false" />
+              <form>
+                <div class="row step2">
+                  @for (field of forms.prescriber.user.step2; track field.name) {
+                    <ng-container
+                      appDynamicField
+                      [field]="field"
+                      [group]="groups.prescriber.user.step2" />
+                  }
+                </div>
+              </form>
+            </div>
+            <hr class="my-4" />
+            <div class="col-md-12">
+              <app-form-title
+                [required]="false"
+                [title]="content.prescriber.user.step3.title"
+                [subtitle]="content.prescriber.user.step3.subtitle" />
+              <form>
+                <div class="row mt-4">
+                  <div class="col-md mt-2"><h3>Create Login</h3></div>
+                  @for (field of forms.prescriber.user.step3; track field.name) {
+                    <ng-container
+                      appDynamicField
+                      [field]="field"
+                      [group]="groups.prescriber.user.step3" />
+                  }
+                  <div class="col-md"></div>
+                </div>
+              </form>
+            </div>
+          </div>
+        } @else if (selectedType() === 'other') {
+          <app-form-title [title]="content.other.user.step2.title" />
+          <form>
+            <div class="row">
+              @for (field of forms.other.user.step2; track field.name) {
+                <ng-container appDynamicField [field]="field" [group]="groups.other.user.step2" />
+              }
+            </div>
+          </form>
+          <hr class="my-4" />
+          <app-form-title
+            [required]="false"
+            [subtitle]="content.other.user.step3.subtitle"
+            [emphasis]="'low'" />
+          <form>
+            <div class="row">
+              <div class="row mt-3">
+                <div class="col-md">
+                  <h3>Create Login</h3>
+                </div>
+                @for (field of forms.other.user.step3; track field.name) {
+                  <ng-container appDynamicField [field]="field" [group]="groups.other.user.step3" />
+                }
+                <div class="col-md"></div>
+              </div>
+            </div>
+          </form>
+        }
+      }
+      @case ('prescriber') {
+        <app-form-title
+          [title]="content.other.prescriber.title"
+          [subtitle]="content.other.prescriber.subtitle"
+          [emphasis]="'low'" />
+        <form>
+          <div class="row">
+            @for (field of forms.other.prescriber; track field.name) {
+              <ng-container appDynamicField [field]="field" [group]="groups.other.prescriber" />
+            }
+            <div class="field-wrap col-md form-actions">
+              <button
+                class="sm"
+                type="button"
+                (click)="addPrescriber()"
+                [disabled]="groups.other.prescriber.invalid">
+                Add
+              </button>
+            </div>
+          </div>
+          @if (errorMsg()) {
+            <p class="red m-0">{{ errorMsg() }}</p>
+          }
+        </form>
+        @if (prescribersWithFacility().length) {
+          <app-table
+            class="table-wrap"
+            [paginated]="true"
+            [columnConfigs]="prescriberCols"
+            [tableData]="prescribersWithFacility()"
+            [actions]="prescriberRowActions"
+            (emitAction)="onPrescriberRowActions($event)" />
+        }
+      }
+      @case ('facility') {
+        @if (selectedType() === 'prescriber') {
+          <app-form-title
+            [required]="false"
+            [emphasis]="'low'"
+            [title]="content.prescriber.facility.title"
+            [subtitle]="content.prescriber.facility.subtitle" />
+          @defer {
+            @for (item of prescribersWithFacility(); track $index) {
+              <app-accordion
+                title="Existing Practice Office(s)"
+                (selectedOfficesAddress)="addSelectedFacility($event, item)"
+                [practiceOffices]="prescriberFacility" />
+            }
+          }
+          <app-seperator />
+          <app-form-title
+            [emphasis]="'low'"
+            [subtitle]="content.prescriber.facility.sectionTitle" />
+          <form>
+            <div class="row">
+              @for (field of forms.prescriber.facility; track field.name) {
+                <ng-container
+                  appDynamicField
+                  [field]="field"
+                  [group]="groups.prescriber.facility" />
+              }
+              <div class="col-md-2 form-actions">
+                @if (updateData) {
+                  <button class="sm outline" type="button" (click)="cancelUpdationInFacility()">
+                    Cancel
+                  </button>
+                }
+                <button
+                  class="sm"
+                  type="button"
+                  [disabled]="groups.prescriber.facility.invalid"
+                  (click)="updateData ? updateFacilityForData(rowIndex) : addFacility()">
+                  {{ updateData ? 'Update' : 'Add' }}
+                </button>
+              </div>
+            </div>
+          </form>
+          @if (selectedFacility().length) {
+            <app-table
+              class="table-wrap"
+              [tableData]="selectedFacility()"
+              [columnConfigs]="facilityCols"
+              [actions]="facilityRowActions"
+              (emitAction)="onRowAction($event)" />
+          }
+        } @else if (selectedType() === 'other') {
+          <app-form-title
+            [emphasis]="'low'"
+            [required]="false"
+            [title]="content.other.facility.title"
+            [subtitle]="content.other.facility.subtitle" />
+          @for (item of prescribersWithFacility(); track $index) {
+            <app-accordion
+              [title]="'Prescriber Name - ' + item.prescriber"
+              [preSelect]="selectedFacilitiesMap.get(item.prescriberId) || []"
+              (selectedOfficesAddress)="addSelectedFacility($event, item)"
+              [practiceOffices]="item.facilities" />
+          }
+          <hr class="my-4" />
+          <app-form-title [subtitle]="content.other.facility.sectionTitle" [emphasis]="'low'" />
+          <form>
+            <div class="row">
+              @for (field of forms.other.facility; track field.name) {
+                <ng-container appDynamicField [field]="field" [group]="groups.other.facility" />
+              }
+              <div class="col-md-2 form-actions">
+                @if (updateData) {
+                  <button class="sm outline" type="button" (click)="cancelUpdationInFacility()">
+                    Cancel
+                  </button>
+                }
+                <button
+                  class="sm"
+                  type="button"
+                  [disabled]="groups.other.facility.invalid"
+                  (click)="updateData ? updateFacilityForData(rowIndex) : addFacility()">
+                  {{ updateData ? 'Update' : 'Add' }}
+                </button>
+              </div>
+            </div>
+          </form>
+          @if (selectedFacility().length) {
+            <app-table
+              class="table-wrap"
+              [tableData]="selectedFacility()"
+              [columnConfigs]="facilityCols"
+              [actions]="facilityRowActions"
+              [disabledRow]="updateData"
+              (emitAction)="onRowAction($event)" />
+          }
+        }
+      }
+    }
+    <button action class="outline" (click)="handleBack()">
+      <app-icon icon="chevron-left" /> Back
+    </button>
+    <button
+      action
+      [disabled]="isInvalid || updateData"
+      (click)="currentStep() === 'facility' ? handleSaveAndRegister() : handleNext()">
+      @if (currentStep() === 'facility') {
+        <app-icon icon="save-all" />
+        Save and Register
+      } @else {
+        Next <app-icon icon="chevron-right" />
+      }
+    </button>
+  </app-header-wrap>
+} @else if (currentStep() === 'success') {
+  <app-fullpage-alerts [title]="content.success.title" [content]="content.success.subtitle">
+    <button class="mt-5 outline" [routerLink]="['/login']" type="button">Back to Login</button>
+  </app-fullpage-alerts>
+}

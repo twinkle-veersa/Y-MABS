@@ -1,0 +1,12 @@
+<div class="stepper">
+  @for (item of steps() | keyvalue: null; track item.key) {
+    @let step = item.value;
+    <div class="step" [class.active]="currentStep() >= $index + 1">
+      <div class="circle">{{ $index + 1 }}</div>
+      @if (!$last) {
+        <div class="line" [class.active]="currentStep() >= $index + 1"></div>
+      }
+      <div class="title">{{ step.title }}</div>
+    </div>
+  }
+</div>

@@ -1,0 +1,21 @@
+<footer>
+  <div class="content">
+    <div class="links">
+      @for (item of content.links; track $index) {
+        <a [href]="item.href" target="_blank">{{ item.label }}</a>
+        @if ($index < content.links.length - 1) {
+          <span>|</span>
+        }
+      }
+    </div>
+    <br />
+    <p [innerHTML]="content.text.line1"></p>
+    <p [innerHTML]="content.text.line2"></p>
+  </div>
+  <div class="logo">
+    <a [href]="content.logoHref" target="_blank">
+      <img class="p-2" ngSrc="logo.png" [alt]="content.logoAlt" width="280" height="74" />
+    </a>
+    <p class="mt-0 pe-4">{{ content.code }}</p>
+  </div>
+</footer>

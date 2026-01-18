@@ -1,0 +1,24 @@
+@if (field(); as f) {
+  @if (f.label) {
+    <app-input-label [field]="f" [isRequired]="isRequired" />
+  }
+  <div class="input-wrap radio">
+    @for (item of f.options; track $index) {
+      <div>
+        <label [for]="f.name + item.option">
+          <input
+            type="radio"
+            [name]="f.name"
+            [value]="item.value"
+            [formControl]="control"
+            [id]="f.name + item.option" />
+          {{ item.option }}
+        </label>
+      </div>
+    }
+
+    @if (control.touched && control.invalid) {
+      <app-error-msg [control]="control" [label]="f.label" />
+    }
+  </div>
+}

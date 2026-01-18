@@ -1,0 +1,21 @@
+@use 'variables' as var;
+@use 'fields' as f;
+
+.input-wrap {
+  position: relative;
+  app-icon {
+    color: var.$dark-grey;
+    position: absolute;
+    cursor: pointer;
+    right: 0.5rem;
+    top: 0.5rem;
+  }
+}
+
+p-datepicker {
+  display: flex;
+  flex-direction: column;
+  &.p-datepicker-input {
+    @include f.input;
+  }
+}

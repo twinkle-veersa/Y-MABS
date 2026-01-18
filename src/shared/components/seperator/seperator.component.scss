@@ -1,0 +1,18 @@
+@use 'mixins' as mix;
+
+.seperator {
+  @include mix.flexCentered;
+  margin-block: 2rem;
+  gap: 1rem;
+
+  & > * {
+    flex: 1;
+  }
+}
+
+@include mix.responsive(medium) {
+  .seperator {
+    gap: 0rem;
+    margin-block: 1rem;
+  }
+}
