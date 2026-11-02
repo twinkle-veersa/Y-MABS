@@ -10,6 +10,9 @@ interface Header {
   logoHref?: string;
   for?: string;
   phone: string;
+  email?: string;
+  fax?: string;
+  poBox?: string;
 }
 interface Footer {
   logoAlt: string;

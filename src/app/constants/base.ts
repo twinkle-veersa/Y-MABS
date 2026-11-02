@@ -1,13 +1,16 @@
 import { BaseContent } from '@shared/models/base.content';
 
-const portal = 'Lantheus Link';
-const logoHref = 'https://www.lantheuslink.com/';
-const phone = '1-844-339-8514';
-const code = 'PM-US-PY-1004 03/25';
+const portal = 'Y-mAbs Connect';
+const logoHref = 'https://www.ymabs.com/';
+const phone = '1-833-339-6227';
+const email = 'ymabsconnect@valeris.com';
+const fax = '1-877-209-6227';
+const poBox = '5490 Louisville, KY 40255';
+const code = '';
 const links = [
-  { label: 'Privacy Policy', href: 'https://www.lantheus.com/legal/privacy-policy/' },
-  { label: 'Terms of Use', href: 'https://www.lantheus.com/legal/' },
-  { label: 'Contact Us', href: 'https://www.lantheuslink.com/' }
+  { label: 'Privacy Policy', href: 'https://www.ymabs.com/' },
+  { label: 'Terms of Use', href: 'https://www.ymabs.com/' },
+  { label: 'Contact Us', href: 'mailto:ymabsconnect@valeris.com' }
 ];
 
 export const BASE: BaseContent = {
@@ -15,7 +18,10 @@ export const BASE: BaseContent = {
     logoAlt: `${portal} Logo`,
     logoHref,
     for: `For U.S. Healthcare<br /> Professionals Only`,
-    phone
+    phone,
+    email,
+    fax,
+    poBox
   },
   footer: {
     logoAlt: `${portal} Logo`,
@@ -23,10 +29,8 @@ export const BASE: BaseContent = {
     links,
     text: {
       line1: `This site is intended only for residents of the United States and U.S.
-      healthcare professionals only. <br /> Trademarks are the property of their
-      respective owners.`,
-      line2: `Portal powered by © 2025 PharmaCord LLC<br />
-      Copyright © 2025 Lantheus Link or its affiliates. All trademarks are the property of their respective owners.`
+      healthcare professionals only.`,
+      line2: `All Rights Reserved.`
     },
     code
   },

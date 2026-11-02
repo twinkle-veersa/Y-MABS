@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, input, signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FieldBaseComponent } from '../field-base.component';
 import { ErrorMsgComponent } from '../error-msg/error-msg.component';
@@ -23,4 +23,8 @@ import { InputLabelComponent } from '../input-label/input-label.component';
 })
 export class InputComponent extends FieldBaseComponent {
   showPassword = signal<boolean>(false);
+  /** When true, show validation even if the control is not yet touched (e.g. after submit). */
+  readonly forceShowErrors = input(false);
+
+  readonly showErrors = computed(() => this.forceShowErrors() || this.control.touched);
 }

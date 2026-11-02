@@ -1,88 +1,388 @@
 @use 'variables' as var;
 @use 'mixins' as mix;
 
+$contact-icon: var.$accent-color;
+$contact-label: #6b7280;
+$contact-value: #1f2937;
+$header-border: #d7d7d7;
+$divider: rgba(#55565b, 0.22);
+
 header {
   min-height: 6rem;
-  padding-inline: 1rem;
+  padding: 0.85rem clamp(0.75rem, 2vw, 1.75rem);
   @include mix.flexCentered(space-between);
-  border-bottom: 0.4286rem solid var.$secondary-color;
+  border-bottom: 1px solid $header-border;
+  background-color: var.$white;
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
 
   .logo {
     @include mix.flexCentered(flex-start);
+    flex: 0 0 auto;
+    min-width: 0;
+
+    a {
+      display: block;
+      line-height: 0;
+    }
+
+    img {
+      display: block;
+      width: clamp(10rem, 16vw, 14.5rem);
+      height: auto;
+      object-fit: contain;
+      object-position: left center;
+    }
   }
-  img {
-    max-width: 18rem;
-    height: auto;
+
+  .contact-grid {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .contact-item {
+    @include mix.flexCentered(flex-start, flex-start);
+    gap: 0.45rem;
+    padding: 0 clamp(0.4rem, 1vw, 0.85rem);
+    min-width: 0;
+
+    app-icon {
+      color: $contact-icon;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      line-height: 0;
+    }
+
+    .contact-text {
+      @include mix.flexColumn;
+      gap: 0.1rem;
+      min-width: 0;
+
+      .label {
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: $contact-label;
+        line-height: 1.1;
+      }
+
+      .value {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: $contact-value;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+      }
+
+      a.value {
+        text-decoration: none;
+        color: $contact-value;
+
+        &:hover {
+          color: $contact-icon;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  span.line {
+    align-self: stretch;
+    width: 1px;
+    min-height: 2.25rem;
+    background-color: $divider;
+    flex-shrink: 0;
+  }
+}
+
+// -------- Auth (logged out) --------
+header.auth-header {
+  border-bottom-color: var.$header-accent;
+
+  .logo {
+    flex: 0 1 auto;
+    max-width: min(14.5rem, 42%);
+
+    a {
+      width: 100%;
+    }
+
+    img {
+      width: 100%;
+      max-width: 100%;
+    }
   }
 
   .side {
-    h3 {
-      font-weight: 400;
+    @include mix.flexCentered(flex-end, center);
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .contact-grid {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  .contact-item:not(:first-child) {
+    border-left: 1px solid $divider;
+  }
+}
+
+// -------- App (logged in) — Figma post-login header --------
+header.app-header {
+  border-bottom-color: var.$secondary-color;
+  border-bottom-width: 0.2rem;
+  align-items: center;
+
+  .contact-grid.app-contacts {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto;
+    grid-auto-flow: column; // Phone/Fax | Email/PO Box
+    column-gap: 0.25rem;
+    row-gap: 0.35rem;
+    flex: 1 1 auto;
+    justify-content: center;
+    max-width: 28rem;
+
+    .contact-item {
+      padding: 0 0.65rem;
+
+      &:nth-child(-n + 2) {
+        border-right: 1px solid $divider;
+      }
     }
+  }
 
-    span.line {
-      height: 3.125rem;
-      width: 0.125rem;
-      background-color: rgba(#55565b, 0.2);
-    }
+  .user-actions {
+    @include mix.flexCentered(flex-end, center);
+    flex: 0 0 auto;
+    gap: 0.65rem;
+    min-width: 0;
 
-    .divider {
-      display: contents;
-    }
-
-    @include mix.flexCentered;
-    gap: 1rem;
-
-    .call {
-      font-size: 1.25rem;
-      font-weight: 700;
-    }
-
-    .profile-section {
-      @include mix.flexCentered(space-between, center);
-      gap: 0.5rem;
+    .action-item {
+      @include mix.flexCentered(flex-start, center);
+      gap: 0.4rem;
+      color: var.$dark;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
 
       app-icon {
-        font-size: 1.25rem;
-        color: var.$dark;
+        color: var.$accent-color;
+        font-size: 1.15rem;
+        line-height: 0;
       }
 
-      .profile-name {
-        font-weight: 400;
-        font-size: 1rem;
-        color: var.$dark;
+      &:hover {
+        color: var.$primary-color;
+      }
+    }
+
+    .profile-name {
+      color: inherit;
+      text-decoration: none;
+      font-weight: 600;
+
+      span {
+        font-weight: 500;
+        margin-right: 0.25rem;
       }
     }
 
     .logout {
-      padding-left: 0;
+      color: var.$dark;
+      min-width: 0;
+      border: none;
+      background: transparent;
+      box-shadow: none;
+
+      &:hover {
+        color: var.$error;
+        background: transparent;
+      }
+
+      &:disabled {
+        background: transparent;
+      }
+    }
+  }
+}
+
+@include mix.responsive(m-large) {
+  header.auth-header .logo {
+    max-width: min(12.5rem, 36%);
+  }
+
+  header.app-header {
+    .contact-grid.app-contacts {
+      max-width: 24rem;
     }
 
-    app-icon {
-      color: var.$primary-color;
+    .user-actions {
+      gap: 0.45rem;
+
+      .action-item {
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+@include mix.responsive(large) {
+  header.auth-header {
+    .contact-grid {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      row-gap: 0.65rem;
+    }
+
+    .contact-item {
+      flex: 0 1 auto;
+      max-width: 13rem;
+
+      &:nth-child(3) {
+        border-left: none;
+      }
+    }
+  }
+
+  header.app-header {
+    flex-wrap: wrap;
+    row-gap: 0.75rem;
+
+    .contact-grid.app-contacts {
+      order: 3;
+      width: 100%;
+      max-width: none;
+      justify-content: flex-start;
+    }
+
+    .user-actions {
+      margin-left: auto;
     }
   }
 }
 
 @include mix.responsive(medium) {
-  header {
-    min-height: 3.75rem;
-    img {
-      height: auto;
-      width: 10rem;
-    }
-    .side {
-      gap: 0.75rem;
-      padding-left: 0.375rem;
-      .call {
-        font-size: 0.8rem;
+  header.auth-header {
+    min-height: auto;
+    padding: 0.85rem 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+
+    .logo {
+      justify-content: center;
+      width: 100%;
+      max-width: none;
+
+      a {
+        width: clamp(10rem, 42vw, 13rem);
+        margin-inline: auto;
       }
-      h3 {
+
+      img {
+        object-position: center;
+      }
+    }
+
+    .side {
+      width: 100%;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem 0.5rem;
+      width: 100%;
+    }
+
+    .contact-item {
+      max-width: none;
+      padding: 0 0.5rem;
+      border-left: none !important;
+
+      &:nth-child(even) {
+        border-left: 1px solid $divider !important;
+      }
+    }
+  }
+
+  header.app-header {
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+
+    .logo {
+      flex: 1 1 auto;
+    }
+
+    .contact-grid.app-contacts {
+      display: none; // contacts on desktop only; avoid crowding tablet header
+    }
+
+    .user-actions {
+      flex: 1 1 auto;
+      justify-content: flex-end;
+
+      .action-item {
         font-size: 0.75rem;
       }
+
+      .profile-name {
+        max-width: 9rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
-    .logout {
-      display: none;
+  }
+}
+
+@include mix.responsive(small) {
+  header.auth-header {
+    padding: 0.75rem;
+
+    .logo a {
+      width: clamp(9rem, 55vw, 11rem);
+    }
+
+    .contact-grid {
+      grid-template-columns: 1fr;
+      gap: 0.65rem;
+    }
+
+    .contact-item {
+      padding: 0.65rem 0 0;
+      border-left: none !important;
+      border-top: 1px solid $divider;
+
+      &:first-child {
+        border-top: none;
+        padding-top: 0;
+      }
+
+      &.contact-secondary {
+        display: none;
+      }
+    }
+  }
+
+  header.app-header {
+    .user-actions {
+      width: 100%;
+      justify-content: space-between;
+
+      .messaging span {
+        display: none; // icon-only on narrow phones
+      }
     }
   }
 }

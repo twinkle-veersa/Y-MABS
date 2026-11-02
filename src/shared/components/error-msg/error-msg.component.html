@@ -1,7 +1,7 @@
 @let c = control();
 @let l = label() || 'This Field';
 @if (c.hasError('required')) {
-  {{ l }} is required.
+  {{ l }} is required
 }
 @if (c.hasError('pattern')) {
   {{ l }} is invalid.

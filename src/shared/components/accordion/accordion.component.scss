@@ -52,7 +52,7 @@
         background-color: var.$primary-color;
 
         &:disabled {
-          background-color: #c2dad7;
+          background-color: var.$button-disabled;
         }
       }
     }

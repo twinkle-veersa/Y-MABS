@@ -16,12 +16,12 @@
       [minlength]="f.validation?.minLength || null"
       [maxlength]="f.validation?.maxLength || (f.inputValidation === 'phone' ? 14 : null)"
       [placeholder]="f.placeholder ? f.placeholder : 'Enter your ' + f.label"
-      [class.invalid]="control.invalid && control.touched" />
+      [class.invalid]="control.invalid && showErrors()" />
 
     @if (control.value && field().validation?.custom?.length) {
       @let errors = control.errors && control.errors['weakPassword'];
       <app-password-checks [errors]="errors" />
-    } @else if (control.touched && control.invalid) {
+    } @else if (showErrors() && control.invalid) {
       <app-error-msg [control]="control" [label]="f.label" />
     }
 

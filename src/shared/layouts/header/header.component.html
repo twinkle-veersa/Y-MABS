@@ -1,37 +1,123 @@
-<header>
+<header [class.auth-header]="isAuthLayout()" [class.app-header]="!isAuthLayout()">
   <div class="logo">
     @if (api.isLoggedIn() && util.screenWidth() <= 768) {
       <app-hamburger [navs]="nav" />
     }
-    <a [href]="content.logoHref" target="_blank">
-      <img ngSrc="logo.png" [alt]="content.logoAlt" width="280" height="74" />
+    <a [href]="content.logoHref" target="_blank" rel="noopener noreferrer">
+      <img
+        src="logo-ymabs-connect.svg"
+        [alt]="content.logoAlt"
+        width="230"
+        height="38"
+        decoding="async" />
     </a>
   </div>
 
-  <div class="side">
-    @if (!api.isLoggedIn() || api.isFirstTimeLoginFlow() !== null) {
-      <h3 [innerHTML]="content.for" class="mobile-font"></h3>
-      <span class="line"></span>
-    }
-    <div class="call mobile-font">
-      <app-icon icon="call" />
-      {{ content.phone }}
+  @if (isAuthLayout()) {
+    <div class="side">
+      <div class="contact-grid">
+        <div class="contact-item">
+          <app-icon icon="call" />
+          <div class="contact-text">
+            <span class="label">Phone:</span>
+            <a class="value" [href]="'tel:' + content.phone">{{ content.phone }}</a>
+          </div>
+        </div>
+
+        @if (content.email) {
+          <div class="contact-item">
+            <app-icon icon="mail" />
+            <div class="contact-text">
+              <span class="label">Email:</span>
+              <a class="value" [href]="'mailto:' + content.email">{{ content.email }}</a>
+            </div>
+          </div>
+        }
+
+        @if (content.fax) {
+          <div class="contact-item contact-secondary">
+            <app-icon icon="print" />
+            <div class="contact-text">
+              <span class="label">Fax:</span>
+              <span class="value">{{ content.fax }}</span>
+            </div>
+          </div>
+        }
+
+        @if (content.poBox) {
+          <div class="contact-item contact-secondary">
+            <app-icon icon="mailbox" />
+            <div class="contact-text">
+              <span class="label">PO Box:</span>
+              <span class="value">{{ content.poBox }}</span>
+            </div>
+          </div>
+        }
+      </div>
     </div>
-    @if (api.isLoggedIn() && !api.isFirstTimeLoginFlow()) {
-      <span class="line mobile-none"></span>
-      <div class="profile-section mobile-none">
-        <app-icon class="mt-1" icon="user" />
+  } @else {
+    <div class="contact-grid app-contacts">
+      <div class="contact-item">
+        <app-icon icon="call" />
+        <div class="contact-text">
+          <span class="label">Phone:</span>
+          <a class="value" [href]="'tel:' + content.phone">{{ content.phone }}</a>
+        </div>
+      </div>
+
+      @if (content.fax) {
+        <div class="contact-item">
+          <app-icon icon="print" />
+          <div class="contact-text">
+            <span class="label">Fax:</span>
+            <span class="value">{{ content.fax }}</span>
+          </div>
+        </div>
+      }
+
+      @if (content.email) {
+        <div class="contact-item">
+          <app-icon icon="mail" />
+          <div class="contact-text">
+            <span class="label">Email:</span>
+            <a class="value" [href]="'mailto:' + content.email">{{ content.email }}</a>
+          </div>
+        </div>
+      }
+
+      @if (content.poBox) {
+        <div class="contact-item">
+          <app-icon icon="mailbox" />
+          <div class="contact-text">
+            <span class="label">PO Box:</span>
+            <span class="value">{{ content.poBox }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="user-actions">
+      <div class="action-item profile-section">
+        <app-icon icon="user" />
         <a [routerLink]="['home', 'profile']" class="profile-name">
           <span>Welcome</span>
-          {{ api.tokenInfo()!.acctname }}
+          {{ api.tokenInfo()?.acctname }}
         </a>
       </div>
 
-      <span class="line mobile-none"></span>
-      <button class="light transparent logout mobile-none" type="submit" (click)="api.logout()">
+      <span class="line" aria-hidden="true"></span>
+
+      <a class="action-item messaging" routerLink="/under-construction">
+        <app-icon icon="mail" />
+        <span>Secure Messaging</span>
+      </a>
+
+      <span class="line" aria-hidden="true"></span>
+
+      <button class="action-item logout transparent" type="button" (click)="api.logout()">
         <app-icon icon="logout" />
-        Logout
+        <span>Logout</span>
       </button>
-    }
-  </div>
+    </div>
+  }
 </header>

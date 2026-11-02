@@ -1,33 +1,30 @@
 import { FieldConfig } from '@shared/models';
 
 export const LOGIN: {
-  supportTitle: string;
   loginBoxTitle: string;
-  list: string[];
   form: FieldConfig[];
 } = {
-  loginBoxTitle: 'Login',
-  supportTitle: '24/7 Online Support',
-  list: [
-    'Enroll patients online',
-    'Upload documents',
-    `Check patient enrollment statuses`,
-    'Get Real-time notifications alerts',
-    `Check plan coverage and track <br/ > scan status`
-  ],
+  loginBoxTitle: 'Welcome!',
   form: [
     {
       fieldType: 'text',
       label: 'Username',
+      // API still expects `Email` as the field name
       name: 'Email',
-      placeholder: 'Enter your username'
+      placeholder: ' ',
+      validation: {
+        required: true
+      }
     },
     {
       fieldType: 'text',
       inputType: 'password',
       label: 'Password',
       name: 'Password',
-      placeholder: 'Enter your password'
+      placeholder: ' ',
+      validation: {
+        required: true
+      }
     }
   ]
 };

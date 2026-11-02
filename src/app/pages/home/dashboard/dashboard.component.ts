@@ -68,7 +68,7 @@ export class DashboardComponent {
         datasets: [
           {
             label: 'My Active Patients',
-            backgroundColor: ['#002D05', '#058348', '#74DD48', '#F3F7DC'],
+            backgroundColor: ['#2B2A6B', '#3D7AB5', '#5B89B1', '#EEF5FB'],
             borderColor: '#C1C8CB',
             data: this.claimStatusData.map(c => c.value)
           }

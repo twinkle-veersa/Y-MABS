@@ -23,7 +23,7 @@
     @include mix.flexColumn;
 
     .popup-header {
-      background: #058348;
+      background: var.$primary-color;
       color: #fff;
       padding: 0.63rem 1.25rem;
       @include mix.flexCentered(space-between, center);
