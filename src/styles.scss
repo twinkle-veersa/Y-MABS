@@ -110,8 +110,8 @@ button:not(.toolbarButton, .p-button, .p-ripple) {
   border: none;
   // min-width: 10rem;
   border-radius: 0.35rem;
-  background-color: var.$primary-color;
-  border: 0.2rem solid var.$primary-color;
+  background-color: #472875;
+  border: 0.2rem solid #472875;
   font-family: var.$primary-font;
   font-size: 1rem;
   font-weight: 700;
@@ -140,12 +140,8 @@ button:not(.toolbarButton, .p-button, .p-ripple) {
 
   &.outline {
     border-color: var.$secondary-color;
-    background-color: transparent;
-    color: var.$dark;
-
-    &:hover {
-      background-color: var.$secondary-color;
-    }
+    background-color: var.$secondary-color;
+    color: #fff;
   }
 
   &.sm {
@@ -175,8 +171,9 @@ button:not(.toolbarButton, .p-button, .p-ripple) {
   &:disabled {
     color: white;
     cursor: not-allowed;
-    background-color: var.$grey;
-    border-color: var.$grey;
+    background-color: #e7e7e7;
+    border-color: #e7e7e7;
+    color: #656c77;
   }
 }
 

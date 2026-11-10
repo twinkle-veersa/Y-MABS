@@ -1,5 +1,5 @@
 @use 'mixins' as mix;
 
 :host {
-  @include mix.hostContainer;
+  @include mix.flexCentered(center, flex-start);
 }

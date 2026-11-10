@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FORGOT_PASSWORD, STEPS, FormStep } from '@constants/forgot-password';
 import { DynamicFieldDirective } from '@shared/utils/dynamic-field.directive';
@@ -46,11 +46,6 @@ export class ForgotPasswordComponent {
   currentStep = signal<FormStep>(STEPS[0]);
   securityQuestionAnswer: SecurityAnswer[] = [];
 
-  usernameRs = this.api.getRs<{ Username: string }>(`facilityAccount/password/reset`, {
-    parameter: this.uuid
-  });
-  username = computed(() => this.usernameRs.value()?.Payload.Username);
-
   submitForm: Record<FormStep, () => void> = {
     email: () => this.validateAndGetQuestions(),
     security: () => this.saveSecurityAnswers(),
@@ -78,6 +73,11 @@ export class ForgotPasswordComponent {
 
   nextStep() {
     if (this.groups[this.currentStep()].valid) this.submitForm[this.currentStep()]();
+  }
+
+  previousStep() {
+    const idx = STEPS.indexOf(this.currentStep());
+    if (idx > 0) this.currentStep.set(STEPS[idx - 1]);
   }
 
   validateAndGetQuestions() {

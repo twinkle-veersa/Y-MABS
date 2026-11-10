@@ -2,13 +2,13 @@
 @use 'variables' as var;
 
 :host {
-  @include mix.hostContainer;
+  @include mix.flexCentered(center, flex-start);
   flex-direction: column;
 
   .error {
-    color: var.$error;
-    padding: 1rem 0rem 1.5rem 0rem;
-    font-weight: 500;
+    color: #e72020;
+    padding: 1.5rem 0;
+    font-weight: 400;
   }
 
   .register {
@@ -18,4 +18,8 @@
     text-decoration: underline;
     font-size: 1rem;
   }
+}
+
+::ng-deep app-header-wrap .page-actions {
+  justify-content: flex-start;
 }

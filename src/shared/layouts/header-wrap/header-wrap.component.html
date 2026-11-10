@@ -25,9 +25,9 @@
     }
     <div class="content" [class.no-padding]="noContentPadding()">
       <ng-content />
-      <div class="page-actions">
-        <ng-content select="[action]" />
-      </div>
+    </div>
+    <div class="page-actions">
+      <ng-content select="[action]" />
     </div>
   </div>
 </div>

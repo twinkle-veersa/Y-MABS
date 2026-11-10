@@ -10,7 +10,7 @@ export const FORGOT_PASSWORD: {
     email: {
       title: 'Forgot Password',
       head: 'Confirm Username & Email Address',
-      subhead: 'Please provide the username and email address for your account.'
+      subhead: 'Please provide the username and email address for your account'
     },
     security: {
       title: 'Answer Security Questions',
@@ -18,13 +18,12 @@ export const FORGOT_PASSWORD: {
     },
     password: {
       title: 'Confirm New Password',
-      head: 'Confirm Your New Password',
       subhead: 'Please choose a new password.'
     },
     success: {
       title: 'Password Reset',
       subhead: 'Your password has been reset successfully',
-      action: 'Continue to Login Screen'
+      action: 'Continue to Login'
     }
   },
   forms: {
@@ -33,11 +32,13 @@ export const FORGOT_PASSWORD: {
         fieldType: 'text',
         label: 'Username',
         name: 'userName',
+        placeholder: 'Enter your username',
         validation: { required: true }
       },
       {
         fieldType: 'text',
         label: 'Email Address',
+        placeholder: 'Enter your email address',
         name: 'email',
         validation: { required: true, email: true }
       }
@@ -48,6 +49,7 @@ export const FORGOT_PASSWORD: {
         fieldType: 'text',
         inputType: 'password',
         label: 'New Password',
+        placeholder: 'Enter new Password',
         name: 'Password',
         validation: { required: true, custom: [checkPassword()] }
       },
@@ -55,7 +57,7 @@ export const FORGOT_PASSWORD: {
         fieldType: 'text',
         inputType: 'password',
         label: 'Confirm New Password',
-        placeholder: 'Confirm your new Password',
+        placeholder: 'Confirm new Password',
         name: 'PasswordConfirmation',
         validation: { required: true }
       }

@@ -121,10 +121,6 @@ export const routes: Routes = [
     data: { noSidebar: true }
   },
   {
-    path: 'splash',
-    loadComponent: () => import('./pages/splash/splash.component').then(c => c.SplashComponent)
-  },
-  {
     path: 'under-construction',
     loadComponent: () =>
       import('./pages/error/under-construction/under-construction.component').then(

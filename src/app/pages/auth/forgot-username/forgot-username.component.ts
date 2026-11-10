@@ -3,7 +3,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { HeaderWrapComponent } from '@shared/layouts/header-wrap/header-wrap.component';
 import { FormTitleComponent } from '@shared/layouts/form-title/form-title.component';
-import { IconComponent } from '@shared/components/icon/icon.component';
 import { FORGOT_USERNAME } from '@constants/forgot-username';
 import { DynamicFieldDirective } from '@shared/utils/dynamic-field.directive';
 import { UtilityService } from '@shared/services/utility.service';
@@ -16,8 +15,7 @@ import { ApiService } from '@shared/services/api.service';
     DynamicFieldDirective,
     ReactiveFormsModule,
     HeaderWrapComponent,
-    FormTitleComponent,
-    IconComponent
+    FormTitleComponent
   ],
   templateUrl: './forgot-username.component.html',
   styleUrl: './forgot-username.component.scss',
