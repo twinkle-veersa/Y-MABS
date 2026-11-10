@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { BASE } from '@constants/base';
-import { ApiService } from '@shared/services/api.service';
 
 @Component({
   selector: 'app-footer',
@@ -10,5 +9,4 @@ import { ApiService } from '@shared/services/api.service';
 })
 export class FooterComponent {
   readonly content = BASE.footer;
-  readonly api = inject(ApiService);
 }

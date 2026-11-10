@@ -6,7 +6,8 @@ $login-blue: var.$primary-color;
 $login-blue-dark: color.adjust(var.$primary-color, $lightness: -8%);
 $card-border: var.$secondary-color;
 $input-bg: var.$light;
-$input-border: color.adjust(var.$primary-color, $lightness: 18%);
+$input-border: #9bb8d4;
+$label-color: #2f5f8a;
 
 :host {
   @include mix.flexCentered(center, center);
@@ -14,33 +15,34 @@ $input-border: color.adjust(var.$primary-color, $lightness: 18%);
   width: 100%;
   min-height: 100%;
   background-color: var.$white;
-  padding: 3.5rem 1.5rem;
+  padding: 3rem 1.5rem;
   color: var.$font-color;
   box-sizing: border-box;
 }
 
 .login-box {
   width: 100%;
-  max-width: 28rem;
+  max-width: 26.5rem;
   background-color: var.$white;
-  border: 1px solid $card-border;
+  border: 3px solid $card-border;
   border-radius: 0.25rem;
-  padding: 2.5rem 2.75rem 2rem;
+  padding: 2.75rem 2.5rem 2.25rem;
   box-sizing: border-box;
 
   h2 {
-    margin: 0 0 1.75rem;
-    font-size: 1.75rem;
+    margin: 0 0 2rem;
+    font-size: 1.875rem;
     font-weight: 700;
     color: #1a1a1a;
     text-align: center;
+    line-height: 1.2;
     font-family: var.$primary-font;
   }
 
   form {
     @include mix.flexColumn;
-    gap: 1.25rem;
-    align-items: stretch;
+    gap: 1.35rem;
+    align-items: center;
 
     app-input {
       width: 100%;
@@ -49,71 +51,68 @@ $input-border: color.adjust(var.$primary-color, $lightness: 18%);
   }
 
   .login-btn {
-    width: 100%;
-    margin-top: 0.5rem;
-    background-color: $login-blue;
-    border-color: $login-blue;
+    width: fit-content;
+    margin-top: 0.35rem;
+    background-color: $card-border;
+    border: 1px solid $card-border;
     border-radius: 0.25rem;
+    color: var.$white;
     font-weight: 600;
-    padding: 0.7rem 1rem;
     font-size: 1rem;
-
-    &:hover:not(:disabled) {
-      background-color: $login-blue-dark;
-      border-color: $login-blue-dark;
-    }
+    line-height: 1.2;
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    font-family: var.$primary-font;
 
     &:disabled {
-      background-color: #a8c4db;
-      border-color: #a8c4db;
-      color: var.$white;
+      cursor: not-allowed;
+      opacity: 0.5;
     }
   }
 
   .links {
-    margin-top: 1.5rem;
+    margin-top: 1.75rem;
     text-align: center;
     font-size: 0.875rem;
     color: var.$font-color;
+    font-family: var.$primary-font;
 
     p {
-      margin: 0.45rem 0;
-      line-height: 1.4;
+      margin: 0.5rem 0;
+      line-height: 1.45;
+      color: #6d7278;
+      font-weight: 600;
+      font-size: 0.75rem;
     }
 
     a {
-      color: $login-blue;
+      color: #0d6efd;
       font-weight: 600;
       text-decoration: underline;
       text-underline-offset: 0.15rem;
-
-      &:hover {
-        color: $login-blue-dark;
-      }
     }
   }
 }
 
 :host ::ng-deep app-input {
   position: relative;
-  padding-top: 0.35rem;
+  padding-top: 0.4rem;
 
   app-input-label {
     position: absolute;
     top: 0;
-    left: 0.75rem;
+    left: 0.7rem;
     z-index: 1;
     background: var.$white;
-    padding: 0 0.35rem;
+    padding: 0 0.3rem;
     line-height: 1;
 
     label span {
       font-size: 0.75rem;
       font-weight: 500;
-      color: $login-blue-dark;
+      color: $label-color;
     }
 
-    // Figma login labels have no required asterisk
     app-req {
       display: none;
     }
@@ -127,26 +126,26 @@ $input-border: color.adjust(var.$primary-color, $lightness: 18%);
       background: $input-bg;
       border: 1px solid $input-border;
       border-radius: 0.25rem;
-      padding: 0.85rem 0.75rem;
+      padding: 0.9rem 0.85rem;
       font-size: 0.95rem;
-      min-height: 2.75rem;
+      min-height: 2.85rem;
+      color: #1a1a1a;
+      box-sizing: border-box;
 
       &:focus,
       &:active {
         background: $input-bg;
         border-color: $login-blue;
         outline: none;
-        box-shadow: 0 0 0 1px rgba($login-blue, 0.25);
+        box-shadow: none;
       }
 
       &.invalid {
         border-color: var.$error;
-        background: #fff5f5;
 
         &:focus,
         &:active {
           border-color: var.$error;
-          box-shadow: 0 0 0 1px rgba(var.$error, 0.25);
         }
       }
     }
@@ -158,11 +157,10 @@ $input-border: color.adjust(var.$primary-color, $lightness: 18%);
       min-height: auto;
     }
 
-    // Keep eye icon aligned to the input, not the error text
     app-icon {
-      top: 0.9rem;
+      top: 0.95rem;
       transform: none;
-      color: $login-blue-dark;
+      color: $label-color;
     }
   }
 }
@@ -174,13 +172,13 @@ $input-border: color.adjust(var.$primary-color, $lightness: 18%);
   }
 
   .login-box {
-    max-width: 26rem;
-    padding: 2rem 1.5rem 1.75rem;
+    max-width: 24.5rem;
+    padding: 2.25rem 1.5rem 1.75rem;
     margin-inline: auto;
 
     h2 {
-      font-size: 1.55rem;
-      margin-bottom: 1.5rem;
+      font-size: 1.65rem;
+      margin-bottom: 1.6rem;
     }
   }
 }
@@ -193,24 +191,22 @@ $input-border: color.adjust(var.$primary-color, $lightness: 18%);
   .login-box {
     max-width: none;
     padding: 1.75rem 1.15rem 1.5rem;
-    border-radius: 0.35rem;
 
     h2 {
-      font-size: 1.4rem;
-      margin-bottom: 1.25rem;
+      font-size: 1.45rem;
+      margin-bottom: 1.35rem;
     }
 
     form {
-      gap: 1.1rem;
+      gap: 1.15rem;
     }
 
     .login-btn {
-      padding: 0.75rem 1rem;
-      margin-top: 0.35rem;
+      padding: 0.8rem 1rem;
     }
 
     .links {
-      margin-top: 1.25rem;
+      margin-top: 1.35rem;
       font-size: 0.8125rem;
     }
   }
@@ -218,7 +214,7 @@ $input-border: color.adjust(var.$primary-color, $lightness: 18%);
   :host ::ng-deep app-input {
     .input-wrap input {
       min-height: 2.9rem;
-      font-size: 1rem; // avoid iOS zoom
+      font-size: 1rem;
     }
   }
 }
@@ -232,7 +228,7 @@ $input-border: color.adjust(var.$primary-color, $lightness: 18%);
     padding: 1.5rem 0.9rem 1.25rem;
 
     h2 {
-      font-size: 1.3rem;
+      font-size: 1.35rem;
     }
   }
 }

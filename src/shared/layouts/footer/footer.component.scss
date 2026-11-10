@@ -3,73 +3,28 @@
 
 $footer-blue: var.$secondary-color;
 
-footer {
+footer.auth-footer {
   gap: 1rem;
-  padding: 2rem 1rem;
   @include mix.flexCentered;
-  border-top: 0.3rem solid var.$secondary-color;
-  background-color: #f2f2f2;
+  border-top: none;
+  background-color: $footer-blue;
+  color: var.$white;
+  justify-content: center;
+  padding: 1.25rem 1.5rem;
+  min-height: 4.5rem;
 
-  &.auth-footer {
-    border-top: none;
-    background-color: $footer-blue;
-    color: var.$white;
-    justify-content: center;
-    padding: 1.25rem 1.5rem;
-    min-height: 4.5rem;
+  .auth-content {
+    text-align: center;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    max-width: 52rem;
 
-    .auth-content {
-      text-align: center;
-      font-size: 0.875rem;
-      line-height: 1.45;
-      max-width: 52rem;
-
-      p {
-        margin: 0.15rem 0;
-      }
-    }
-  }
-
-  .content {
-    padding: 1.5rem 1rem 0;
-    flex: auto;
-
-    .links {
-      @include mix.flexCentered(start);
-      gap: 0.5rem;
-
-      a {
-        color: inherit;
-        text-decoration: underline;
-        text-underline-position: under;
-        text-decoration-color: var.$primary-color;
-
-        &:hover {
-          text-decoration-color: var.$secondary-color;
-        }
-      }
-    }
-  }
-
-  .logo {
-    margin-top: auto;
-    text-align: right;
-
-    a {
-      display: inline-block;
-      max-width: min(14rem, 100%);
+    .auth-text {
+      font-size: 1rem;
     }
 
-    img {
-      display: block;
-      width: 100%;
-      max-width: 14rem;
-      height: auto;
-      object-fit: contain;
-    }
-
-    span {
-      white-space: nowrap;
+    p {
+      margin: 0.15rem 0;
     }
   }
 }
@@ -81,21 +36,6 @@ footer {
 
     .auth-content {
       font-size: 0.8rem;
-    }
-  }
-
-  footer:not(.auth-footer) {
-    flex-direction: column;
-    @include mix.flexCentered(center, flex-start);
-    padding-bottom: 1rem;
-
-    .logo {
-      text-align: left;
-      padding-left: 1rem;
-
-      img {
-        max-width: 11rem;
-      }
     }
   }
 }

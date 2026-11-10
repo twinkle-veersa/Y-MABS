@@ -17,7 +17,7 @@
     <div class="side">
       <div class="contact-grid">
         <div class="contact-item">
-          <app-icon icon="call" />
+          <img src="phone.svg" width="43" height="32" alt="" aria-hidden="true" />
           <div class="contact-text">
             <span class="label">Phone:</span>
             <a class="value" [href]="'tel:' + content.phone">{{ content.phone }}</a>
@@ -26,7 +26,7 @@
 
         @if (content.email) {
           <div class="contact-item">
-            <app-icon icon="mail" />
+            <img src="email.svg" width="43" height="32" alt="" aria-hidden="true" />
             <div class="contact-text">
               <span class="label">Email:</span>
               <a class="value" [href]="'mailto:' + content.email">{{ content.email }}</a>
@@ -36,7 +36,7 @@
 
         @if (content.fax) {
           <div class="contact-item contact-secondary">
-            <app-icon icon="print" />
+            <img src="fax.svg" width="43" height="32" alt="" aria-hidden="true" />
             <div class="contact-text">
               <span class="label">Fax:</span>
               <span class="value">{{ content.fax }}</span>
@@ -46,7 +46,7 @@
 
         @if (content.poBox) {
           <div class="contact-item contact-secondary">
-            <app-icon icon="mailbox" />
+            <img src="pobox.svg" width="43" height="32" alt="" aria-hidden="true" />
             <div class="contact-text">
               <span class="label">PO Box:</span>
               <span class="value">{{ content.poBox }}</span>
@@ -56,68 +56,64 @@
       </div>
     </div>
   } @else {
-    <div class="contact-grid app-contacts">
-      <div class="contact-item">
-        <app-icon icon="call" />
-        <div class="contact-text">
-          <span class="label">Phone:</span>
-          <a class="value" [href]="'tel:' + content.phone">{{ content.phone }}</a>
+    <div class="app-right">
+      <div class="contact-grid app-contacts">
+        <div class="contact-col">
+          <div class="contact-item">
+            <img src="phone.svg" width="43" height="32" alt="" aria-hidden="true" />
+            <div class="contact-text">
+              <a class="value" [href]="'tel:' + content.phone">{{ content.phone }}</a>
+            </div>
+          </div>
+          <div class="contact-item">
+            <img src="fax.svg" width="43" height="32" alt="" aria-hidden="true" />
+            <div class="contact-text">
+              <span class="value">{{ content.fax }}</span>
+            </div>
+          </div>
+        </div>
+
+        <span class="line" aria-hidden="true"></span>
+
+        <div class="contact-col">
+          <div class="contact-item">
+            <img src="email.svg" width="43" height="32" alt="" aria-hidden="true" />
+            <div class="contact-text">
+              <a class="value" [href]="'mailto:' + content.email">{{ content.email }}</a>
+            </div>
+          </div>
+          <div class="contact-item">
+            <img src="pobox.svg" width="43" height="32" alt="" aria-hidden="true" />
+            <div class="contact-text">
+              <span class="value">{{ content.poBox }}</span>
+            </div>
+          </div>
         </div>
       </div>
-
-      @if (content.fax) {
-        <div class="contact-item">
-          <app-icon icon="print" />
-          <div class="contact-text">
-            <span class="label">Fax:</span>
-            <span class="value">{{ content.fax }}</span>
-          </div>
+      <span class="line" aria-hidden="true"></span>
+      <div class="user-actions">
+        <div class="action-item profile-section">
+          <img src="user.svg" width="28" height="28" alt="" aria-hidden="true" />
+          <a [routerLink]="['home', 'profile']" class="profile-name">
+            <span>Welcome</span>
+            {{ api.tokenInfo()?.acctname }}
+          </a>
         </div>
-      }
 
-      @if (content.email) {
-        <div class="contact-item">
-          <app-icon icon="mail" />
-          <div class="contact-text">
-            <span class="label">Email:</span>
-            <a class="value" [href]="'mailto:' + content.email">{{ content.email }}</a>
-          </div>
-        </div>
-      }
+        <span class="line" aria-hidden="true"></span>
 
-      @if (content.poBox) {
-        <div class="contact-item">
-          <app-icon icon="mailbox" />
-          <div class="contact-text">
-            <span class="label">PO Box:</span>
-            <span class="value">{{ content.poBox }}</span>
-          </div>
-        </div>
-      }
-    </div>
-
-    <div class="user-actions">
-      <div class="action-item profile-section">
-        <app-icon icon="user" />
-        <a [routerLink]="['home', 'profile']" class="profile-name">
-          <span>Welcome</span>
-          {{ api.tokenInfo()?.acctname }}
+        <a class="action-item messaging" routerLink="/under-construction">
+          <app-icon icon="securemessaging" />
+          <span>Secure Messaging</span>
         </a>
+
+        <span class="line" aria-hidden="true"></span>
+
+        <button class="action-item logout transparent" type="button" (click)="api.logout()">
+          <img src="logout.svg" width="28" height="28" alt="" aria-hidden="true" />
+          <span>Logout</span>
+        </button>
       </div>
-
-      <span class="line" aria-hidden="true"></span>
-
-      <a class="action-item messaging" routerLink="/under-construction">
-        <app-icon icon="mail" />
-        <span>Secure Messaging</span>
-      </a>
-
-      <span class="line" aria-hidden="true"></span>
-
-      <button class="action-item logout transparent" type="button" (click)="api.logout()">
-        <app-icon icon="logout" />
-        <span>Logout</span>
-      </button>
     </div>
   }
 </header>

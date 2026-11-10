@@ -14,18 +14,10 @@
   main {
     @include mix.flexColumn;
     flex-grow: 1;
-    background: linear-gradient(
-      360deg,
-      rgba(var.$light, 0.55) 0%,
-      rgba(var.$secondary-color, 0.28) 45%,
-      rgba(var.$primary-color, 0.35) 100%
-    );
-  }
-
-  &.auth-layout {
-    main {
-      background: var.$white;
-      justify-content: center;
-    }
+    background-image: url('/background.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: unset;
+    flex-grow: 1;
   }
 }

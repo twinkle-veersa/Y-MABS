@@ -6,12 +6,6 @@ const phone = '1-833-339-6227';
 const email = 'ymabsconnect@valeris.com';
 const fax = '1-877-209-6227';
 const poBox = '5490 Louisville, KY 40255';
-const code = '';
-const links = [
-  { label: 'Privacy Policy', href: 'https://www.ymabs.com/' },
-  { label: 'Terms of Use', href: 'https://www.ymabs.com/' },
-  { label: 'Contact Us', href: 'mailto:ymabsconnect@valeris.com' }
-];
 
 export const BASE: BaseContent = {
   header: {
@@ -24,15 +18,10 @@ export const BASE: BaseContent = {
     poBox
   },
   footer: {
-    logoAlt: `${portal} Logo`,
-    logoHref,
-    links,
     text: {
-      line1: `This site is intended only for residents of the United States and U.S.
-      healthcare professionals only.`,
-      line2: `All Rights Reserved.`
-    },
-    code
+      line1: `©2026 Y-mAbs Therapeutics, Inc. All Rights Reserved.`,
+      line2: `This is a provider portal intended to be used by healthcare professionals only. `
+    }
   },
   register: {
     title: 'Thank You for Registering!',

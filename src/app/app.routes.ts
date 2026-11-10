@@ -20,12 +20,6 @@ export const routes: Routes = [
           import('./pages/auth/register/register.component').then(c => c.RegisterComponent)
       },
       {
-        // Figma "Request Access" / onboarding flow
-        path: 'onboarding',
-        loadComponent: () =>
-          import('./pages/auth/register/register.component').then(c => c.RegisterComponent)
-      },
-      {
         path: 'forgot-username',
         loadComponent: () =>
           import('./pages/auth/forgot-username/forgot-username.component').then(
