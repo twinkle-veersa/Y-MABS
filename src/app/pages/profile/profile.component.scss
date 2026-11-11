@@ -1,10 +1,99 @@
 @use 'variables' as var;
 @use 'mixins' as mix;
 
-.tab {
-  @include mix.tabStyle;
+:host {
+  display: block;
+  width: 100%;
 }
 
-hr {
-  margin-block: 3rem;
+.tab-wrap {
+  padding: 0.5rem;
+  background: #f7f8f9;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.tab-shell {
+  gap: 0.5rem;
+  background: #eeeeee;
+  display: flex;
+  border-radius: 0.5rem;
+  padding: 0.2rem;
+  width: fit-content;
+}
+
+.tab-button {
+  min-width: 0;
+  border: none;
+  background: #ececec;
+  color: #000000;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.75rem 2rem;
+
+  &.active {
+    background: #472875;
+    color: #fff;
+    border-radius: 6px;
+  }
+}
+
+.settings-content {
+  padding: 2rem;
+  border-top: 1px solid #d6d6d6;
+  background: #fcfcfc;
+  min-height: 20rem;
+}
+
+.heading-wrap {
+  margin-bottom: 2rem;
+
+  h1 {
+    color: #2c2c2c;
+    font-size: 1.25rem;
+    margin: 0 0 1rem;
+  }
+
+  .required-text {
+    color: var.$error;
+  }
+}
+
+.narrow {
+  max-width: 48rem;
+}
+
+.security-grid {
+  .column {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.footer-actions {
+  @include mix.flexCentered(space-between, center);
+  padding: 1rem;
+  border-top: 1px solid #dbdbdb;
+}
+
+@include mix.responsive(bs-large) {
+  .tab-wrap {
+    width: 100%;
+  }
+
+  .tab-shell {
+    flex-direction: column;
+    padding-top: 1rem;
+  }
+
+  .settings-content {
+    min-height: auto;
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .security-grid .with-divider {
+    border-right: 0;
+    border-bottom: 1px solid var.$container-border;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+  }
 }

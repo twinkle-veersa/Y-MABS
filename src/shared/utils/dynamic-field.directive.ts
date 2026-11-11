@@ -17,27 +17,31 @@ import { DatepickerComponent } from '@shared/components/datepicker/datepicker.co
 import { FieldConfig, FieldType } from '@shared/models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UtilityService } from '@shared/services/utility.service';
+import { LineComponent } from '@shared/components/line/line.component';
 
 type ComponentTypes =
   | typeof InputComponent
   | typeof SelectComponent
   | typeof RadioComponent
   | typeof CheckboxComponent
-  | typeof DatepickerComponent;
+  | typeof DatepickerComponent
+  | typeof LineComponent;
 
 type FieldComponent =
   | InputComponent
   | SelectComponent
   | RadioComponent
   | CheckboxComponent
-  | DatepickerComponent;
+  | DatepickerComponent
+  | LineComponent;
 
 const ComponentMap: Record<FieldType, ComponentTypes> = {
   text: InputComponent,
   select: SelectComponent,
   radio: RadioComponent,
   checkbox: CheckboxComponent,
-  date: DatepickerComponent
+  date: DatepickerComponent,
+  line: LineComponent
 };
 
 @Directive({ selector: '[appDynamicField]' })

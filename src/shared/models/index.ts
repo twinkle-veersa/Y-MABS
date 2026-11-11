@@ -12,7 +12,7 @@ export interface SelectOptions {
   option: string;
 }
 
-export const fieldTypes = ['text', 'select', 'radio', 'checkbox', 'date'] as const;
+export const fieldTypes = ['text', 'select', 'radio', 'checkbox', 'date', 'line'] as const;
 export type FieldType = (typeof fieldTypes)[number];
 export const fieldPositions = ['left', 'right', 'bottom'] as const;
 export type FieldPositon = (typeof fieldPositions)[number];
@@ -28,6 +28,7 @@ export interface FieldConfig {
   validation?: FieldValidations;
   inputValidation?: ValType;
   inputType?: 'text' | 'password' | 'tel' | 'number' | 'file'; // For input fields
+  autocomplete?: string;
   position?: string; // TODO Implement using this property with FieldPositon type instead of string
   fieldSize?: number; // INFO Here 0 (Zero) indicated auto sizing
   hint?: string;
@@ -35,6 +36,8 @@ export interface FieldConfig {
   max?: Date;
   dependsOn?: string;
   condition?: string;
+  marginTop?: string;
+  marginBottom?: string;
 }
 
 export interface FieldValidations {

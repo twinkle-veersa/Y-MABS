@@ -15,13 +15,14 @@
       "
       [minlength]="f.validation?.minLength || null"
       [maxlength]="f.validation?.maxLength || (f.inputValidation === 'phone' ? 14 : null)"
+      [attr.autocomplete]="f.autocomplete ?? null"
       [placeholder]="f.placeholder ? f.placeholder : 'Enter your ' + f.label"
-      [class.invalid]="control.invalid && showErrors()" />
+      [class.invalid]="control.invalid && control.touched" />
 
     @if (control.value && field().validation?.custom?.length) {
       @let errors = control.errors && control.errors['weakPassword'];
       <app-password-checks [errors]="errors" />
-    } @else if (showErrors() && control.invalid) {
+    } @else if (control.touched && control.invalid) {
       <app-error-msg [control]="control" [label]="f.label" />
     }
 

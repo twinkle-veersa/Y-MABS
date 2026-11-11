@@ -5,7 +5,7 @@ import { REGEX } from './regex';
 export const TABS = ['password', 'security', 'info'] as const;
 export type Tab = (typeof TABS)[number];
 export const PROFILE: {
-  content: Record<Tab, { title: string; head: string }>;
+  content: Record<Tab, { title: string; head: string; subtitle?: string }>;
   forms: Record<Tab, FieldConfig[]>;
   exitConfirmation: string;
 } = {
@@ -15,12 +15,12 @@ export const PROFILE: {
       head: 'Enter your current password and a new password.'
     },
     security: {
-      title: 'Change Security Question',
+      title: 'Change Security Questions',
       head: 'Update your security questions in the event you forget your password.'
     },
     info: {
       title: 'Profile Information',
-      head: 'Manage your profile and contact information.'
+      head: 'Manage your profile and contact information'
     }
   },
   forms: {
@@ -30,6 +30,7 @@ export const PROFILE: {
         inputType: 'password',
         label: 'Current Password',
         name: 'CurrentPassword',
+        placeholder: 'Enter current password',
         validation: { required: true }
       },
       {
@@ -37,13 +38,14 @@ export const PROFILE: {
         inputType: 'password',
         label: 'New Password',
         name: 'Password',
+        placeholder: 'Enter new password',
         validation: { required: true, custom: [checkPassword()] }
       },
       {
         fieldType: 'text',
         inputType: 'password',
         label: 'Confirm New Password',
-        placeholder: 'Confirm New Password',
+        placeholder: 'Confirm new password',
         name: 'PasswordConfirmation',
         validation: { required: true }
       }
@@ -55,13 +57,21 @@ export const PROFILE: {
         inputType: 'password',
         label: 'Current Password',
         name: 'CurrentPassword',
+        placeholder: 'Enter current password',
         validation: { required: true }
+      },
+      {
+        position: 'left',
+        fieldType: 'line',
+        name: 'line',
+        marginTop: '4.1rem',
+        marginBottom: '1.5rem'
       },
       {
         position: 'left',
         fieldType: 'select',
         label: 'Select a Question',
-        placeholder: 'Select',
+        placeholder: 'Select a question',
         name: 'Id_1',
         options: [],
         validation: { required: true }
@@ -70,6 +80,7 @@ export const PROFILE: {
         position: 'left',
         fieldType: 'text',
         label: 'Your Answer',
+        placeholder: 'Enter your answer',
         name: 'Answer_1',
         validation: { required: true }
       },
@@ -77,7 +88,7 @@ export const PROFILE: {
         position: 'right',
         fieldType: 'select',
         label: 'Select a Question',
-        placeholder: 'Select',
+        placeholder: 'Select a question',
         name: 'Id_2',
         options: [],
         validation: { required: true }
@@ -86,6 +97,7 @@ export const PROFILE: {
         position: 'right',
         fieldType: 'text',
         label: 'Your Answer',
+        placeholder: 'Enter your answer',
         name: 'Answer_2',
         validation: { required: true }
       },
@@ -93,7 +105,7 @@ export const PROFILE: {
         position: 'right',
         fieldType: 'select',
         label: 'Select a Question',
-        placeholder: 'Select',
+        placeholder: 'Select a question',
         name: 'Id_3',
         options: [],
         validation: { required: true }
@@ -102,6 +114,7 @@ export const PROFILE: {
         position: 'right',
         fieldType: 'text',
         label: 'Your Answer',
+        placeholder: 'Enter your answer',
         name: 'Answer_3',
         validation: { required: true }
       }
@@ -114,9 +127,6 @@ export const PROFILE: {
         fieldSize: 3,
         validation: {
           required: true
-          // pattern: REGEX.character,
-          // minLength: 3,
-          // maxLength: 10
         }
       },
       {
@@ -126,20 +136,15 @@ export const PROFILE: {
         fieldSize: 3,
         validation: {
           required: true
-          // pattern: REGEX.character,
-          // minLength: 3,
-          // maxLength: 10
         }
       },
-
-      // need to work on this
       {
         fieldSize: 3,
         fieldType: 'text',
         label: 'Phone',
         name: 'Phone',
         inputValidation: 'phone',
-        validation: { pattern: REGEX.phone }
+        validation: { required: true, pattern: REGEX.phone }
       },
       {
         fieldSize: 3,
@@ -147,13 +152,13 @@ export const PROFILE: {
         label: 'Fax',
         name: 'Fax',
         inputValidation: 'phone',
-        validation: { pattern: REGEX.phone }
+        validation: { required: true, pattern: REGEX.phone }
       },
       {
         fieldType: 'text',
         label: 'Email',
         name: 'Email',
-        fieldSize: 6,
+        fieldSize: 3,
         validation: { required: true, email: true }
       }
     ]

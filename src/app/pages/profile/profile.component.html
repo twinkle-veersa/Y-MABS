@@ -1,70 +1,86 @@
-@if (activeTab) {
-  <form [formGroup]="groups[activeTab]" (ngSubmit)="submitForm[activeTab]()">
-    <app-header-wrap>
-      @for (tab of tabs; track $index) {
-        <button
-          class="tab center"
-          type="button"
-          [class.active]="tab === activeTab"
-          (click)="activeTab = tab">
-          {{ content[tab].title }}
-        </button>
-      }
-      <app-form-title [title]="content[activeTab].head" />
-      <div class="row">
-        @switch (activeTab) {
+@if (activeTab(); as tab) {
+  <form [formGroup]="groups[tab]" (ngSubmit)="submitForm[tab]()">
+    <app-header-wrap [noContentPadding]="true" [bordered]="true">
+      <div class="tab-wrap">
+        <div class="tab-shell">
+          @for (item of tabs; track item) {
+            <button
+              class="tab-button"
+              type="button"
+              [class.active]="tab === item"
+              (click)="activeTab.set(item)">
+              {{ content[item].title }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="settings-content">
+        <div class="heading-wrap">
+          <h1>{{ content[tab].head }}</h1>
+          @if (tab === 'security' && content[tab].subtitle) {
+            <span>
+              {{ content[tab].subtitle }}
+              <span class="required-text">(* Required field)</span>
+            </span>
+          } @else {
+            <p class="required-text">(* Required field)</p>
+          }
+        </div>
+
+        @switch (tab) {
           @case ('password') {
-            <div class="col-lg-4 col-md-6 col-sm-12">
-              @for (field of forms[activeTab]; track field.name) {
-                <ng-container appDynamicField [field]="field" [group]="groups[activeTab]" />
+            <div class="row narrow">
+              @for (field of forms[tab]; track field.name) {
+                <div class="col-md-8">
+                  <ng-container appDynamicField [field]="field" [group]="groups[tab]" />
+                </div>
               }
             </div>
           }
           @case ('security') {
-            @if (securityForm() && securityForm().length) {
-              <div class="col-md-6">
-                @for (field of securityForm(); track field.name; let i = $index) {
-                  @if (field.position === 'left') {
-                    @if (i === 1) {
-                      <hr class="mobile-none" />
+            @if (securityForm().length) {
+              <div class="row security-grid">
+                <div class="col-md-6 column">
+                  @for (field of securityForm(); track field.name) {
+                    @if (field.position === 'left') {
+                      <ng-container appDynamicField [field]="field" [group]="groups[tab]" />
                     }
-                    <ng-container appDynamicField [field]="field" [group]="groups[activeTab]" />
                   }
-                }
-              </div>
-              <div class="col-md-6">
-                @for (field of securityForm(); track field.name) {
-                  @if (field.position === 'right') {
-                    <ng-container appDynamicField [field]="field" [group]="groups[activeTab]" />
+                </div>
+                <div class="col-md-6 column">
+                  @for (field of securityForm(); track field.name) {
+                    @if (field.position === 'right') {
+                      <ng-container appDynamicField [field]="field" [group]="groups[tab]" />
+                    }
                   }
-                }
+                </div>
               </div>
             }
           }
           @case ('info') {
-            @for (field of forms[activeTab]; track field.name) {
-              <ng-container appDynamicField [field]="field" [group]="groups[activeTab]" />
-            }
+            <div class="row">
+              @for (field of forms[tab]; track field.name) {
+                <ng-container appDynamicField [field]="field" [group]="groups[tab]" />
+              }
+            </div>
           }
         }
       </div>
-      <button action class="outline desktop-button" routerLink="/home" type="button">
-        <app-icon icon="chevron-left" /> Back to Home
-      </button>
-      <button class="desktop-button" action type="submit" [disabled]="groups[activeTab].invalid">
-        Save
-      </button>
+
+      <div class="footer-actions">
+        <button class="outline" routerLink="/home" type="button">
+          <app-icon icon="chevron-left" /> Back to Home
+        </button>
+        <button type="submit" [disabled]="groups[tab].invalid">Save</button>
+      </div>
     </app-header-wrap>
   </form>
   <div class="button-group">
     <button action class="outline" routerLink="/home" type="button">
       <app-icon icon="chevron-left" /> Back to Home
     </button>
-    <button
-      action
-      type="button"
-      [disabled]="groups[activeTab].invalid"
-      (click)="submitForm[activeTab]()">
+    <button action type="button" [disabled]="groups[tab].invalid" (click)="submitForm[tab]()">
       Save
     </button>
   </div>

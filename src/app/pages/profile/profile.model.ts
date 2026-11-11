@@ -6,9 +6,11 @@ export interface ReqPass {
   PasswordConfirmation: string;
   UserName: string | null;
 }
+
 export interface ResPass {
   Message: string;
 }
+
 export interface ReqSec {
   PortalAccountId: number;
   CurrentPassword: string;
@@ -18,19 +20,23 @@ export interface ReqSec {
     { Id: number; Answer: string }
   ];
 }
+
 export interface ResSec {
   StatusCode: number;
   Message: string;
+  ErrorMessage?: string;
 }
+
 export interface SecurityFormValue {
   CurrentPassword: string;
   [key: string]: string;
 }
+
 export interface ReqInfo {
-  //set from the API call
   MasterAccountId: number;
   UserContactDetails: ReqInfoUser;
 }
+
 export interface ReqInfoUser {
   Id: null;
   FirstName: string;
@@ -41,6 +47,7 @@ export interface ReqInfoUser {
   Phone?: string | null;
   Fax?: string | null;
 }
+
 export interface ResInfo {
   StatusMessage: string;
 }
@@ -59,6 +66,7 @@ interface QuestionType {
   Value: string;
   IsActive: boolean;
 }
+
 export interface ProfileInfo {
   FirstName: string;
   LastName: string;
@@ -118,19 +126,6 @@ export interface Facility {
   FacilityContacts?: FacilityContact[];
   Contacts?: FacilityContact[];
 }
-
-// interface FacilityContact {
-//   Id: number;
-//   FirstName: string;
-//   LastName: string;
-//   Title: string;
-//   OfficeContactType: null;
-//   Phone: null | string | string;
-//   Extension: null | null | string | string;
-//   Fax: null | string | string;
-//   Email: null | null | string | string;
-//   Rank: number | null;
-// }
 
 interface Address {
   Line1?: string;

@@ -171,7 +171,12 @@ export class ApiService {
     post: <Q extends object, R>(
       endpoint: string,
       payload: Q,
-      options?: { context: HttpContext; baseUrl?: string }
+      options?: {
+        context?: HttpContext;
+        baseUrl?: string;
+        showSuccessToast?: boolean;
+        showErrorToast?: boolean;
+      }
     ) =>
       this.http
         .post<
@@ -181,9 +186,9 @@ export class ApiService {
           map(res => {
             const message = res.Payload?.Message ?? res.Payload?.StatusMessage;
             const errMsg = this.extractErrMsg(res.Errors);
-            if (res.Status === 'SUCCESS' && message) {
+            if (res.Status === 'SUCCESS' && message && options?.showSuccessToast !== false) {
               this.toast.success(message, 'Success');
-            } else if (res.Status === 'ERROR') {
+            } else if (res.Status === 'ERROR' && options?.showErrorToast !== false) {
               // INFO Using timeout to wait for requester to handle this. If no msg shown by requester this will be shown...
               setTimeout(() => {
                 if (this.toast.currentlyActive < 1) this.toast.error(errMsg, 'Error!');
@@ -205,6 +210,9 @@ export class ApiService {
   ) {
     return httpResource<ApiReqRes<Q, R>>(() => {
       const parameter = params?.parameter?.();
+      if (params?.parameter && (parameter == null || parameter === '')) {
+        return undefined;
+      }
       const query = params?.query ?? {};
       const baseUrl = params?.baseUrl ?? this.baseUrl;
       const url = baseUrl + endpoint + (parameter != null ? `/${parameter}` : '');
