@@ -33,6 +33,7 @@ export class TableComponent {
   pdfSrc = input<Blob | null>();
   sortingEnabled = input<boolean>(false);
   actions = input<RowAction[]>([]);
+  firstActionOutline = input(false);
   selection = input<'single' | 'multiple' | null>(null);
   selectAllEnabled = input<boolean>(false);
   pageSizes = input<number[]>([5, 10, 15, 20]);

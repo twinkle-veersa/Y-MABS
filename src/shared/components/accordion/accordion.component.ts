@@ -25,10 +25,11 @@ export class AccordionComponent {
 
   constructor() {
     effect(() => {
-      this.searchControl.setValue(this.searchTerm());
+      this.searchControl.setValue(this.searchTerm(), { emitEvent: false });
     });
-    effect(() => {
-      this.searchTerm.set(this.searchControl.value || '');
+
+    this.searchControl.valueChanges.subscribe(value => {
+      this.searchTerm.set(value ?? '');
     });
   }
   open = input<boolean>(false);
@@ -39,12 +40,24 @@ export class AccordionComponent {
   practiceOffices = input<Facility[]>([]);
   selectedOfficesAddress = output<Facility[]>();
   filteredOffices = computed<Facility[]>(() => {
-    const search = this.searchTerm().toString().toLowerCase().trim();
-    return search.length
-      ? this.practiceOffices().filter(office =>
-          Object.values(office).some((v: string) => v.toString().toLowerCase().includes(search))
-        )
-      : this.practiceOffices();
+    const search = this.searchTerm().toLowerCase().trim();
+    if (!search.length) return this.practiceOffices();
+
+    return this.practiceOffices().filter(office => {
+      const address = office.Address?.[0];
+      const searchable = [
+        office.PracticeGroup,
+        office.OfficeName,
+        office.Email,
+        office.Phone,
+        office.Fax,
+        address?.Line1,
+        address?.City,
+        address?.State,
+        address?.Zipcode
+      ];
+      return searchable.some(v => v?.toString().toLowerCase().includes(search));
+    });
   });
   facilityCols: ColConfig[] = [
     { key: 'PracticeGroup', title: 'Practice Name' },

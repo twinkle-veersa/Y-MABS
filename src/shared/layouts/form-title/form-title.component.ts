@@ -12,4 +12,5 @@ export class FormTitleComponent {
   subtitle = input<string>();
   emphasis = input<'high' | 'low'>('high');
   required = input<boolean>(true);
+  requiredTitle = input<boolean>(false);
 }

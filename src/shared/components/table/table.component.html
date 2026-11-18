@@ -11,7 +11,7 @@
         }
         @for (item of columnConfigs(); track $index) {
           <th
-            [class.text-center]="item.key === 'action'"
+            [class.text-end]="item.key === 'action'"
             [class.sortable]="sortingEnabled() && (item.sortable ?? true) && item.key !== 'action'"
             (click)="
               sortingEnabled() && (item.sortable ?? true) && item.key !== 'action'
@@ -62,8 +62,8 @@
                 <div class="row-action">
                   @for (item of actions(); track $index) {
                     <button
-                      class="sm"
                       type="button"
+                      [class.outline]="$index === 0 && firstActionOutline()"
                       [disabled]="disabledRow() === data"
                       (click)="rowAction(item.type, data, $index)">
                       {{ item.name }}
@@ -129,42 +129,21 @@
   </div>
 }
 <ng-template #rowValue let-data let-key="key" let-config="col">
-  @let value = config.isArray ? data[key][0] : data[key];
+  @let value = config.isArray ? data[key]?.[0] : data[key];
   @if (config.pipeName) {
-    <span [class.text-nowrap]="config.pipeName === 'phone'">
-      {{ value | dynamicPipe: config.pipeName : config.pipeAttr }}
-    </span>
-  } @else {
-    <span [classList]="config.classList">
-      {{ value }}
-    </span>
-  }
-</ng-template>
-<!-- <ng-template #rowValue let-data let-key="key" let-config="col">
-  @if (config.isArray && isArray(data[key]) && data[key].length) {
-    @let firstItem = data[key][0];
-    @if (config.pipeName) {
+    @if (value) {
       <span [class.text-nowrap]="config.pipeName === 'phone'">
-        {{ firstItem | dynamicPipe: config.pipeName }}
-      </span>
-    } @else {
-      <span [classList]="config.classList">
-        {{ firstItem | json }}
+        {{ value | dynamicPipe: config.pipeName : config.pipeAttr }}
       </span>
     }
   } @else {
-    @let value = data[key];
-    @if (config.pipeName) {
-      <span [class.text-nowrap]="config.pipeName === 'phone'">
-        {{ value | dynamicPipe: config.pipeName }}
-      </span>
-    } @else {
+    @if (value) {
       <span [classList]="config.classList">
         {{ value }}
       </span>
     }
   }
-</ng-template> -->
+</ng-template>
 
 <ng-template #pdfRow let-data>
   <tr style="min-height: 800px">

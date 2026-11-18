@@ -15,7 +15,7 @@
             </div>
           }
         </div>
-        <div class="subhead">{{ subheading() }}</div>
+        <div class="subhead" [innerHTML]="subheading()"></div>
         <div class="stepper ms-3 mobile-stepper">
           @for (item of steps().steps; let i = $index; track i) {
             <span [class]="{ complete: i <= steps().complete }">{{ item }}</span>

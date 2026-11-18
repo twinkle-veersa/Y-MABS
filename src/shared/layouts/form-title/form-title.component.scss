@@ -3,9 +3,14 @@
 h2 {
   margin: 0rem;
   font-weight: 700;
+  color: #0e075d;
 
   &.highlight {
     color: var.$dark;
+  }
+
+  .required-note {
+    font-weight: 300;
   }
 }
 
@@ -22,11 +27,12 @@ h3 {
   margin: 1rem 0;
 
   &.normal {
-    font-weight: normal;
+    font-weight: 300;
+    color: #181818;
   }
 }
 
 .required-note {
-  color: var.$error;
+  color: #e40046;
   font-size: 0.75rem;
 }

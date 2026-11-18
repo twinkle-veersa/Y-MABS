@@ -207,10 +207,6 @@ header.app-header {
         line-height: 0;
         flex-shrink: 0;
       }
-
-      &:hover {
-        color: var.$primary-color;
-      }
     }
 
     .profile-name {
@@ -237,11 +233,6 @@ header.app-header {
       border: none;
       background: transparent;
       box-shadow: none;
-
-      &:hover {
-        color: var.$error;
-        background: transparent;
-      }
 
       &:disabled {
         background: transparent;

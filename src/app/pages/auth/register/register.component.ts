@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy,
-  linkedSignal,
+  ChangeDetectorRef,
   Component,
   computed,
   inject,
@@ -14,7 +14,7 @@ import { FormTitleComponent } from '@shared/layouts/form-title/form-title.compon
 import { AccordionComponent } from '@shared/components/accordion/accordion.component';
 import { HeaderWrapComponent } from '@shared/layouts/header-wrap/header-wrap.component';
 import { FullpageAlertsComponent } from '@shared/layouts/fullpage-alerts/fullpage-alerts.component';
-import { REGISTER, AccountType, ACCOUNT_TYPES, FormStepType, UserSteps } from '@constants/register';
+import { REGISTER, FormStepType, UserSteps, ROLE_PK_ID, NPI_ERROR_MSG } from '@constants/register';
 import { DynamicFieldDirective } from '@shared/utils/dynamic-field.directive';
 import { UtilityService } from '@shared/services/utility.service';
 import { ApiService } from '@shared/services/api.service';
@@ -24,10 +24,8 @@ import { PhonePipe } from '@shared/utils/phone.pipe';
 import { formatPhoneInObj, sanitizeObj, sanitizePhone } from '@shared/utils/utility.functions';
 import { ToastrService } from 'ngx-toastr';
 import { FacilityContact } from 'app/pages/home/settings/settings.component';
-import { AlertService } from '@shared/services/alert.service';
 import { SeperatorComponent } from '@shared/components/seperator/seperator.component';
-
-const NPI_ERROR_MSG = `One or more pieces of information entered do not match our records. Please try again or contact us for additional assistance.`;
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -50,22 +48,26 @@ const NPI_ERROR_MSG = `One or more pieces of information entered do not match ou
 })
 export class RegisterComponent {
   readonly content = REGISTER.content;
-  readonly userTypes = ACCOUNT_TYPES;
   readonly forms = REGISTER.forms;
   private router = inject(Router);
   private util = inject(UtilityService);
   private api = inject(ApiService);
   private toast = inject(ToastrService);
-  private alert = inject(AlertService);
-  prescriberSet = signal<boolean>(false);
-  errorMsg = signal('');
+  private cdr = inject(ChangeDetectorRef);
+  prescriberSet = signal(false);
   stepper = computed(() => {
-    const steps = REGISTER.steps[this.selectedType()];
+    const steps = REGISTER.steps;
     return {
       complete: steps.indexOf(this.currentStep()),
-      steps: steps?.slice(0, -1).map((_, i) => i + 1)
+      steps: steps.slice(0, -1).map((_, i) => i + 1)
     };
   });
+
+  get canFindPrescriber(): boolean {
+    if (this.prescriberSet()) return true;
+    const npi = String(this.groups.user.step1.get('prescriberNPI')?.value ?? '').trim();
+    return npi.length === 10;
+  }
 
   facilityCols: ColConfig[] = [
     { key: 'PracticeGroup', title: 'Practice Name' },
@@ -73,57 +75,47 @@ export class RegisterComponent {
     { key: 'Phone', pipeName: 'phone' },
     { key: 'Fax', pipeName: 'phone' },
     { key: 'Email' },
-    { key: 'action', title: 'Edit / Delete' }
+    { key: 'action', title: 'Actions' }
   ];
   facilityRowActions: RowAction[] = [
     { type: 'edit', name: 'Edit' },
     { type: 'delete', name: 'Delete' }
   ];
-  prescriberCols: ColConfig[] = [
-    { key: 'npi', title: 'Prescriber NPI #' },
-    { key: 'prescriber', title: 'Name' },
-    { key: 'action', title: 'Actions' }
-  ];
-
-  prescriberRowActions: RowAction[] = [{ type: 'delete', name: 'Delete' }];
-  selectedFacility = linkedSignal<Facility[]>(() => (this.selectedType() ? [] : [])); // Resets selectedFacility if type changes
-  prescriberFacility: Facility[] = [];
+  selectedFacility = signal<Facility[]>([]);
   updateData: Facility | null = null;
-  rowIndex = 0;
   prescriberId: number | null = null;
 
-  prescribersWithFacility = signal<PrescriberWithFacility[]>([]); // For Other Registration
+  prescribersWithFacility = signal<PrescriberWithFacility[]>([]);
+  selectedFacilitiesMap = signal(new Map<number, Facility[]>());
   groups = this.util.generateForm(this.forms);
-  selectedType = signal<AccountType>(this.userTypes[0]);
-  currentStep = signal<FormStepType>(REGISTER.steps[this.selectedType()][0]);
+  currentStep = signal<FormStepType>('user');
+
   get isInvalid() {
-    if (this.currentStep() === 'accountType') {
-      return !this.selectedType();
-    } else if (this.currentStep() === 'user') {
-      const userGroups = this.groups[this.selectedType()].user;
+    if (this.currentStep() === 'user') {
+      if (!this.prescriberSet()) return true;
+      const userGroups = this.groups.user;
       return Object.keys(userGroups).some(k => userGroups[k as keyof UserSteps<unknown>].invalid);
-    } else if (this.currentStep() === 'facility') {
-      if (this.selectedType() === 'other') {
-        return (
-          !this.prescribersWithFacility().length ||
-          ![...this.selectedFacilitiesMap.values()].some(x => x.length)
-        );
-      }
-      return !this.selectedFacility().length;
-    } else if (this.currentStep() === 'prescriber') {
-      return !this.prescribersWithFacility().length;
+    }
+    if (this.currentStep() === 'facility') {
+      if (!this.prescribersWithFacility().length) return true;
+      const hasAccordionSelection = [...this.selectedFacilitiesMap().values()].some(x => x.length);
+      const hasManual = this.selectedFacility().length > 0;
+      return !hasAccordionSelection && !hasManual;
     }
     return false;
   }
+
   constructor() {
-    // this.groups.prescriber.user.step3.addValidators(matchPassword('password', 'confirmPassword'));
-    this.groups.other.user.step3.addValidators(matchPassword('password', 'confirmPassword'));
+    this.groups.user.step3.addValidators(matchPassword('password', 'confirmPassword'));
+    this.groups.user.step1.get('prescriberNPI')?.valueChanges.subscribe(() => {
+      this.cdr.markForCheck();
+    });
   }
 
   onRowAction(event: { type: string; data: unknown }) {
     const data = event.data as Facility;
     if (event.type === 'edit') {
-      const facilityForm = this.groups?.[this.selectedType()]?.facility;
+      const facilityForm = this.groups.facility;
       const address = data.Address && data.Address.length ? data.Address[0] : {};
       facilityForm.patchValue(
         formatPhoneInObj({
@@ -140,9 +132,7 @@ export class RegisterComponent {
       );
       this.updateData = data;
     } else if (event.type === 'delete') {
-      this.alert.confirm(`Are you sure you want to remove this facility ?`).then(confirmed => {
-        if (confirmed) this.deleteFacility(data);
-      });
+      this.deleteFacility(data);
     }
   }
 
@@ -151,53 +141,43 @@ export class RegisterComponent {
     this.prescribersWithFacility.update(prescribers =>
       prescribers.map(prescriber => {
         const facilities = prescriber.facilities.filter(x => x !== row);
-        const selected = this.selectedFacilitiesMap.get(prescriber.prescriberId) || [];
-        this.selectedFacilitiesMap.set(
-          prescriber.prescriberId,
-          selected.filter(x => x !== row)
-        );
         return { ...prescriber, facilities };
       })
     );
+    this.selectedFacilitiesMap.update(map => {
+      const next = new Map(map);
+      for (const [id, facilities] of next) {
+        next.set(
+          id,
+          facilities.filter(x => x !== row)
+        );
+      }
+      return next;
+    });
   }
-
-  onPrescriberRowActions(event: { type: string; data: unknown }) {
-    if (event.type === 'delete') {
-      this.alert.confirm(`Are you sure you want to remove this prescriber ?`).then(confirmed => {
-        if (confirmed) this.prescribersWithFacility.update(x => x.filter(d => d !== event.data));
-      });
-    }
-  }
-
-  selectedFacilitiesMap = new Map<number, Facility[]>();
 
   addSelectedFacility(data: Facility[], prescriber: PrescriberWithFacility) {
-    this.selectedFacilitiesMap.set(prescriber.prescriberId, data);
+    this.selectedFacilitiesMap.update(map => {
+      const next = new Map(map);
+      const manuals = this.selectedFacility().filter(
+        manual =>
+          !data.some(
+            office =>
+              office.PracticeGroup === manual.PracticeGroup &&
+              office.OfficeName === manual.OfficeName
+          )
+      );
+      next.set(prescriber.prescriberId, [...data, ...manuals]);
+      return next;
+    });
   }
 
   addFacility() {
-    const facilityForm = this.groups?.[this.selectedType()]?.facility;
+    const facilityForm = this.groups.facility;
     if (facilityForm?.valid) {
-      const formData = facilityForm.value as facilityForm;
-      const newFacility: Facility = sanitizeObj({
-        PracticeGroup: formData.practiceName || '',
-        Email: formData.email ?? '',
-        Fax: formData.fax || null,
-        OfficeName: formData.practiceName || '',
-        Rank: 1,
+      const newFacility = this.buildFacilityFromForm(facilityForm.value as facilityForm, {
         Id: null,
-        Phone: formData.phone || null,
-        PhoneType: 'Office',
-        Extension: null,
-        Address: [
-          {
-            Line1: formData.address1 || '',
-            Line2: formData.address2 || '',
-            City: formData.city || '',
-            State: formData.state || '',
-            Zipcode: formData.zip || ''
-          }
-        ],
+        Rank: 1,
         Contacts: []
       });
       this.updateNewFacility(newFacility);
@@ -209,50 +189,34 @@ export class RegisterComponent {
 
   updateNewFacility(newFacility: Facility) {
     this.selectedFacility.update(x => [newFacility, ...x]);
-    this.prescribersWithFacility.update(prescribers =>
-      prescribers.map(prescriber => {
-        const facilities = [newFacility, ...prescriber.facilities];
-        const selected = this.selectedFacilitiesMap.get(prescriber.prescriberId) || [];
-        this.selectedFacilitiesMap.set(prescriber.prescriberId, [newFacility, ...selected]);
-        return { ...prescriber, facilities };
-      })
-    );
+    this.selectedFacilitiesMap.update(map => {
+      const next = new Map(map);
+      for (const prescriber of this.prescribersWithFacility()) {
+        const selected = next.get(prescriber.prescriberId) || [];
+        next.set(prescriber.prescriberId, [newFacility, ...selected]);
+      }
+      return next;
+    });
   }
+
   cancelUpdationInFacility() {
-    const facilityForm = this.groups?.[this.selectedType()]?.facility;
-    facilityForm?.reset();
+    this.groups.facility.reset();
     this.updateData = null;
   }
 
-  updateFacilityForData(index: number) {
-    const facilityForm = this.groups?.[this.selectedType()]?.facility;
-    if (facilityForm !== undefined && facilityForm.valid) {
-      const formData = facilityForm.value as facilityForm;
-      const updatedFacility: Facility = sanitizeObj({
-        PracticeGroup: formData.practiceName || '',
-        Email: formData.email || '',
-        Fax: formData.fax || null,
-        OfficeName: formData.practiceName || '',
-        Rank: 3, // Default rank or logic for dynamic rank
-        Id: this.selectedFacility()[index].Id, // Retain existing ID
-        Phone: formData.phone || null,
-        PhoneType: 'Office', // Default phone type
-        Extension: null, // Default extension
-        Address: [
-          {
-            Line1: formData.address1 || '',
-            Line2: formData.address2 || '',
-            City: formData.city || '',
-            State: formData.state || '',
-            Zipcode: formData.zip || ''
-          }
-        ],
-        Contacts: this.selectedFacility()[index].Contacts || [] // Retain existing contacts
+  updateFacilityForData() {
+    const facilityForm = this.groups.facility;
+    if (facilityForm !== undefined && facilityForm.valid && this.updateData !== null) {
+      const updatedFacility = this.buildFacilityFromForm(facilityForm.value as facilityForm, {
+        Id: this.updateData.Id ?? null,
+        Rank: 3,
+        Contacts: this.updateData.Contacts || []
       });
-      if (this.updateData !== null) {
-        this.deleteFacility(this.updateData);
-        this.updateNewFacility(updatedFacility);
-      }
+      const previous = this.updateData;
+      this.selectedFacility.update(list => [
+        updatedFacility,
+        ...list.filter(facility => facility !== previous)
+      ]);
       this.updateData = null;
       facilityForm.reset();
     } else {
@@ -261,209 +225,32 @@ export class RegisterComponent {
   }
 
   handleNext() {
-    const arr = REGISTER.steps[this.selectedType()];
+    const arr = REGISTER.steps;
     this.currentStep.update(c => arr[arr.indexOf(c) + 1]);
   }
 
-  // handleSaveAndRegister() {
-  //   console.log('final sumbit');
-  //   const accountType = this.selectedType();
-  //   // const step1Form = this.groups?.[accountType]?.user?.step1;
-  //   const step2Form = this.groups?.[accountType]?.user?.step2;
-  //   const step3Form = this.groups?.[accountType]?.user?.step3;
-
-  //   const userPayload: User = {
-  //     Username: '',
-  //     EmailAddress: '',
-  //     Password: '',
-  //     PasswordConfirmation: '',
-  //     // PrescriberId: (step1Form?.value?.prescriberNPI
-  //     //   ? Number(step1Form?.value?.prescriberNPI)
-  //     //   : undefined) as number,
-  //     IsNewUser: true,
-  //     Role: { RolePkId: 4 },
-  //     UserContactDetails: []
-  //   };
-
-  //   if (step2Form?.valid) {
-  //     const { firstName, lastName, phone, email, fax } = step2Form.value as Step2FormValues;
-  //     userPayload.EmailAddress = email;
-  //     userPayload.UserContactDetails?.push(
-  //       sanitizeObj({
-  //         FirstName: firstName,
-  //         LastName: lastName,
-  //         Phone: phone,
-  //         Email: email,
-  //         Fax: fax
-  //       })
-  //     );
-  //   }
-
-  //   if (step3Form?.valid) {
-  //     const { username, password, confirmPassword } = step3Form.value as Step3FormValues;
-  //     userPayload.Username = username;
-  //     userPayload.Password = password;
-  //     userPayload.PasswordConfirmation = confirmPassword;
-  //   }
-
-  //   console.log('Final User Payload:', userPayload);
-
-  //   // Make API call to create user first
-  //   this.api.call.post<User, responsePayload>('account', userPayload).subscribe({
-  //     next: res => {
-  //       console.log('User Created Successfully:', res);
-  //       userPayload.MasterAccountId = res.Payload.masterPortalAccountId;
-  //       userPayload.IsNewUser = false;
-
-  //       userPayload.UserContactDetails = userPayload?.UserContactDetails?.map(contact => ({
-  //         ...contact,
-  //         Id: Number(res.Payload.contactId)
-  //       }));
-  //       // After user creation, make API calls for each selected facility
-  //       this.handleFacilityRegistration(userPayload);
-  //     },
-  //     error: err => {
-  //       console.error('Error:', err);
-  //     }
-  //   });
-  // }
-  // async handleFacilityRegistration(userPayload: User) {
-  //   const selectedFacilities: Facility[] = this.selectedFacility();
-  //   const finalFacilityPayloads: Facility[] = [];
-  //   for (const facility of selectedFacilities) {
-  //     const sanitizedPhone = sanitizePhone(facility.Phone ?? '');
-  //     const sanitizedFax = sanitizePhone(facility.Fax ?? '');
-
-  //     const facilityPayload = {
-  //       ...userPayload,
-  //       IsNewUser: false,
-  //       MasterAccountId: userPayload.MasterAccountId,
-  //       MasterFacility: {
-  //         PracticeGroup: facility.PracticeGroup || userPayload.MasterFacility?.PracticeGroup,
-  //         Email: facility.Email || userPayload.MasterFacility?.Email,
-  //         Fax: facility.Fax ?? '',
-  //         OfficeName: facility.OfficeName || userPayload.MasterFacility?.OfficeName,
-  //         Rank: facility.Rank || userPayload.MasterFacility?.Rank,
-  //         Id: facility.Id || userPayload.MasterFacility?.Id || null,
-  //         Phone: facility.Phone ?? '',
-  //         PhoneType: 'Office',
-  //         Extension: null,
-  //         Address: facility.Address || userPayload.MasterFacility?.Address,
-  //         Contacts: facility.Contacts || userPayload.MasterFacility?.Contacts
-  //       }
-  //     };
-
-  //     try {
-  //       const res = await this.api.call
-  //         .post<User, responsePayload>('account', facilityPayload)
-  //         .toPromise();
-  //       console.log(res?.Parameters?.MasterFacility?.Address);
-  //       const finalfacilitypayload = {
-  //         PracticeGroup: res?.Parameters.MasterFacility?.PracticeGroup,
-  //         Email: res?.Parameters.MasterFacility?.Email,
-  //         Fax: sanitizedFax,
-  //         OfficeName: res?.Parameters.MasterFacility?.OfficeName,
-  //         Rank: res?.Parameters.MasterFacility?.Rank,
-  //         // Id: res?.Parameters.MasterFacility?.Id,
-  //         Id: res?.Payload?.facilityId,
-  //         Phone: sanitizedPhone,
-  //         PhoneType: 'Office',
-  //         Extension: null,
-  //         Address: res?.Parameters.MasterFacility?.Address,
-  //         Contacts: facility.Contacts
-  //       };
-
-  //       finalFacilityPayloads.push(finalfacilitypayload);
-  //       console.log('Facility Created Successfully:', finalfacilitypayload);
-  //     } catch (err) {
-  //       console.error('Error creating facility:', err);
-  //     }
-  //   }
-  //   this.finalFacilityCall(finalFacilityPayloads, userPayload);
-  // }
-
-  // finalFacilityCall(finalFacilityPayloads: Facility[], userPayload: User) {
-  //   console.log(finalFacilityPayloads);
-  //   const requests = this.prescribersWithFacility().map(pwf => {
-  //     // DO NOT REMOVE
-  //     // const aggregatedFacilities = pwf.selectedFacilities
-  //     //   .filter(sf => finalFacilityPayloads.find(y => y.Id === sf))
-  //     //   .map(ff => {
-  //     //     return { ...ff, ...finalFacilityPayloads.find(y => y.Id === ff.Id) };
-  //     //   });
-  //     const finalPayload: User = {
-  //       Username: userPayload.Username,
-  //       EmailAddress: userPayload.EmailAddress,
-  //       Password: userPayload.Password,
-  //       PasswordConfirmation: userPayload.PasswordConfirmation,
-  //       // Check with aggregatedFacilities defined above
-  //       Facilities: pwf.selectedFacilities.map(x => {
-  //         return {
-  //           ...x,
-  //           PhoneType: undefined,
-  //           Address: x?.Address ? x.Address[0] : {}
-  //         };
-  //       }) as Facility[],
-  //       MasterAccountId: userPayload.MasterAccountId,
-  //       PrescriberId: pwf.prescriberId,
-  //       IsNewUser: false
-  //       // Role: { RolePkId: 4 }
-  //       // UserContactDetails: userPayload.UserContactDetails
-  //     };
-  //     console.log(
-  //       `Final Facility Call for prescriber [${pwf.prescriberId}] - ${pwf.prescriber}`,
-  //       finalPayload
-  //     );
-  //     return this.api.call.post<User, responsePayload>('account', finalPayload);
-  //   });
-  //   forkJoin([...requests]).subscribe({
-  //     next: results => {
-  //       if (results.every(x => x.Status === 'SUCCESS')) {
-  //         this.handleNext();
-  //       } else {
-  //         this.toast.error(
-  //           results.find(x => x.Errors && x.Errors[0])?.Errors[0]?.Message ??
-  //             'Something went wrong..!'
-  //         );
-  //       }
-  //     }
-  //   });
-  //   // .subscribe({
-  //   //   next: res => {
-  //   //     if (res.Status === 'SUCCESS') {
-  //   //       this.handleNext();
-  //   //     }
-  //   //     console.log('All Facilities Registered Successfully:', res);
-  //   //   },
-  //   //   error: err => {
-  //   //     console.error('Error during final facility registration:', err);
-  //   //   }
-  //   // });
-  // }
-
   async handleSaveAndRegister() {
-    console.log('final submit');
-    const accountType = this.selectedType();
-    const step1Form = this.groups?.[accountType]?.user?.step1;
-    const step2Form = this.groups?.[accountType]?.user?.step2;
-    const step3Form = this.groups?.[accountType]?.user?.step3;
+    const step2Form = this.groups.user.step2;
+    const step3Form = this.groups.user.step3;
 
-    // Step 1: Create new user
+    if (!this.prescriberId) {
+      this.toast.error('Please look up your NPI before registering.');
+      return;
+    }
+
     const userPayload: User = {
       Username: '',
       EmailAddress: '',
       Password: '',
       PasswordConfirmation: '',
-      PrescriberId: ((step1Form?.value as { prescriberNPI?: string })?.prescriberNPI
-        ? Number((step1Form?.value as { prescriberNPI?: string })?.prescriberNPI)
-        : undefined) as number,
+      PrescriberId: this.prescriberId,
       IsNewUser: true,
-      Role: { RolePkId: 4 },
+      Role: { RolePkId: ROLE_PK_ID },
       UserContactDetails: []
     };
 
     if (step2Form?.valid) {
-      const { firstName, lastName, phone, email, fax } = step2Form.value as Step2FormValues;
+      const { firstName, lastName, phone, email, fax } = step2Form.getRawValue() as Step2FormValues;
       userPayload.EmailAddress = email;
       userPayload.UserContactDetails?.push(
         sanitizeObj({
@@ -484,13 +271,10 @@ export class RegisterComponent {
     }
 
     try {
-      // First API call - Create new user
-      const userResponse = await this.api.call
-        .post<User, responsePayload>('account', userPayload)
-        .toPromise();
-      console.log('User Created Successfully:', userResponse);
+      const userResponse = await firstValueFrom(
+        this.api.call.post<User, responsePayload>('account', userPayload)
+      );
 
-      // Prepare for second call - Add master facility
       userPayload.MasterAccountId = userResponse?.Payload.masterPortalAccountId;
       userPayload.IsNewUser = false;
       userPayload.UserContactDetails = userPayload.UserContactDetails?.map(contact => ({
@@ -498,11 +282,8 @@ export class RegisterComponent {
         Id: Number(userResponse?.Payload.contactId)
       }));
 
-      // Step 2: Create master facility
       const facilityResponse = await this.handleFacilityRegistration(userPayload);
-      console.log('facility' + facilityResponse.values);
 
-      // Step 3: Map facilities to prescribers
       const finalPayload = {
         ...userPayload,
         MasterFacility: undefined,
@@ -513,7 +294,6 @@ export class RegisterComponent {
         })
       } as UserForApi;
 
-      console.log(finalPayload);
       await this.finalFacilityCall(facilityResponse, finalPayload);
 
       this.handleNext();
@@ -526,6 +306,7 @@ export class RegisterComponent {
   async handleFacilityRegistration(userPayload: User): Promise<Facility[]> {
     const selectedFacilities: Facility[] = this.selectedFacility();
     const finalFacilityPayloads: Facility[] = [];
+
     for (const facility of selectedFacilities) {
       const sanitizedPhone = sanitizePhone(facility.Phone ?? '') || null;
       const sanitizedFax = sanitizePhone(facility.Fax ?? '') || null;
@@ -536,11 +317,18 @@ export class RegisterComponent {
         : addressData || {};
 
       const facilityPayload: User = {
-        ...userPayload,
+        Username: userPayload.Username,
+        EmailAddress: userPayload.EmailAddress,
+        Password: userPayload.Password,
+        PasswordConfirmation: userPayload.PasswordConfirmation,
+        IsNewUser: false,
+        Role: userPayload.Role,
+        UserContactDetails: userPayload.UserContactDetails,
+        MasterAccountId: userPayload.MasterAccountId,
         MasterFacility: {
           PracticeGroup: facility.PracticeGroup,
           Email: facility.Email || userPayload.EmailAddress,
-          Fax: facility.Fax ?? null,
+          Fax: sanitizedFax,
           OfficeName: facility.OfficeName || facility.PracticeGroup,
           Rank: facility.Rank || 1,
           Id: null,
@@ -548,14 +336,14 @@ export class RegisterComponent {
           Extension: null,
           Address: [singleAddress],
           Contacts: [],
-          ...(facility.Phone ? { Phone: facility.Phone } : {})
+          ...(sanitizedPhone ? { Phone: sanitizedPhone } : {})
         }
       };
 
       try {
-        const res = await this.api.call
-          .post<User, responsePayload>('account', facilityPayload)
-          .toPromise();
+        const res = await firstValueFrom(
+          this.api.call.post<User, responsePayload>('account', facilityPayload)
+        );
 
         const createdFacility: Facility = {
           PracticeGroup: res?.Parameters.MasterFacility?.PracticeGroup,
@@ -571,10 +359,9 @@ export class RegisterComponent {
         };
 
         finalFacilityPayloads.push(createdFacility);
-        console.log('Facility Created Successfully:', createdFacility);
       } catch (err) {
         console.error('Error creating facility:', err);
-        throw err; // Re-throw to stop the process
+        throw err;
       }
     }
 
@@ -582,19 +369,10 @@ export class RegisterComponent {
   }
 
   async finalFacilityCall(finalFacilities: Facility[], userPayload: UserForApi) {
-    console.log(finalFacilities);
     try {
       const requests = this.prescribersWithFacility().map(prescriber => {
-        // DO NOT REMOVE
-        // const aggregatedFacilities = pwf.selectedFacilities
-        //   .filter(sf => finalFacilityPayloads.find(y => y.Id === sf))
-        //   .map(ff => {
-        //     return { ...ff, ...finalFacilityPayloads.find(y => y.Id === ff.Id) };
-        //   });
-        // Get facilities selected for this prescriber
-        const prescriberFacilities = this.selectedFacilitiesMap.get(prescriber.prescriberId) || [];
-
-        // Map to final facility objects with IDs
+        const prescriberFacilities =
+          this.selectedFacilitiesMap().get(prescriber.prescriberId) || [];
 
         const facilitiesToAssign = prescriberFacilities.map(pf => {
           const finalFacility =
@@ -605,178 +383,199 @@ export class RegisterComponent {
           return {
             ...finalFacility,
             PhoneType: undefined,
+            NPI: null,
             Address: finalFacility.Address ? finalFacility.Address[0] : {}
           };
         });
 
         const finalPayload: UserForApi = {
-          ...userPayload,
-          Facilities: facilitiesToAssign,
-          PrescriberId: prescriber.prescriberId
+          Username: userPayload.Username,
+          EmailAddress: userPayload.EmailAddress,
+          Password: userPayload.Password,
+          PasswordConfirmation: userPayload.PasswordConfirmation,
+          MasterAccountId: userPayload.MasterAccountId,
+          IsNewUser: false,
+          Role: userPayload.Role,
+          PrescriberId: prescriber.prescriberId,
+          Facilities: facilitiesToAssign
         };
 
-        return this.api.call.post<UserForApi, responsePayload>('account', finalPayload).toPromise();
+        return firstValueFrom(
+          this.api.call.post<UserForApi, responsePayload>('account', finalPayload)
+        );
       });
 
       const results = await Promise.all(requests);
 
-      // Check for errors
       const hasErrors = results.some(result => result?.Status !== 'SUCCESS');
       if (hasErrors) {
         this.toast.error('Something went wrong..!');
       }
-      console.log('All prescriber-facility mappings completed successfully');
     } catch (error) {
       console.error('Error in final facility call:', error);
       throw error;
     }
   }
 
+  private buildFacilityFromForm(
+    formData: facilityForm,
+    extras: { Id: number | string | null; Rank: number; Contacts: FacilityContact[] }
+  ): Facility {
+    return sanitizeObj({
+      PracticeGroup: formData.practiceName || '',
+      Email: formData.email ?? '',
+      Fax: formData.fax || null,
+      OfficeName: formData.practiceName || '',
+      Rank: extras.Rank,
+      Id: extras.Id,
+      Phone: formData.phone || null,
+      PhoneType: 'Office',
+      Extension: null,
+      Address: [
+        {
+          Line1: formData.address1 || '',
+          Line2: formData.address2 || '',
+          City: formData.city || '',
+          State: formData.state || '',
+          Zipcode: formData.zip || ''
+        }
+      ],
+      Contacts: extras.Contacts
+    });
+  }
+
+  private mapLookupFacilities(facilities: PrescriberFacility[]): Facility[] {
+    return facilities.map(facility => ({
+      PracticeGroup: facility.GroupName || '',
+      Email: facility.Email ?? '',
+      Fax: facility.Fax || '',
+      OfficeName: facility.Name || '',
+      Rank: 1,
+      Id: facility.Id || null,
+      Phone: facility.Phone || null,
+      PhoneType: 'Office',
+      Address: [
+        {
+          Line1: facility.Address1 || '',
+          Line2: facility.Address2,
+          City: facility.City || '',
+          State: facility.State || '',
+          Zipcode: `${facility.Zip || ''}${facility.ZipSuffixCode ? '-' + facility.ZipSuffixCode : ''}`
+        }
+      ],
+      Contacts: []
+    }));
+  }
+
   handleBack() {
-    if (this.currentStep() !== 'user') {
-      const arr = REGISTER.steps[this.selectedType()];
-      this.currentStep.update(c => arr[arr.indexOf(c) - 1]);
-    } else {
+    if (this.currentStep() === 'user') {
+      this.resetRegistrationState();
       this.router.navigate(['/login']);
+      return;
     }
+
+    if (this.currentStep() === 'facility') {
+      this.cancelUpdationInFacility();
+    }
+
+    const arr = REGISTER.steps;
+    this.currentStep.set(arr[arr.indexOf(this.currentStep()) - 1]);
+  }
+
+  private resetRegistrationState() {
+    const userSteps = this.groups.user;
+    (Object.keys(userSteps) as (keyof UserSteps<unknown>)[]).forEach(step => {
+      userSteps[step].reset();
+      userSteps[step].enable();
+    });
+    this.groups.facility.reset();
+    this.groups.facility.enable();
+
+    this.currentStep.set('user');
+    this.prescriberSet.set(false);
+    this.prescriberId = null;
+    this.updateData = null;
+    this.prescribersWithFacility.set([]);
+    this.selectedFacility.set([]);
+    this.selectedFacilitiesMap.set(new Map());
   }
 
   findPrescriber() {
-    const accountType = this.selectedType();
-    const step1Form = this.groups?.[accountType]?.user?.step1;
-    const step2Form = this.groups?.[accountType]?.user?.step2;
+    const step1Form = this.groups.user.step1;
+    const step2Form = this.groups.user.step2;
 
-    if (this.prescriberSet() === false) {
-      if (step1Form.valid) {
-        const formValue = step1Form.value as Step1FormValues;
-        const { prescriberNPI, first: firstName, last: lastName } = formValue;
-        const formattedValue = `${prescriberNPI}/${firstName}/${lastName}`;
-
-        this.api.call
-          .get<[{ Facilities: PrescriberFacility[] }]>('provider/' + formattedValue)
-          .subscribe({
-            next: res => {
-              console.log(res.Payload[0].Facilities);
-              if (res.Status === 'SUCCESS') {
-                this.prescriberFacility = res.Payload[0]?.Facilities.map(facility => ({
-                  PracticeGroup: facility.GroupName || '',
-                  Email: facility.Email ?? '',
-                  Fax: facility.Fax || '',
-                  OfficeName: facility.Name || '',
-                  Rank: 1,
-                  Id: facility.Id || null,
-                  Phone: facility.Phone || null,
-                  PhoneType: 'Office',
-
-                  Address: [
-                    {
-                      Line1: facility.Address1 || '',
-                      Line2: facility.Address2,
-                      City: facility.City || '',
-                      State: facility.State || '',
-                      Zipcode: `${facility.Zip || ''}${facility.ZipSuffixCode ? '-' + facility.ZipSuffixCode : ''}`
-                    }
-                  ],
-                  Contacts: []
-                }));
-
-                step2Form?.patchValue({ firstName, lastName });
-                this.prescriberSet.set(true);
-                step1Form?.disable();
-
-                console.log('Prescriber Facilities:', this.prescriberFacility);
-                // this.facilityDataForAccordion.update(()=>this.prescriberFacility)
-              } else {
-                console.error('No facilities found in response or invalid response structure.');
-              }
-            },
-            error: err => {
-              console.error('Cannot find the prescriber:', err);
-            }
-          });
-      } else {
-        console.log('Form is invalid or undefined:', step1Form?.errors);
-      }
-    } else {
-      step1Form?.reset();
-      step1Form?.enable();
-      step2Form?.reset();
+    if (this.prescriberSet()) {
+      step1Form.reset();
+      step1Form.enable();
+      step2Form.reset();
+      step2Form.enable();
       this.prescriberSet.set(false);
+      this.prescriberId = null;
+      this.prescribersWithFacility.set([]);
+      this.selectedFacilitiesMap.set(new Map());
+      this.selectedFacility.set([]);
+      this.updateData = null;
+      return;
     }
-  }
-  addPrescriber() {
-    const form = this.groups.other.prescriber;
-    const formValue = form.value as Step1FormValues;
-    const { prescriberNPI, first: firstName, last: lastName } = formValue;
-    if (this.prescribersWithFacility().find(x => x.npi == prescriberNPI)) {
-      this.toast.warning(`Prescriber ${firstName} ${lastName} is already added..!`);
-    } else {
-      const formattedValue = `${prescriberNPI}/${firstName.trim()}/${lastName.trim()}`;
-      this.errorMsg.set('');
-      this.api.call
-        .get<[{ Id: number; Facilities: PrescriberFacility[] }]>('provider/' + formattedValue)
-        .subscribe({
-          next: res => {
-            if (res.Status === 'SUCCESS') {
-              this.prescriberId = Number(res.Payload[0]?.Id);
-              const facilities = res.Payload[0]?.Facilities.map(facility => ({
-                PracticeGroup: facility.GroupName || '', // Optional field
-                Email: facility.Email ?? '', // Handle potential null or undefined values
-                Fax: facility.Fax || '', // Provide a default value if Fax is missing
-                OfficeName: facility.Name || '', // Map the name of the facility
-                Rank: 1, // Assign rank if available; otherwise, default to null
-                Id: facility.Id || null, // Assign ID; allow null if not provided
-                Phone: facility.Phone || null, // Map the phone number
-                PhoneType: 'Office', // Assign a default phone type; adjust if necessary
 
-                Address: [
-                  {
-                    Line1: facility.Address1 || '', // Map Address1
-                    Line2: facility.Address2, // Map Address2; allow null
-                    City: facility.City || '', // Map the city
-                    State: facility.State || '', // Map the state
-                    Zipcode: `${facility.Zip || ''}${facility.ZipSuffixCode ? '-' + facility.ZipSuffixCode : ''}` // Combine Zip and ZipSuffixCode
-                  }
-                ],
-                Contacts: [] // Default to an empty array unless data is available
-              }));
-              const obj = {
-                npi: prescriberNPI,
-                prescriberId: this.prescriberId,
-                prescriber: `${firstName} ${lastName}`,
-                facilities,
-                selectedFacilities: []
-              };
-              this.prescribersWithFacility.update(prev => {
-                const seen = new Set<string>();
-                return [obj, ...prev].map(p => ({
-                  ...p,
-                  facilities: p.facilities.filter(f => {
-                    const key = f.OfficeName ?? '';
-                    return seen.has(key) ? false : seen.add(key);
-                  }),
-                  selectedFacilities: this.selectedFacilitiesMap.get(p.prescriberId)?.filter(f => {
-                    const key = f.OfficeName ?? '';
-                    return !seen.has(key) || seen.add(key);
-                  })
-                }));
-              });
-              form.reset();
-            } else {
-              this.errorMsg.set(NPI_ERROR_MSG);
-              console.error('No facilities found in response or invalid response structure.');
-            }
-          },
-          error: () => this.errorMsg.set(NPI_ERROR_MSG)
-        });
+    const npi = String(step1Form.get('prescriberNPI')?.value ?? '').trim();
+
+    if (!npi || npi.length !== 10) {
+      this.toast.error('Please enter a valid 10-digit NPI.');
+      return;
     }
+
+    const endpoint = `provider/${npi}/firstName/lastName`;
+
+    this.api.call
+      .get<PrescriberLookupResponse[]>(endpoint, { query: { skipValidation: true } })
+      .subscribe({
+        next: res => {
+          const prescriberData = res?.Payload?.[0];
+
+          if (res.Status === 'SUCCESS' && prescriberData) {
+            const facilities = this.mapLookupFacilities(prescriberData.Facilities ?? []);
+            this.prescriberId = Number(prescriberData.Id ?? 0);
+
+            const firstName = prescriberData.PrescriberFirstName ?? '';
+            const lastName = prescriberData.PrescriberLastName ?? '';
+            const phone = prescriberData.PrescriberPhone ?? '';
+            const fax = prescriberData.PrescriberFax ?? '';
+            const email = prescriberData.PrescriberEmail ?? '';
+
+            this.prescribersWithFacility.set([
+              {
+                npi,
+                prescriberId: this.prescriberId,
+                prescriber: `${firstName} ${lastName}`.trim(),
+                facilities
+              }
+            ]);
+
+            step2Form.patchValue(
+              formatPhoneInObj({
+                firstName,
+                lastName,
+                phone,
+                fax,
+                email
+              })
+            );
+
+            this.prescriberSet.set(true);
+            step1Form.disable({ emitEvent: false });
+            this.cdr.markForCheck();
+          } else {
+            this.toast.error(NPI_ERROR_MSG);
+          }
+        },
+        error: () => {
+          this.toast.error(NPI_ERROR_MSG);
+        }
+      });
   }
 }
-interface Step1FormValues {
-  prescriberNPI: string;
-  first: string;
-  last: string;
-}
+
 interface Step2FormValues {
   firstName: string;
   lastName: string;
@@ -796,7 +595,6 @@ interface Step3FormValues {
   confirmPassword: string;
 }
 
-// user.model.ts
 export interface Role {
   RolePkId: number;
 }
@@ -829,12 +627,12 @@ export interface Facility {
   OfficeName?: string;
   Rank?: number | null;
   PrescriberId?: number;
-  Id?: number | string | null; // Allow for null if not yet assigned
+  Id?: number | string | null;
   Phone?: string | null;
   PhoneType?: string;
   Extension?: string | null;
   Address?: Address[];
-  Contacts?: FacilityContact[]; // Define this as needed based on actual data structure
+  Contacts?: FacilityContact[];
   FacilityContacts?: FacilityContact[];
   LinkedToAccount?: boolean;
 }
@@ -848,8 +646,9 @@ export interface MasterFacilityForApi {
   Id?: number | string | null;
   Phone?: string | null;
   PhoneType?: string;
+  NPI?: string | null;
   Extension?: string | null;
-  Address?: Address; // single object here!
+  Address?: Address;
   Contacts?: FacilityContact[];
 }
 
@@ -878,6 +677,16 @@ interface facilityForm {
   zip: string;
 }
 
+interface PrescriberLookupResponse {
+  Id?: number;
+  PrescriberFirstName?: string;
+  PrescriberLastName?: string;
+  PrescriberPhone?: string;
+  PrescriberFax?: string;
+  PrescriberEmail?: string;
+  Facilities: PrescriberFacility[];
+}
+
 interface PrescriberFacility {
   Id: number;
   Name: string;
@@ -898,5 +707,4 @@ interface PrescriberWithFacility {
   prescriberId: number;
   prescriber: string;
   facilities: Facility[];
-  // selectedFacilities: Facility[];
 }

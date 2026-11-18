@@ -11,6 +11,11 @@
   &.full {
     grid-template-columns: auto;
   }
+
+  .content-panel {
+    min-height: 600px;
+    background-color: #eeeffe;
+  }
 }
 @include mix.responsive(medium) {
   aside {

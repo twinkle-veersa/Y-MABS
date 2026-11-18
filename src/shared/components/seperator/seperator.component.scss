@@ -3,7 +3,7 @@
 .seperator {
   @include mix.flexCentered;
   margin-block: 2rem;
-  gap: 1rem;
+  gap: 2rem;
 
   & > * {
     flex: 1;

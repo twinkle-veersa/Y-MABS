@@ -25,14 +25,16 @@ thead {
   @include mix.scrollbars(0.3rem, var.$primary-color);
 }
 th {
-  background-color: var.$panel-color;
+  background-color: #f4f3f3;
+  border-bottom: 1px solid #e9e9e9;
+
   .wrap {
     @include mix.flexCentered(flex-start, center);
     white-space: nowrap;
     .column-head {
       font-weight: 500;
       font-size: 1rem;
-      color: var.$dark;
+      color: #56518e;
       cursor: pointer;
     }
     .sort-icon {
@@ -69,16 +71,26 @@ td {
 tbody {
   tr {
     &:nth-child(odd) {
-      background-color: var.$row-odd;
+      background-color: #f7fcfe;
+      td {
+        border-bottom: 0.4px solid #c6ddf3;
+      }
+    }
+
+    &:nth-child(even) {
+      background-color: var.$white;
+      td {
+        border-bottom: 0.4px solid #c3c3c3;
+      }
     }
 
     &:hover {
       background-color: var.$row-hover;
     }
-  }
 
-  tr.selected {
-    background-color: var.$light;
+    &:last-child td {
+      border-bottom: none;
+    }
   }
 
   tr.clickable {
@@ -86,19 +98,17 @@ tbody {
   }
 
   tr.pdf-open {
-    color: #fff;
+    color: var.$white;
     background-color: var.$primary-color;
   }
 
   tr.disabled {
-    background-color: var.$disabled;
+    background-color: #f1f1f1;
     background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23333' stroke-width='2' stroke-dasharray='5%2c 5' stroke-dashoffset='12' stroke-linecap='square'/%3e%3c/svg%3e");
   }
 }
 
 .pagination {
-  // position: sticky;
-  // bottom: 0;
   background-color: var.$panel-color;
   @include mix.flexCentered;
   padding: 0.25rem;
@@ -112,13 +122,14 @@ tbody {
   .page {
     background-color: var.$primary-color;
     padding: 0.5rem 1rem;
-    color: #fff;
+    color: var.$white;
   }
 
   select {
     background: transparent;
     outline: none;
     border: none;
+    display: none;
   }
 }
 
@@ -126,11 +137,27 @@ tbody {
   @include mix.flexCentered(flex-start);
   gap: 1rem;
 
-  button.sm {
+  button {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.9rem;
     border: none;
+    border-radius: 0.35rem;
+    color: #fff;
+    cursor: pointer;
+
+    &:first-child,
+    &.outline {
+      background-color: #6a8caf;
+      border-color: #6a8caf;
+      color: #fff;
+    }
 
     &:disabled {
-      background-color: var.$table-action-button-disabled;
+      cursor: not-allowed;
+      background-color: #acbfc9;
+      border-color: #acbfc9;
+      color: #fff;
     }
   }
 }

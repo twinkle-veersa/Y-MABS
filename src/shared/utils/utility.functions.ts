@@ -11,8 +11,13 @@ export function formatPhoneInObj<T extends object>(obj: T, keys: string[] = []) 
   return obj;
 }
 
-export const formatPhone = (v: string): string =>
-  v?.toString().replace(/^(\d{0,3})(\d{0,3})(\d{0,4})/, '($1) $2-$3') ?? '';
+export const formatPhone = (v: string): string => {
+  const digits = v?.toString().replace(/\D/g, '').slice(0, 10) ?? '';
+  if (!digits.length) return '';
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+};
 
 export const formatDate = (v: Date): string =>
   (v.getMonth() + 1).toString().padStart(2, '0') +

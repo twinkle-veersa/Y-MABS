@@ -1,4 +1,9 @@
-<h2 [class.highlight]="highlight()">{{ title() }}</h2>
+<h2 [class.highlight]="highlight()">
+  {{ title() }}
+  @if (requiredTitle()) {
+    <span class="required-note"> (* Required field)</span>
+  }
+</h2>
 <div class="subtitle">
   <h3 [class.normal]="emphasis() === 'low'">
     {{ subtitle() }}

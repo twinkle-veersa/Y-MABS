@@ -37,14 +37,14 @@ $side-nav-width: 6.5rem;
 
 // Forms
 $field-input-color: #000;
-$field-input-color-disabled: #000;
+$field-input-color-disabled: #1b1b1b;
 
 $field-padding: 0.5rem;
 $field-border: 1px solid $border-color;
 $field-border-radius: 0.3rem;
 
 $field-bg: #fff;
-$field-bg-disabled: #e1e1e1;
+$field-bg-disabled: #eeeeee;
 $field-bg-focused: lighten($light, 1%);
 $field-bg-invalid: lighten($error, 45%);
 

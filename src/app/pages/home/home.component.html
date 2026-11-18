@@ -4,7 +4,7 @@
       <app-sidenav [navs]="nav" />
     </aside>
   }
-  <section style="min-height: 600px">
+  <section [class.content-panel]="!isSidebarDisabled()">
     <router-outlet />
   </section>
 </div>
