@@ -1,0 +1,183 @@
+@if (thread(); as conversation) {
+  @let title =
+    conversation.Mails[0].portalMessageCategory.value + ': ' + conversation.Mails[0].subject;
+  <h2 [title]="title">{{ title }}</h2>
+  <div class="message-scroll">
+    @if (documentLoading()) {
+      <p role="status" class="status">{{ content.attachmentLoading }}</p>
+    }
+    @if (documentError()) {
+      <p role="alert" class="error">{{ documentError() }}</p>
+    }
+    @for (message of conversation.Mails; track message.portalMessagePkId) {
+      <article class="message" [id]="'message-' + message.portalMessagePkId">
+        @if (message.priorityIndicator) {
+          <div class="importance">
+            <span aria-hidden="true">!</span>{{ content.highImportance }}
+          </div>
+        }
+        <header class="message-header">
+          <span class="avatar">{{
+            (message.senderPortalAccount?.userAccountName || content.senderInitials)
+              .slice(0, 2)
+              .toUpperCase()
+          }}</span>
+          <div class="sender">
+            <strong>{{ message.senderPortalAccount?.userAccountName || content.sender }}</strong>
+            @if (message.senderPortalAccount?.emailAddress) {
+              <span>&lt;{{ message.senderPortalAccount?.emailAddress }}&gt;</span>
+            }
+            <p>{{ content.regarding }} {{ regardingLabels()[message.portalMessagePkId] }}</p>
+          </div>
+          <div class="message-controls">
+            <div class="actions">
+              @if (mailbox() !== content.archive) {
+                <button
+                  type="button"
+                  class="transparent"
+                  [attr.aria-label]="content.reply"
+                  (click)="reply.emit(message)">
+                  ↶
+                </button>
+                <button
+                  type="button"
+                  class="transparent star"
+                  [class.favorite]="message.favouriteIndicator"
+                  [attr.aria-label]="
+                    message.favouriteIndicator ? content.removeFavorite : content.markFavorite
+                  "
+                  [disabled]="pendingActions().includes(message.portalMessagePkId)"
+                  (click)="action('favorite', message)">
+                  <app-icon icon="messaging-favorite" />
+                </button>
+                <button
+                  type="button"
+                  class="transparent"
+                  [attr.aria-label]="message.readIndicator ? content.markUnread : content.markRead"
+                  [disabled]="pendingActions().includes(message.portalMessagePkId)"
+                  (click)="action(message.readIndicator ? 'unread' : 'read', message)">
+                  <app-icon icon="mail" />
+                </button>
+              }
+              <button
+                type="button"
+                class="transparent"
+                [attr.aria-label]="
+                  mailbox() === content.archive
+                    ? content.restoreConversation
+                    : content.archiveConversation
+                "
+                [disabled]="pendingActions().includes(message.portalMessagePkId)"
+                (click)="action('archive', message)">
+                <app-icon icon="messaging-archive" />
+              </button>
+              @if (message.messageDocs.length) {
+                <button
+                  type="button"
+                  class="transparent"
+                  [attr.aria-label]="content.downloadAll"
+                  (click)="downloadAll(message)">
+                  <app-icon icon="download" />
+                </button>
+              }
+            </div>
+            <time>{{ message.createDate | date: 'EEE, MM/dd/yyyy h:mm a' }}</time>
+          </div>
+        </header>
+        <div class="message-body">
+          @if (message.messageDocs.length) {
+            <div class="attachments">
+              @for (document of message.messageDocs; track document.document.DocID) {
+                <details>
+                  <summary>▧ {{ document.document.documentType.documentType }}</summary>
+                  <div class="attachment-actions">
+                    <button
+                      type="button"
+                      class="transparent"
+                      (click)="openDocument(message, document)">
+                      {{ content.preview }}</button
+                    ><button
+                      type="button"
+                      class="transparent"
+                      (click)="openDocument(message, document, true)">
+                      {{ content.download }}
+                    </button>
+                  </div>
+                </details>
+              }
+            </div>
+          }
+          <div class="body-html ql-editor" [innerHTML]="message.body"></div>
+          @let file = preview();
+          @if (file && file.message.portalMessagePkId === message.portalMessagePkId) {
+            <section class="inline-preview" [attr.aria-label]="content.attachmentPreview">
+              <div class="preview-caption">
+                <span>{{ file.document.document.documentType.documentType }}</span
+                ><button class="outline" type="button" (click)="expandPreview()">
+                  {{ content.expandPreview }}</button
+                ><button
+                  type="button"
+                  class="transparent"
+                  [attr.aria-label]="content.closePreview"
+                  (click)="closePreview()">
+                  ×
+                </button>
+              </div>
+              @if (!expanded()) {
+                <app-pdf-viewer [pdfSrc]="file.blob" />
+              }
+            </section>
+          }
+        </div>
+      </article>
+    }
+  </div>
+} @else {
+  <div class="empty-reader">
+    <app-icon icon="mail" />
+    <h2>{{ content.emptyReader }}</h2>
+    <p>{{ content.noSelection }}</p>
+  </div>
+}
+<dialog
+  #attachmentDialog
+  class="attachment-dialog"
+  (cancel)="collapsePreview()"
+  (close)="expanded.set(false)">
+  @if (preview(); as file) {
+    <header class="preview-header">
+      <h2>{{ file.document.document.documentType.documentType }}</h2>
+      <div class="preview-actions">
+        <button type="button" class="transparent" (click)="downloadPreview()">
+          <app-icon icon="download" />{{ content.download }}</button
+        ><button type="button" class="transparent" (click)="archiveFromPreview()">
+          {{ mailbox() === content.archive ? content.restore : content.archive }}</button
+        ><button type="button" class="transparent" (click)="printPreview()">
+          <app-icon icon="print" />{{ content.print }}
+        </button>
+        @if (mailbox() !== content.archive) {
+          <button type="button" class="transparent" (click)="replyFromPreview()">↶ Reply</button>
+        }
+        <button
+          type="button"
+          class="transparent"
+          [attr.aria-label]="content.closeExpandedPreview"
+          (click)="collapsePreview()">
+          ×
+        </button>
+      </div>
+    </header>
+    <div class="preview-content">
+      @if (expanded()) {
+        <app-pdf-viewer [pdfSrc]="file.blob" />
+      }
+      <aside>
+        <h3>{{ file.message.subject }}</h3>
+        <p>{{ file.message.messageDocs.length }} {{ content.attachments }}</p>
+        <strong>{{ file.message.senderPortalAccount?.userAccountName || content.sender }}</strong>
+        <p>{{ file.message.createDate | date: 'medium' }}</p>
+        <div class="body-html ql-editor" [innerHTML]="file.message.body"></div>
+      </aside>
+    </div>
+  }
+</dialog>

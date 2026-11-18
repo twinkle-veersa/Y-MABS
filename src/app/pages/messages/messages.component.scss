@@ -1,0 +1,138 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+:host {
+  display: block;
+  padding: 2rem;
+}
+.mailbox {
+  border: 1px solid var.$container-border;
+  border-radius: 1rem;
+  padding: 0.65rem;
+  background: var.$messaging-surface-subtle;
+  &-heading {
+    @include mix.flexCentered(null);
+    gap: 0.5rem;
+    background: var.$accent-color;
+    color: var.$white;
+    border-radius: 0.5rem;
+    padding: 0.7rem 1rem;
+    button {
+      color: var.$white;
+      padding: 0.5rem;
+    }
+  }
+  &-toolbar {
+    @include mix.flexCentered(null);
+    gap: 1rem;
+    padding: 0.75rem;
+    margin: 0.75rem 0;
+    background: var.$white;
+    border: 1px solid var.$messaging-toolbar-border;
+    border-radius: 0.4rem;
+    box-shadow: var.$messaging-toolbar-shadow;
+  }
+  &-body {
+    --messaging-heading-height: 3.5rem;
+    --messaging-rail-width: 4.5rem;
+    display: grid;
+    grid-template-columns: minmax(24rem, 32%) minmax(0, 1fr);
+    border: 1px solid var.$medium-grey;
+    border-radius: 0.35rem;
+    overflow: hidden;
+    min-height: 38rem;
+    &.sidebar-closed {
+      --messaging-rail-width: 3.5rem;
+      grid-template-columns: 3.5rem minmax(0, 1fr);
+    }
+  }
+}
+h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+.new-mail {
+  background: var.$accent-color;
+  border-color: var.$accent-color;
+  white-space: nowrap;
+}
+.search-field {
+  @include mix.flexCentered(null);
+  gap: 0.75rem;
+  border: 1px solid var.$messaging-border;
+  border-radius: 0.3rem;
+  padding: 0.55rem 0.75rem;
+  width: min(100%, 32rem);
+  app-input {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+  }
+}
+.reader-pane {
+  min-width: 0;
+  border-left: 1px solid var.$medium-grey;
+}
+.mobile-back {
+  display: none;
+}
+// Overrides for shared controls and editor internals stay inside this component.
+:host ::ng-deep {
+  .search-field app-input {
+    @include mix.compactControl;
+    .input-wrap {
+      input {
+        border: 0;
+        padding: 0;
+        min-height: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+    }
+  }
+}
+@include mix.responsive(medium) {
+  :host {
+    padding: 0.75rem;
+  }
+  .mailbox-toolbar {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  .new-mail {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+  .mailbox-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .reader-pane {
+    display: none;
+    border: 0;
+  }
+  .show-reader {
+    app-message-list {
+      display: none;
+    }
+    .reader-pane {
+      display: block;
+    }
+  }
+  .mailbox-body.sidebar-closed {
+    .reader-pane {
+      display: block;
+    }
+    app-message-list {
+      display: flex;
+    }
+  }
+  .mobile-back {
+    display: inline-flex;
+    margin: 0.5rem;
+  }
+  h1 {
+    font-size: 1.2rem;
+  }
+}

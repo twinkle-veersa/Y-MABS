@@ -1,0 +1,223 @@
+@let replyMessage = reply();
+@let title = replyMessage ? content.replyPrefix + replyMessage.subject : content.newMessage;
+<h2 [title]="title">{{ title }}</h2>
+<form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="busy()">
+  @if (!replyMessage) {
+    <div class="association-row">
+      <app-select class="regarding-field" [field]="fields.regarding" [group]="form" />
+      @if (value().regarding) {
+        <app-select class="association-field" [field]="associationField()" [group]="form" />
+      }
+    </div>
+    @if (optionsLoading() && value().regarding) {
+      <p class="hint" role="status">
+        {{ content.loadingOptions }}
+        {{ value().regarding === 'Patient' ? content.patients : content.facilities }}…
+      </p>
+    }
+    @if (optionsError()) {
+      <div class="options-error" role="alert">
+        {{ optionsError() }}
+        <button type="button" class="transparent" (click)="retryOptions.emit()">
+          {{ content.retry }}
+        </button>
+      </div>
+    }
+    @if (
+      value().regarding && !optionsLoading() && !associationOptions().length && !optionsError()
+    ) {
+      <p class="hint">
+        {{ content.noOptions }}
+        {{ value().regarding === 'Patient' ? content.patients : content.facilities }}
+        {{ content.availableOptions }}
+      </p>
+    }
+    <app-select class="category-field" [field]="fields.category" [group]="form" />
+    <div class="subject-row">
+      <app-input [field]="fields.subject" [group]="form" [forceShowErrors]="attempted()" /><button
+        type="button"
+        class="priority-control transparent"
+        [class.selected]="value().highPriority === 1"
+        [attr.aria-pressed]="value().highPriority === 1"
+        [disabled]="sending()"
+        (click)="togglePriority()">
+        <span aria-hidden="true">!</span>{{ content.priority }}
+      </button>
+    </div>
+  }
+  <div
+    class="editor-wrap"
+    (dragover)="dragOver($event)"
+    (dragleave)="dragging.set(false)"
+    (drop)="drop($event)"
+    [class.dragging]="dragging()">
+    <label for="message-body" class="sr-only">{{ content.messageBody }}</label>
+    <p-editor
+      id="message-body"
+      formControlName="body"
+      [placeholder]="content.messagePlaceholder"
+      [readonly]="sending()"
+      [formats]="formats"
+      (onInit)="initializeEditor($event)"
+      (onSelectionChange)="rememberSelection($event)">
+      <ng-template #header>
+        <div class="editor-toolbar" role="toolbar" [attr.aria-label]="content.formatting">
+          <span class="toolbar-group">
+            <button
+              type="button"
+              class="editor-tool"
+              [attr.aria-label]="content.copy"
+              [disabled]="!selectionLength() || sending()"
+              (click)="copySelection()">
+              <svg viewBox="0 0 18 18" aria-hidden="true">
+                <rect
+                  x="5"
+                  y="2"
+                  width="9"
+                  height="12"
+                  rx=".5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.2" />
+                <path
+                  d="M3 5H2v11h9v-1"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.2" /></svg
+              ><span class="tool-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <button
+              type="button"
+              class="editor-tool"
+              [attr.aria-label]="content.clearFormatting"
+              [disabled]="sending()"
+              (click)="clearFormatting()">
+              <svg viewBox="0 0 18 18" aria-hidden="true">
+                <path
+                  d="M4 2h10v6H4zM6 2v3m3-3v3m3-3v3M6 8v3h2v5h2v-5h2V8"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.2"
+                  stroke-linejoin="round" />
+              </svg>
+            </button>
+          </span>
+          <span class="toolbar-group font-tools">
+            <app-select class="font-select" [field]="editorFields.font" [group]="editorForm" />
+            <app-select class="size-select" [field]="editorFields.size" [group]="editorForm" />
+          </span>
+          <span class="toolbar-group">
+            <button
+              type="button"
+              class="editor-tool"
+              [attr.aria-label]="content.attachFiles"
+              [disabled]="busy()"
+              (click)="openAttachments()">
+              <svg viewBox="0 0 18 18" aria-hidden="true">
+                <path
+                  d="M6.6 11.4 9 9a1.456 1.456 0 0 1 2.059 2.059l-3.088 3.088a2.912 2.912 0 0 1-4.118-4.118l6.177-6.177a2.912 2.912 0 0 1 4.118 4.118"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  stroke-linecap="round" /></svg
+              ><span class="tool-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <button
+              type="button"
+              class="ql-link"
+              [attr.aria-label]="content.link"
+              [disabled]="sending()"></button>
+          </span>
+          <span class="toolbar-group">
+            @for (tool of editorTools.text; track tool.className) {
+              <button
+                type="button"
+                [class]="tool.className"
+                [attr.aria-label]="tool.label"
+                [disabled]="sending()"></button>
+            }
+            <span
+              class="format-picker highlight-picker"
+              [style.--format-color]="editorForm.controls.background.value || '#ffff00'"
+              ><span class="format-icon" aria-hidden="true"
+                ><svg viewBox="0 0 18 18">
+                  <path
+                    d="m4 11 7-7 3 3-7 7H4zm6-6 3 3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.3" /></svg></span
+              ><app-select [field]="editorFields.background" [group]="editorForm"
+            /></span>
+            <span
+              class="format-picker color-picker"
+              [style.--format-color]="editorForm.controls.color.value || '#e60000'"
+              ><span class="format-icon text-color" aria-hidden="true">A</span
+              ><app-select [field]="editorFields.color" [group]="editorForm"
+            /></span>
+          </span>
+          <span class="toolbar-group">
+            @for (tool of editorTools.paragraph; track tool.value) {
+              <button
+                type="button"
+                [class]="tool.className"
+                [value]="tool.value"
+                [attr.aria-label]="tool.label"
+                [disabled]="sending()"></button>
+            }
+            <span class="format-picker alignment-picker"
+              ><app-icon
+                class="format-icon"
+                icon="messaging-hamburger"
+                aria-hidden="true" /><app-select [field]="editorFields.align" [group]="editorForm"
+            /></span>
+          </span>
+        </div>
+      </ng-template>
+    </p-editor>
+    @if (attempted() && form.controls.body.invalid) {
+      <p class="validation-error" role="alert">{{ content.requiredMessage }}</p>
+    }
+    <div class="attachments">
+      @for (item of files(); track $index) {
+        <span class="attachment-chip"
+          ><span>▧ {{ item.file.name }}</span
+          ><button
+            class="transparent"
+            type="button"
+            [disabled]="sending()"
+            [attr.aria-label]="content.remove + item.file.name"
+            (click)="removeFile($index)">
+            ×
+          </button></span
+        >
+      }
+    </div>
+  </div>
+  @if (attachmentError()) {
+    <p class="validation-error" role="alert">{{ attachmentError() }}</p>
+  }
+  @if (converting()) {
+    <p class="hint" role="status">{{ content.preparing }}</p>
+  }
+  <footer>
+    <button type="button" class="outline cancel" [disabled]="busy()" (click)="cancelCompose.emit()">
+      {{ content.cancel }}
+    </button>
+    <div class="send-actions">
+      <span class="drop-label">{{ content.dropFiles }}</span
+      ><app-file-upload
+        [multiple]="true"
+        [fileTypes]="attachmentMimeType"
+        [label]="content.attachFiles"
+        [buttonText]="content.upload"
+        [disabled]="busy()"
+        (emitFiles)="addFiles($event)" />
+      <button
+        class="send"
+        type="submit"
+        [disabled]="status() !== 'VALID' || invalidAssociation() || busy()">
+        <app-icon icon="messaging-sent" />{{ sending() ? content.sending : content.send }}
+      </button>
+    </div>
+  </footer>
+</form>

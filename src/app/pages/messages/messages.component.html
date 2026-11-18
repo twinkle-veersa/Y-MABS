@@ -1,1 +1,82 @@
-<p>messages works!</p>
+<section class="mailbox" aria-labelledby="messaging-title">
+  <header class="mailbox-heading">
+    <button
+      type="button"
+      class="transparent"
+      [attr.aria-label]="content.backDashboard"
+      (click)="back()">
+      <app-icon icon="messaging-return" />
+    </button>
+    <h1 id="messaging-title">{{ content.title }}</h1>
+  </header>
+  <div class="mailbox-toolbar">
+    <button
+      type="button"
+      class="new-mail"
+      [disabled]="composing() || sending()"
+      (click)="compose()">
+      <app-icon icon="mail" />{{ content.newMail }}
+    </button>
+    <div class="search-field">
+      <app-icon icon="search" /><app-input [field]="searchField" [group]="searchForm" />
+    </div>
+  </div>
+  <div
+    class="mailbox-body"
+    [class.show-reader]="mobileReader()"
+    [class.sidebar-closed]="!sidebarOpen()">
+    <app-message-list
+      [groups]="visibleGroups()"
+      [mailbox]="mailbox()"
+      [grouping]="grouping()"
+      [selectedThreadId]="selectedThreadId()"
+      [loading]="loading()"
+      [error]="error()"
+      [endOfData]="endOfData()"
+      [favoriteOnly]="favoriteOnly()"
+      [dateFilter]="dateFilter()"
+      [dateStart]="dateStart()"
+      [dateEnd]="dateEnd()"
+      [pendingActions]="pendingActions()"
+      [groupLabels]="groupLabels()"
+      (mailboxChange)="changeMailbox($event)"
+      (groupingChange)="changeGrouping($event)"
+      (selectThread)="selectThread($event)"
+      (favoriteChange)="favoriteOnly.set($event)"
+      (dateFilterChange)="dateFilter.set($event)"
+      (dateStartChange)="dateStart.set($event)"
+      (dateEndChange)="dateEnd.set($event)"
+      (loadMore)="load(false)"
+      (sidebarChange)="sidebarOpen.set($event)"
+      (retry)="load(groups().length === 0)"
+      (messageAction)="onAction($event)" />
+    <div class="reader-pane">
+      <button class="mobile-back transparent" type="button" (click)="closeMobileReader()">
+        <app-icon icon="left-arrow" />{{ content.backMessages }}
+      </button>
+      @if (composing()) {
+        <app-message-compose
+          [reply]="replyTo()"
+          [patients]="patients()"
+          [facilities]="facilities()"
+          [patientsLoading]="patientsLoading()"
+          [facilitiesLoading]="facilitiesLoading()"
+          [optionsError]="patientsError() || facilitiesError()"
+          [sending]="sending()"
+          (retryOptions)="retryOptions()"
+          (dirtyChange)="draftDirty.set($event)"
+          (cancelCompose)="discardDraft()"
+          (sendMessage)="send($event)" />
+      } @else {
+        <app-message-reader
+          [thread]="selectedThread()"
+          [mailbox]="mailbox()"
+          [selectedMessageId]="selectedMessageId()"
+          [regardingLabels]="regardingLabels()"
+          [pendingActions]="pendingActions()"
+          (reply)="compose($event)"
+          (messageAction)="onAction($event)" />
+      }
+    </div>
+  </div>
+</section>

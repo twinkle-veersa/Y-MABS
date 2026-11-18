@@ -1,7 +1,7 @@
 @use 'variables' as var;
 
-@mixin flexCentered($justify: center, $align: center) {
-  display: flex;
+@mixin flexCentered($justify: center, $align: center, $display: flex) {
+  display: $display;
   align-items: $align;
   justify-content: $justify;
 }
@@ -82,4 +82,48 @@
     @warn "Unfortunately,`#{$breakpoint}` was not found. "
 + "Available breakpoints are: #{map-keys(var.$breakpoints)}.";
   }
+}
+
+@mixin textTruncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@mixin visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+
+@mixin compactControl {
+  app-input-label {
+    @include visuallyHidden;
+  }
+  .input-wrap {
+    margin: 0;
+  }
+}
+
+@mixin messagingHeading {
+  margin: 0;
+  padding: 0.75rem 1.25rem;
+  height: var(--messaging-heading-height, 3.5rem);
+  line-height: calc(var(--messaging-heading-height, 3.5rem) - 1.5rem - 1px);
+  border-bottom: 1px solid var.$medium-grey;
+  color: var.$messaging-text-heading;
+  @include textTruncate;
+}
+
+@mixin messagingAvatar {
+  flex: 0 0 2.6rem;
+  height: 2.6rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var.$messaging-avatar-border;
+  background: var.$messaging-avatar-background;
+  color: var.$messaging-avatar-text;
 }

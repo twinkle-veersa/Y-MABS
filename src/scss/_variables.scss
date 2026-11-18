@@ -101,3 +101,49 @@ $breakpoints: (
     max-width: 1024px
   )
 );
+
+// Secure messaging
+$messaging-surface-subtle: #fcfcfc;
+$messaging-border: #ccc;
+$messaging-field-border: #d5d5d5;
+$messaging-message-border: #d6d6d6;
+$messaging-toolbar-border: #e5e5e5;
+$messaging-editor-toolbar-border: #e8e8e8;
+$messaging-history-border: #aaa;
+
+$messaging-text: #303030;
+$messaging-text-heading: #485359;
+$messaging-text-sender: #555;
+$messaging-text-secondary: #777;
+$messaging-text-muted: #737373;
+$messaging-text-attachment: #333;
+$messaging-text-timestamp: #888;
+$messaging-text-action: #59656b;
+$messaging-text-status: #6b7378;
+$messaging-text-hint: #6e777c;
+$messaging-text-subject: #122848;
+$messaging-text-outline-action: #d90058;
+$messaging-text-editor-dropdown: #667078;
+$messaging-placeholder-subject: #9aa1a5;
+$messaging-placeholder-editor: #b2b5b7;
+
+$messaging-folder-active-text: #071d49;
+$messaging-folder-active-background: #faf8ff;
+$messaging-conversation-selected: #f2f9fc;
+$messaging-editor-tool-hover: #f7f5f9;
+$messaging-favorite: #eeb411;
+$messaging-favorite-filter-icon: #d9a820;
+$messaging-favorite-filter-text: #8e6617;
+$messaging-favorite-filter-background: #fff9e8;
+$messaging-priority: #b72c36;
+$messaging-priority-selected: #c12b3d;
+$messaging-priority-background: #fff2f3;
+$messaging-priority-banner: #ae2435;
+$messaging-avatar-border: #4a92ce;
+$messaging-avatar-background: #d4e9f6;
+$messaging-avatar-text: #3e89c1;
+
+$messaging-toolbar-shadow: 0 3px 8px #00000009;
+$messaging-editor-toolbar-shadow: 0 2px 7px #0000000d;
+$messaging-menu-shadow: 0 3px 10px #0002;
+$messaging-dialog-backdrop: #0006;

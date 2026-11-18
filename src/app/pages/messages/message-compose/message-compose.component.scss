@@ -1,0 +1,482 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+:host {
+  display: block;
+  min-width: 0;
+}
+h2 {
+  @include mix.messagingHeading;
+  box-sizing: border-box;
+  font-size: 1.3rem;
+}
+form {
+  margin: 1rem;
+  border: 1px solid var.$messaging-field-border;
+  border-radius: 0.35rem;
+  background: var.$white;
+}
+.association-row {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var.$medium-grey;
+  app-select {
+    flex: 1 1 22rem;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+  }
+}
+.category-field {
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var.$medium-grey;
+}
+.subject-row {
+  @include mix.flexCentered(null);
+  gap: 1.5rem;
+  margin: 0 1.25rem;
+  min-height: 4.5rem;
+  border-bottom: 1px solid var.$medium-grey;
+  app-input {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+  }
+}
+:host button.priority-control.transparent {
+  @include mix.flexCentered(null, center, inline-flex);
+  gap: 0.65rem;
+  flex: 0 0 auto;
+  padding: 0.5rem 0.6rem;
+  color: var.$messaging-text-muted;
+  font-size: 1rem;
+  font-weight: 400;
+  border: 0;
+  border-radius: 0.25rem;
+  background: transparent;
+  span {
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+  &.selected {
+    color: var.$messaging-priority-selected;
+    background: var.$messaging-priority-background;
+  }
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+.editor-wrap {
+  padding: 1rem 1.25rem;
+  &.dragging {
+    outline: 2px dashed var.$accent-color;
+    outline-offset: -4px;
+    background: var.$light;
+  }
+}
+.editor-toolbar {
+  @include mix.flexCentered(null);
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  min-height: 3rem;
+  padding: 0.35rem 0.6rem;
+  color: var.$messaging-text-muted;
+  app-select {
+    min-height: 0;
+    margin: 0;
+    min-width: 0;
+  }
+}
+.toolbar-group {
+  @include mix.flexCentered(null, center, inline-flex);
+  gap: 0.15rem;
+  flex: 0 0 auto;
+  min-width: 0;
+  & + & {
+    border-left: 1px solid var.$medium-grey;
+    padding-left: 0.4rem;
+  }
+}
+.font-tools {
+  flex: 1 1 16rem;
+  max-width: 22rem;
+  gap: 0;
+  .font-select {
+    flex: 1;
+    min-width: 5.5rem;
+  }
+  .size-select {
+    width: 4.5rem;
+    flex: 0 0 4.5rem;
+  }
+}
+.tool-chevron {
+  font-size: 0.7rem;
+  margin-left: 0.1rem;
+}
+.format-picker {
+  position: relative;
+  @include mix.flexCentered(null, center, inline-flex);
+  width: 2.35rem;
+  height: 2rem;
+  app-select {
+    width: 100%;
+    height: 100%;
+  }
+}
+.format-icon {
+  position: absolute;
+  left: 0.15rem;
+  top: 0.2rem;
+  width: 1.1rem;
+  height: 1.2rem;
+  pointer-events: none;
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+.text-color {
+  font:
+    1.1rem 'Segoe UI',
+    sans-serif;
+  text-align: center;
+}
+.color-picker::after,
+.highlight-picker::after {
+  content: '';
+  position: absolute;
+  left: 0.15rem;
+  bottom: 0.2rem;
+  width: 1.05rem;
+  height: 3px;
+  background: var(--format-color);
+  pointer-events: none;
+}
+.alignment-picker .format-icon {
+  top: 0.45rem;
+  height: 0.8rem;
+}
+.attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  &:not(:empty) {
+    margin-top: 0.75rem;
+  }
+}
+.attachment-chip {
+  @include mix.flexCentered(null, center, inline-flex);
+  gap: 0.5rem;
+  border: 1px solid var.$messaging-border;
+  border-radius: 0.2rem;
+  padding: 0.15rem 0.5rem;
+  max-width: 100%;
+  span {
+    @include mix.textTruncate;
+  }
+  button {
+    padding: 0.2rem;
+    font-size: 1.3rem;
+  }
+}
+footer {
+  @include mix.flexCentered(null);
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var.$medium-grey;
+}
+.send-actions {
+  @include mix.flexCentered(null);
+  gap: 0.75rem;
+}
+:host button.cancel.outline {
+  color: var.$messaging-text-outline-action;
+  border: 1px solid var.$messaging-border;
+  font-weight: 500;
+}
+:host button.send {
+  background: var.$accent-color;
+  border-color: var.$accent-color;
+}
+.drop-label,
+.hint {
+  color: var.$messaging-text-hint;
+  font-size: 0.85rem;
+}
+.hint,
+.validation-error,
+.options-error {
+  margin: 0.5rem 1rem;
+}
+.validation-error,
+.options-error {
+  color: var.$error;
+  font-size: 0.85rem;
+}
+.sr-only {
+  @include mix.visuallyHidden;
+}
+// Overrides for shared controls and editor internals stay inside this component.
+:host ::ng-deep {
+  .association-row app-select,
+  app-select.category-field {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: 1rem;
+    app-input-label {
+      padding-top: 0.55rem;
+      label {
+        margin: 0;
+      }
+    }
+    .input-wrap {
+      min-width: 0;
+      width: 100%;
+      max-width: 34rem;
+      margin: 0;
+    }
+  }
+  app-select.regarding-field,
+  app-select.category-field {
+    app-input-label {
+      padding-top: 0;
+      label {
+        @include mix.flexCentered(null);
+        min-height: 2.5rem;
+        padding: 0.55rem 0.75rem;
+        border: 1px solid var.$messaging-field-border;
+        border-radius: 0.25rem;
+      }
+    }
+  }
+  .association-row app-select.association-field {
+    grid-template-columns: minmax(0, 1fr);
+    app-input-label {
+      @include mix.visuallyHidden;
+      padding: 0;
+    }
+  }
+  app-select.regarding-field,
+  app-select.category-field,
+  app-select.association-field {
+    .p-select {
+      min-height: 2.5rem;
+      border: 0;
+      box-shadow: none;
+      background: transparent;
+      &:focus-within {
+        outline: 2px solid var.$accent-color;
+        outline-offset: 2px;
+      }
+    }
+  }
+  .subject-row app-input {
+    @include mix.compactControl;
+    .input-wrap {
+      input {
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        font-size: 1rem;
+        color: var.$messaging-text-heading;
+        padding: 0.9rem 0;
+        box-shadow: none;
+
+        &::placeholder {
+          color: var.$messaging-placeholder-subject;
+        }
+        &:focus-visible {
+          outline: 0;
+          box-shadow: 0 2px 0 var.$accent-color;
+        }
+        &.invalid {
+          box-shadow: 0 2px 0 var.$error;
+        }
+      }
+    }
+  }
+  .font-tools .size-select .p-select {
+    border-left: 0;
+  }
+  .editor-toolbar app-select {
+    @include mix.compactControl;
+    .p-select {
+      width: 100%;
+      min-width: 0;
+      min-height: 2rem;
+      border: 1px solid var.$medium-grey;
+      border-radius: 0;
+      box-shadow: none;
+      background: var.$white;
+      font:
+        0.9rem 'Segoe UI',
+        sans-serif;
+    }
+    .p-select-label {
+      padding: 0.35rem 0.65rem;
+    }
+    .p-select-dropdown {
+      width: 1.6rem;
+      color: var.$messaging-text-editor-dropdown;
+    }
+  }
+  .format-picker app-select {
+    .p-select {
+      border: 0;
+      background: transparent;
+    }
+    .p-select-label {
+      opacity: 0;
+      padding: 0;
+      width: 1.35rem;
+      flex: 0 0 1.35rem;
+    }
+    .p-select-dropdown {
+      width: 0.8rem;
+    }
+  }
+  .p-editor {
+    @include mix.flexColumn;
+    .p-editor-content {
+      order: 0;
+      border: 0;
+      min-height: clamp(18rem, 42vh, 34rem);
+    }
+    .ql-snow {
+      border: 0;
+    }
+    .p-editor-toolbar {
+      order: 1;
+      border: 1px solid var.$messaging-editor-toolbar-border;
+      border-radius: 0.3rem;
+      margin-top: 1rem;
+      background: var.$white;
+      box-shadow: var.$messaging-editor-toolbar-shadow;
+      padding: 0;
+    }
+    .ql-editor {
+      font-family: 'Segoe UI', var.$primary-font;
+      font-size: 1rem;
+      min-height: clamp(18rem, 42vh, 34rem);
+      padding: 0.5rem 0;
+      &.ql-blank::before {
+        left: 0;
+        color: var.$messaging-placeholder-editor;
+        font-style: normal;
+      }
+    }
+    .ql-toolbar {
+      button {
+        @include mix.flexCentered(null, center, inline-flex);
+        justify-content: center;
+        float: none;
+        width: 1.8rem;
+        height: 2rem;
+        min-width: 0;
+        padding: 0.25rem;
+        border: 0;
+        border-radius: 0.15rem;
+        background: transparent;
+        color: var.$messaging-text-muted;
+        font-size: 1rem;
+        font-weight: 400;
+
+        svg {
+          width: 1.1rem;
+          height: 1.1rem;
+        }
+        &:hover {
+          color: var.$accent-color;
+          background: var.$messaging-editor-tool-hover;
+        }
+        &:disabled {
+          opacity: 0.4;
+          cursor: default;
+        }
+      }
+      .editor-tool {
+        width: auto;
+        min-width: 1.8rem;
+      }
+    }
+    .ql-stroke {
+      stroke: currentColor;
+    }
+    .ql-fill {
+      fill: currentColor;
+    }
+  }
+  .send-actions app-file-upload {
+    .field-wrap {
+      min-height: 0;
+      margin: 0;
+    }
+    .input-wrap {
+      width: auto;
+      margin: 0;
+      border: 0;
+    }
+    label,
+    .text-truncate {
+      @include mix.visuallyHidden;
+    }
+    button {
+      color: var.$messaging-text-outline-action;
+      border: 1px solid var.$messaging-border;
+      font-weight: 500;
+      background: transparent;
+    }
+  }
+  @include mix.responsive(medium) {
+    .association-row app-select,
+    app-select.category-field {
+      grid-template-columns: 6rem minmax(0, 1fr);
+      column-gap: 0.5rem;
+    }
+  }
+}
+@include mix.responsive(medium) {
+  form {
+    margin: 0.5rem;
+  }
+  .association-row {
+    gap: 0.25rem;
+  }
+  .association-row,
+  .category-field,
+  footer {
+    padding: 0.75rem;
+  }
+  .subject-row {
+    gap: 0.5rem;
+    margin: 0 0.75rem;
+  }
+  .editor-wrap {
+    padding: 0.75rem;
+  }
+  .editor-toolbar {
+    row-gap: 0.4rem;
+    padding: 0.4rem;
+  }
+  .font-tools {
+    max-width: none;
+  }
+  footer,
+  .send-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .drop-label {
+    display: none;
+  }
+}

@@ -1,0 +1,180 @@
+<div class="list-toolbar">
+  <button
+    type="button"
+    class="transparent icon-button"
+    [attr.aria-label]="content.toggleNavigation"
+    [attr.aria-expanded]="panelOpen()"
+    aria-controls="messaging-sidebar"
+    (click)="toggleSidebar()">
+    <app-icon icon="messaging-hamburger" [class.vertical]="!panelOpen()" />
+  </button>
+  @if (panelOpen()) {
+    <div class="filter-control">
+      <app-icon icon="messaging-calendar" /><app-select
+        [field]="fields.dateFilter"
+        [group]="filters" />
+    </div>
+    <div class="filter-control">
+      <app-icon icon="messaging-regarding" /><app-select
+        [field]="fields.grouping"
+        [group]="filters" />
+    </div>
+    <button
+      type="button"
+      class="transparent favorite-filter"
+      [attr.aria-pressed]="favoriteOnly()"
+      (click)="favoriteChange.emit(!favoriteOnly())">
+      <app-icon icon="messaging-favorite" [class.active]="favoriteOnly()" /><span>{{
+        content.favorite
+      }}</span>
+    </button>
+  }
+</div>
+@if (panelOpen()) {
+  @if (dateFilter() === 'Custom') {
+    <div class="custom-dates">
+      <app-datepicker [field]="startField()" [group]="filters" /><app-datepicker
+        [field]="endField()"
+        [group]="filters" />
+    </div>
+  }
+  <div id="messaging-sidebar" class="list-layout">
+    <nav [attr.aria-label]="content.mailboxes">
+      @for (folder of mailboxes; track folder) {
+        <button
+          type="button"
+          class="folder transparent"
+          [class.active]="mailbox() === folder"
+          [attr.aria-current]="mailbox() === folder ? 'page' : null"
+          (click)="mailboxChange.emit(folder)">
+          <app-icon class="folder-icon" [icon]="mailboxIcons[folder]" aria-hidden="true" />
+          {{ folder }}
+        </button>
+      }
+    </nav>
+    <div class="conversation-scroll" (scroll)="onScroll($event)" [attr.aria-busy]="loading()">
+      @for (group of groups(); track group.GroupByKey) {
+        @let collapsed = collapsedGroups().includes(group.GroupByKey);
+        <button
+          type="button"
+          class="group-heading transparent"
+          [attr.aria-expanded]="!collapsed"
+          (click)="toggleGroup(group.GroupByKey)">
+          <span aria-hidden="true">{{ collapsed ? '⌄' : '⌃' }}</span
+          >{{ groupLabels()[group.GroupByKey] || group.GroupByKey }}
+        </button>
+        @if (!collapsed) {
+          @for (thread of group.Threads; track thread.ThreadId) {
+            @let mail = thread.Mails[0];
+            @let pending = pendingActions().includes(mail.portalMessagePkId);
+            @let expanded = expandedThreads().includes(thread.ThreadId);
+            <article
+              class="conversation"
+              [class.selected]="selectedThreadId() === thread.ThreadId"
+              [class.unread]="!mail.readIndicator">
+              <button
+                type="button"
+                class="conversation-main transparent"
+                [attr.aria-label]="content.read + mail.subject"
+                (click)="selectMessage(thread.ThreadId, mail)">
+                <span class="avatar">{{
+                  (mail.senderPortalAccount?.userAccountName || content.senderInitials)
+                    .slice(0, 2)
+                    .toUpperCase()
+                }}</span>
+                <span class="summary"
+                  ><strong>{{ mail.senderPortalAccount?.userAccountName || content.sender }}</strong
+                  ><span class="subject">{{ mail.subject }}</span
+                  ><span class="snippet">{{ text(mail.body) }}</span>
+                  @if (mail.messageDocs.length) {
+                    <span class="attachment-name"
+                      >▧ {{ mail.messageDocs[0].document.documentType.documentType }}</span
+                    >
+                  }
+                </span>
+              </button>
+              <div class="metadata">
+                @if (mail.favouriteIndicator) {
+                  <app-icon
+                    icon="messaging-favorite"
+                    class="star active"
+                    [attr.aria-label]="content.favorite" />
+                }
+                @if (mail.priorityIndicator) {
+                  <span class="priority" [attr.aria-label]="content.importance">!</span>
+                }
+                <time>{{ mail.createDate | date: 'shortTime' }}</time>
+              </div>
+              <div class="row-actions">
+                @if (mailbox() !== content.archive) {
+                  <button
+                    class="transparent small-action"
+                    type="button"
+                    [disabled]="pending"
+                    [attr.aria-label]="
+                      mail.favouriteIndicator ? content.removeFavorite : content.markFavorite
+                    "
+                    (click)="action('favorite', mail, thread.ThreadId)">
+                    <app-icon icon="messaging-favorite" [class.active]="mail.favouriteIndicator" />
+                  </button>
+                  <button
+                    class="transparent small-action"
+                    type="button"
+                    [disabled]="pending"
+                    (click)="action(mail.readIndicator ? 'unread' : 'read', mail, thread.ThreadId)">
+                    {{ mail.readIndicator ? content.markUnread : content.markRead }}
+                  </button>
+                }
+                @if (thread.Mails.length > 1) {
+                  <button
+                    type="button"
+                    class="transparent small-action"
+                    [attr.aria-expanded]="expanded"
+                    (click)="toggleThread(thread.ThreadId)">
+                    {{ thread.Mails.length }} {{ content.messages }}
+                    {{ expanded ? '⌃' : '⌄' }}
+                  </button>
+                }
+              </div>
+              @if (expanded) {
+                <ol class="thread-history">
+                  @for (message of thread.Mails; track message.portalMessagePkId) {
+                    <li>
+                      <button
+                        type="button"
+                        class="transparent"
+                        (click)="selectMessage(thread.ThreadId, message)">
+                        <strong>{{
+                          message.senderPortalAccount?.userAccountName || content.sender
+                        }}</strong
+                        ><span>{{ text(message.body) }}</span
+                        ><time>{{ message.createDate | date: 'short' }}</time>
+                      </button>
+                    </li>
+                  }
+                </ol>
+              }
+            </article>
+          }
+        }
+      }
+      @if (!groups().length && !loading() && !error()) {
+        <p class="list-status">{{ content.noMatches }}</p>
+      }
+      @if (error()) {
+        <div class="list-status" role="alert">
+          <p>{{ error() }}</p>
+          <button type="button" class="outline" (click)="retry.emit()">{{ content.retry }}</button>
+        </div>
+      }
+      @if (loading()) {
+        <p class="list-status" role="status">{{ content.loading }}</p>
+      }
+      @if (!loading() && !endOfData() && !error()) {
+        <button class="load-more outline" type="button" (click)="loadMore.emit()">
+          {{ content.loadMore }}
+        </button>
+      }
+    </div>
+  </div>
+}

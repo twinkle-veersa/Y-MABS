@@ -71,6 +71,13 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
+        path: 'messages',
+        loadComponent: () =>
+          import('./pages/messages/messages.component').then(c => c.MessagesComponent),
+        canDeactivate: [(component: ComponentCanDeactivate) => component.canNavigateOut()],
+        data: { noSidebar: true }
+      },
+      {
         path: 'dashboard',
         loadComponent: () =>
           import('./pages/home/dashboard/dashboard.component').then(c => c.DashboardComponent)
@@ -136,5 +143,5 @@ export const routes: Routes = [
 ];
 
 interface ComponentCanDeactivate {
-  canNavigateOut: () => boolean;
+  canNavigateOut: () => boolean | Promise<boolean>;
 }
