@@ -2,19 +2,25 @@
 @use 'mixins' as mix;
 
 nav {
-  background-color: var.$dark;
-  height: 100%;
+  background-color: var.$white;
+  height: calc(100% - 1rem);
+  margin: 0.5rem 0.25rem;
+  border: 1px solid var.$container-border;
+  border-radius: 0.5rem;
+  box-shadow: 2px 2px 4px rgba(var.$dark-grey, 0.15);
+  overflow: hidden;
 
   a {
     height: 6.875rem;
-    color: white;
+    color: var.$dark-grey;
     @include mix.flexCentered;
     flex-direction: column;
     text-decoration: none;
-    border-bottom: 1px solid var.$primary-color;
+    border-bottom: 1px solid var.$medium-grey;
 
     img {
       width: 3.125rem;
+      filter: brightness(0) opacity(0.72);
     }
 
     // app-icon {
@@ -26,7 +32,12 @@ nav {
     }
 
     &.active {
-      background-color: var.$primary-color;
+      background-color: var.$accent-color;
+      color: var.$white;
+      font-weight: 700;
+      img {
+        filter: brightness(0) invert(1);
+      }
     }
   }
 }

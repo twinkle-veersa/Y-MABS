@@ -1,50 +1,71 @@
-<app-home-header />
-<div class="dashboard container inner">
-  <div class="card">
-    <div class="patient-chart">
-      @if (chart()) {
-        @defer {
-          <app-chart [data]="chart()!.chartData" [options]="chart()!.chartOptions" />
+<header class="dashboard-header">
+  <h1>{{ content.program }}</h1>
+  <button type="button" class="enrollment" routerLink="/home/enrollment" [disabled]="!canEnroll()">
+    {{ content.enrollment }}
+  </button>
+</header>
+
+<div class="dashboard" [attr.aria-busy]="loading()">
+  @let ready = !loading() && !error();
+  @if (error()) {
+    <div class="feedback error" role="alert">
+      <span>{{ content.error }}</span>
+      <button type="button" class="outline" (click)="retry()">{{ content.retry }}</button>
+    </div>
+  }
+
+  <section class="overview" [attr.aria-label]="content.statuses">
+    <div class="chart-region">
+      <div class="chart-scroll">
+        @if (ready) {
+          <app-chart [data]="chartData()" [options]="chartOptions()" [label]="chartLabel()" />
+        }
+      </div>
+      @if (ready && !hasPatients()) {
+        <p class="empty-chart">{{ content.emptyPatients }}</p>
+      }
+    </div>
+    <nav class="status-panel" [attr.aria-label]="content.statuses">
+      @for (status of statuses(); track status.key) {
+        <button
+          type="button"
+          class="status-card"
+          [class]="'status-' + status.key"
+          [disabled]="!ready"
+          (click)="redirectToSpecificCase(status.key)">
+          <span class="status-label">{{ status.label }}</span>
+          <span class="status-count">{{ status.count }}</span>
+        </button>
+      }
+    </nav>
+  </section>
+
+  <aside class="actions-panel">
+    <h2>
+      <button
+        type="button"
+        class="actions-heading"
+        [attr.aria-expanded]="actionsExpanded()"
+        aria-controls="dashboard-actions"
+        (click)="toggleActionsList()">
+        <span>{{ content.actions }}</span>
+        <span class="count-circle">{{ cases().length }}</span>
+      </button>
+    </h2>
+    <div id="dashboard-actions" class="actions-list" [hidden]="!actionsExpanded()">
+      @for (item of cases(); track $index) {
+        <button
+          type="button"
+          class="action-link transparent"
+          [disabled]="!item.PatientId"
+          (click)="navigateTo(item)">
+          {{ item.CaseId }} - {{ item.PatientName || content.unavailablePatient }}
+        </button>
+      } @empty {
+        @if (ready) {
+          <p class="empty-actions">{{ content.emptyActions }}</p>
         }
       }
     </div>
-    <div class="specification-panel">
-      @for (status of claimStatusData; track $index) {
-        <div
-          class="status-type"
-          [class]="status.key"
-          (click)="redirectToSpecificCase(status.key)"
-          (keydown.space)="redirectToSpecificCase(status.key)"
-          tabindex="0">
-          <div>{{ status.type }}</div>
-          <div class="count">{{ status.value }}</div>
-        </div>
-      }
-    </div>
-  </div>
-
-  <div class="action card">
-    <div
-      class="header"
-      role="button"
-      tabindex="0"
-      (click)="toggleActionsList()"
-      (keydown.space)="toggleActionsList()">
-      <span>Actions Needed</span>
-      <div class="count-circle">{{ cases()?.length ?? 0 }}</div>
-    </div>
-    @if (!isCollapsed) {
-      <div class="actions-list">
-        <ul>
-          @for (item of cases(); track item.id) {
-            <li>
-              <a tabindex="1" (click)="navigateTo(item)" (keyup.enter)="navigateTo(item)"
-                >{{ item.id }} - {{ item.name }}</a
-              >
-            </li>
-          }
-        </ul>
-      </div>
-    }
-  </div>
+  </aside>
 </div>

@@ -147,3 +147,39 @@ $messaging-toolbar-shadow: 0 3px 8px #00000009;
 $messaging-editor-toolbar-shadow: 0 2px 7px #0000000d;
 $messaging-menu-shadow: 0 3px 10px #0002;
 $messaging-dialog-backdrop: #0006;
+
+// Dashboard status palette, shared by the cards and chart through CSS variables.
+$dashboard-background: #eeeeff;
+$dashboard-axis: #071d49;
+$dashboard-status-colors: (
+  intake: (
+    bar: #c4c5fa,
+    background: #f1edff,
+    accent: #cfc3ec
+  ),
+  benefitInvestigation: (
+    bar: #8185ef,
+    background: #e7e6ff,
+    accent: #8288fa
+  ),
+  insuranceAuthRequired: (
+    bar: #4b2876,
+    background: #e7dcfa,
+    accent: #64389d
+  ),
+  financialServices: (
+    bar: $secondary-color,
+    background: #d4dfeb,
+    accent: $secondary-color
+  ),
+  papEvaluation: (
+    bar: #ffb509,
+    background: #fff0cf,
+    accent: #ffb509
+  ),
+  other: (
+    bar: #656d78,
+    background: #dfe6f2,
+    accent: #656d78
+  )
+);

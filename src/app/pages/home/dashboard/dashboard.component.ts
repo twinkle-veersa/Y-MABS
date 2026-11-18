@@ -1,131 +1,139 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
-import { ChartData, ChartOptions } from 'chart.js/auto';
-import { DataService } from '@shared/services/data.service';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  signal
+} from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import type { ChartData, ChartOptions } from 'chart.js';
+import { DASHBOARD, DASHBOARD_STATUSES, DashboardStatusKey } from '@constants/dashboard';
 import { ChartComponent } from '@shared/components/chart/chart.component';
-import { CaseData } from './dashboard.model';
-import { HomeHeaderComponent } from '@shared/layouts/home-header/home-header.component';
+import { DataService } from '@shared/services/data.service';
 import { sanitizeArrayResponse } from '@shared/utils/utility.functions';
-import { Router } from '@angular/router';
+import { CaseData, dashboardStepSize, dashboardSummary, needsAction } from './dashboard.model';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ReactiveFormsModule, ChartComponent, HomeHeaderComponent],
+  imports: [ChartComponent, RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent {
-  private data = inject(DataService);
-  private router = inject(Router);
-  isCollapsed = false;
-
-  claimStatusData = [
-    { type: 'Intake', key: 'intake', value: 0 },
-    { type: 'Benefit Investigation', key: 'benefitInvestigation', value: 0 },
-    { type: 'Insurance Auth Required', key: 'insuranceAuthRequired', value: 0 },
-    { type: 'Scan Scheduled / Ready to Schedule', key: 'triage', value: 0 }
-  ];
-
-  caseData = computed(() => sanitizeArrayResponse(this.data.caseDataRs.value()?.Payload));
-  chart = computed(() => (this.caseData()?.length ? this.buildChart(this.caseData()) : null));
-  cases = computed(() =>
-    this.caseData()
-      ?.filter(c => c.ActionNeeded === true)
-      .map(c => ({ id: c.CaseId, name: c.PatientName, ...c }))
+  readonly content = DASHBOARD;
+  private readonly data = inject(DataService);
+  private readonly router = inject(Router);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  readonly loading = this.data.caseDataRs.isLoading;
+  readonly error = computed(() => !!this.data.caseDataRs.error());
+  readonly canEnroll = computed(() => !!this.data.activePrescribers()?.length);
+  readonly actionsExpanded = signal(true);
+  readonly caseData = computed(
+    () => sanitizeArrayResponse(this.data.caseDataRs.value()?.Payload) ?? []
   );
+  readonly statuses = computed(() => dashboardSummary(this.caseData()));
+  readonly hasPatients = computed(() => this.statuses().some(status => status.count > 0));
+  readonly cases = computed(() =>
+    this.caseData()
+      .filter(needsAction)
+      .sort((a, b) => (b.CaseId ?? '').localeCompare(a.CaseId ?? '', undefined, { numeric: true }))
+  );
+  readonly chartLabel = computed(() =>
+    this.statuses()
+      .map(status => `${status.label}: ${status.count}`)
+      .join('; ')
+  );
+  readonly chartData = computed<ChartData<'bar'>>(() => ({
+    labels: this.statuses().map(status => [...status.lines]),
+    datasets: [
+      {
+        label: DASHBOARD.chart,
+        data: this.statuses().map(status => status.count),
+        backgroundColor: context =>
+          this.chartColor(
+            context.chart.canvas,
+            `--dashboard-${DASHBOARD_STATUSES[context.dataIndex]?.key ?? 'intake'}-bar`
+          ),
+        borderRadius: { topLeft: 12, topRight: 12 },
+        borderSkipped: 'bottom',
+        barPercentage: 0.65,
+        categoryPercentage: 0.8,
+        maxBarThickness: 68
+      }
+    ]
+  }));
+  readonly chartOptions = computed<ChartOptions<'bar'>>(() => {
+    const maximum = Math.max(0, ...this.statuses().map(status => status.count));
+    const stepSize = dashboardStepSize(maximum);
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 24, right: 8, bottom: 12 } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          suggestedMax: Math.max(stepSize, Math.ceil(maximum / stepSize) * stepSize),
+          border: { display: false },
+          title: {
+            display: true,
+            text: DASHBOARD.chart,
+            color: this.chartColor(this.host.nativeElement, '--dashboard-axis'),
+            font: { size: 14, weight: 500 }
+          },
+          ticks: { stepSize, precision: 0, padding: 10 },
+          grid: { color: context => this.chartColor(context.chart.canvas, '--dashboard-grid') }
+        },
+        x: {
+          border: { display: false },
+          grid: { display: false },
+          ticks: {
+            autoSkip: false,
+            maxRotation: 0,
+            padding: 18,
+            color: context => this.chartColor(context.chart.canvas, '--dashboard-axis'),
+            font: { size: 12 }
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: item => `${DASHBOARD.chart}: ${item.raw}` } }
+      },
+      onClick: (_event, elements) => {
+        const index = elements[0]?.index;
+        if (index !== undefined) this.redirectToSpecificCase(DASHBOARD_STATUSES[index].key);
+      },
+      onHover: (_event, elements, chart) => {
+        chart.canvas.style.cursor = elements.length ? 'pointer' : 'default';
+      }
+    };
+  });
 
   toggleActionsList() {
-    if (window.innerWidth <= 768) {
-      this.isCollapsed = !this.isCollapsed;
-    }
+    this.actionsExpanded.update(expanded => !expanded);
   }
 
-  updateClaimStatusData(data: CaseData[]) {
-    data.forEach(c => {
-      this.claimStatusData.forEach(s => {
-        const normalizedStatus = c.EnrollmentStatus?.toLowerCase().includes('benefit investigation')
-          ? 'Benefit Investigation'
-          : c.EnrollmentStatus;
-        if (normalizedStatus === s.type) {
-          s.value++;
-        }
-      });
-    });
+  retry() {
+    this.data.caseDataRs.reload();
   }
 
-  buildChart(data: CaseData[] | undefined) {
-    if (data?.length != null) {
-      this.updateClaimStatusData(data);
-      const totalPatients = this.claimStatusData.reduce((a, c) => a + c.value, 0);
-      const chartData: ChartData<'bar'> = {
-        labels: [
-          'Intake',
-          ['Benefit', 'Investigation'],
-          ['Insurance Auth', 'Required'],
-          ['Scan Scheduled/', 'Ready to Schedule']
-        ],
-        datasets: [
-          {
-            label: 'My Active Patients',
-            backgroundColor: ['#2B2A6B', '#3D7AB5', '#5B89B1', '#EEF5FB'],
-            borderColor: '#C1C8CB',
-            data: this.claimStatusData.map(c => c.value)
-          }
-        ]
-      };
-      const chartOptions: ChartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              color: '#000',
-              font: { weight: 'bold', size: 14 },
-              text: `Number of Active Patients (Total: ${totalPatients})`
-            }
-          },
-          x: { ticks: { autoSkip: false }, grid: { display: false } }
-        },
-        plugins: {
-          legend: {
-            display: true,
-            labels: {
-              color: '#000',
-              font: { weight: 'bold', size: 16 },
-              usePointStyle: true,
-              pointStyle: 'line'
-            },
-            onClick: () => void 0
-          },
-          tooltip: {
-            enabled: true,
-            callbacks: {
-              label: tooltipItem => `${tooltipItem.dataset.label}: ${tooltipItem.raw}`
-            }
-          }
-        }
-      };
-      return { chartData, chartOptions };
-    }
-    return null;
-  }
   navigateTo(item: CaseData) {
-    const patient = this.data.caseData()?.find(x => x.PatientId == item.PatientId);
-    this.data.selectedPatient.set(patient || null);
-    this.router.navigate(['//home/my-patients/', item.CaseId]);
+    if (!item.PatientId) return;
+    this.data.selectedPatient.set(item);
+    return this.router.navigate(['/home/my-patients', item.PatientId]);
   }
-  redirectToSpecificCase(key: string) {
-    const enrollmentStatusMapping: Record<string, string> = {
-      intake: 'Intake',
-      benefitInvestigation: 'Benefit Investigation',
-      insuranceAuthRequired: 'Insurance Auth Required',
-      triage: 'Scan Scheduled/Ready to Schedule'
-    };
-    this.router.navigate(['/home/my-patients'], {
-      state: { filter: `EnrollmentStatus>>${enrollmentStatusMapping[key]}` }
+
+  redirectToSpecificCase(key: DashboardStatusKey) {
+    const status = DASHBOARD_STATUSES.find(item => item.key === key);
+    if (!status) return;
+    return this.router.navigate(['/home/my-patients'], {
+      state: { filter: `EnrollmentStatus>>${status.filter}` }
     });
+  }
+
+  private chartColor(canvas: HTMLElement, property: string): string {
+    return getComputedStyle(canvas).getPropertyValue(property).trim();
   }
 }

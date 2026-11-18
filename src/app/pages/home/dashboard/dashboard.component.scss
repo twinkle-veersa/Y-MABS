@@ -1,142 +1,266 @@
+@use 'sass:map';
 @use 'mixins' as mix;
 @use 'variables' as var;
 
-.card {
-  border-radius: 0.5rem;
-  background: #fff;
-  overflow: hidden;
+:host {
+  @include mix.flexColumn;
+  min-width: 0;
+  min-height: 100%;
+  background: var.$dashboard-background;
+  --dashboard-axis: #{var.$dashboard-axis};
+  --dashboard-grid: #{var.$medium-grey};
+
+  @each $status, $colors in var.$dashboard-status-colors {
+    --dashboard-#{$status}-bar: #{map.get($colors, bar)};
+  }
+}
+
+.dashboard-header {
+  @include mix.flexCentered(space-between);
+  gap: 1rem;
+  padding: 1rem 1.75rem;
+  background: var.$white;
+
+  h1 {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    border-radius: 0.4rem;
+    background: var.$secondary-color;
+    color: var.$white;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+}
+
+:host button.status-card,
+:host button.actions-heading {
+  @include mix.flexCentered(space-between);
+  gap: 0.75rem;
+  width: 100%;
+  border: 0;
+  font-weight: 400;
+  text-align: left;
+}
+
+:host button.enrollment {
+  font-weight: 400;
+  padding: 0.9rem 1.25rem;
+  background: var.$accent-color;
+  border-color: var.$accent-color;
 }
 
 .dashboard {
-  display: flex;
-  gap: 1rem;
-  padding: 0 2rem;
-  max-height: 60rem;
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(15rem, 1fr);
+  align-items: stretch;
+  gap: 1.25rem;
+  flex: 1;
+  min-width: 0;
+  padding: 1.25rem 1.5rem;
+}
 
-  > .card:first-child {
-    display: flex;
-    flex: 1;
+.overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(10.5rem, 23%);
+  min-width: 0;
+  min-height: clamp(32rem, 65vh, 46rem);
+  border: 1px solid var.$container-border;
+  border-radius: 0.85rem;
+  background: var.$white;
+  overflow: hidden;
+}
 
-    .patient-chart {
-      min-height: 35rem;
-      padding: 1rem;
-      display: flex;
-      flex: 1;
-    }
+.chart-region {
+  @include mix.flexColumn;
+  min-width: 0;
+  padding: 1.5rem 0.75rem 1rem;
+}
 
-    .specification-panel {
-      display: flex;
-      flex-direction: column;
-      max-width: 25%;
+.chart-scroll {
+  position: relative;
+  flex: 1;
+  min-height: 28rem;
+}
 
-      .status-type {
-        @include mix.flexCentered(space-between, center);
-        font-weight: 700;
-        padding: 1rem;
-        color: #fff;
-        cursor: pointer;
-        gap: 1rem;
-        flex: 1;
+.status-panel {
+  display: grid;
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+  gap: 0.6rem;
+  padding: 0.5rem;
+  border-radius: 0.85rem;
+  box-shadow: -3px 0 5px rgba(var.$dark-grey, 0.2);
+}
 
-        @include mix.responsive(large) {
-          flex-direction: column;
-          justify-content: center;
-          align-items: flex-start;
-        }
+:host button.status-card {
+  min-width: 0;
+  padding: 0.8rem 1rem;
+  border-left: 0.5rem solid;
+  border-radius: 0.5rem;
+  color: var.$field-input-color;
+  font-size: 1rem;
 
-        .count {
-          font-size: 2rem;
-        }
-      }
-
-      .intake {
-        background: var.$dark;
-      }
-
-      .benefitInvestigation {
-        background: var.$primary-color;
-      }
-
-      .insuranceAuthRequired {
-        background: var.$secondary-color;
-      }
-
-      .triage {
-        background: var.$light;
-        color: var.$dark;
-      }
+  @each $status, $colors in var.$dashboard-status-colors {
+    &.status-#{$status} {
+      background: map.get($colors, background);
+      border-left-color: map.get($colors, accent);
     }
   }
 
-  .action.card {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    min-width: 30%;
+  &:hover:not(:disabled) {
+    filter: brightness(0.97);
+  }
+  &:focus-visible {
+    outline: 2px solid var.$accent-color;
+    outline-offset: -3px;
+  }
+  &:disabled {
+    color: var.$field-input-color;
+    cursor: default;
+    opacity: 0.65;
+  }
+}
 
-    .header {
-      @include mix.flexCentered(space-between, center);
-      background-color: var.$dark;
-      padding: 1rem 1.5rem;
-      color: #fff;
-      font-size: 1.25rem;
-      font-weight: 700;
+.status-label {
+  max-width: 10rem;
+  line-height: 1.4;
+}
 
-      .count-circle {
-        @include mix.flexCentered(center);
-        background-color: #fff;
-        border-radius: 50%;
-        font-size: 1.25rem;
-        font-weight: bold;
-        color: var.$dark;
-        height: 3.5rem;
-        width: 3.5rem;
-      }
-    }
+.status-count {
+  flex: 0 0 auto;
+  font-size: 2rem;
+  font-weight: 700;
+}
 
-    .actions-list {
-      overflow-y: auto;
-      height: calc(100% - 5.5rem);
-      padding: 0 0.5rem;
+.actions-panel {
+  @include mix.flexColumn;
+  align-self: stretch;
+  min-width: 0;
+  border: 1px solid var.$container-border;
+  border-radius: 0.9rem;
+  background: var.$accent-color;
+  overflow: hidden;
 
-      ul {
-        padding-inline-start: 1.5rem;
+  h2 {
+    margin: 0;
+  }
+}
 
-        li {
-          margin-block: 0.5rem;
-          color: var.$dark;
-          font-weight: 600;
-          padding-left: 0.5rem;
+:host button.actions-heading {
+  border-radius: 0;
+  padding: 1.25rem;
+  background: var.$accent-color;
+  color: var.$white;
+  font-size: 1.25rem;
+}
 
-          a {
-            cursor: pointer;
-            color: var.$primary-color;
-          }
-        }
-      }
-    }
+.count-circle {
+  @include mix.flexCentered;
+  flex: 0 0 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var.$header-accent;
+  color: var.$white;
+  font-size: 1.1rem;
+}
+
+.actions-list {
+  flex: 1;
+  min-height: 16rem;
+  max-height: 44rem;
+  padding: 1.25rem 0.9rem;
+  border-radius: 0.85rem 0.85rem 0 0;
+  background: var.$light;
+  overflow-y: auto;
+  @include mix.scrollbars;
+}
+
+:host button.action-link.transparent {
+  border: 0;
+  border-radius: 0;
+  font-weight: 400;
+  text-align: left;
+  display: block;
+  margin: 0 0 1rem;
+  padding: 0;
+  color: var.$accent-color;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-decoration: underline;
+  text-decoration-color: var.$header-accent;
+  text-underline-offset: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.feedback {
+  @include mix.flexCentered(space-between);
+  grid-column: 1 / -1;
+  margin: 0;
+  gap: 1rem;
+  color: var.$font-color;
+  &.error {
+    color: var.$error;
+  }
+}
+
+.empty-chart,
+.empty-actions {
+  margin: 0;
+  padding: 0.75rem;
+  color: var.$font-color;
+  font-size: 0.9rem;
+}
+
+@include mix.responsive(large) {
+  .dashboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .overview {
+    grid-template-columns: minmax(0, 1fr) 12rem;
+  }
+  .actions-list {
+    min-height: 8rem;
+    max-height: 20rem;
   }
 }
 
 @include mix.responsive(medium) {
+  .dashboard-header {
+    padding: 0.75rem;
+    flex-wrap: wrap;
+    h1 {
+      padding: 0.75rem;
+      font-size: 1rem;
+    }
+  }
+  :host button.enrollment {
+    padding: 0.65rem;
+    font-size: 0.85rem;
+  }
   .dashboard {
-    flex-direction: column-reverse;
-    min-height: 50rem;
-
-    > .card:first-child {
-      min-height: 32rem;
-
-      .patient-chart {
-        min-height: 100%;
-      }
-
-      .specification-panel {
-        max-width: 0;
-      }
-    }
-
-    .action.card {
-      .actions-list {
-        min-height: 40vh;
-      }
-    }
+    padding: 0.75rem;
+  }
+  .overview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .chart-region {
+    overflow-x: auto;
+  }
+  .chart-scroll {
+    min-width: 28rem;
+    min-height: 24rem;
+  }
+  .status-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(6.5rem, 1fr));
+    box-shadow: none;
+    border-top: 1px solid var.$medium-grey;
+  }
+  :host button.status-card {
+    padding: 0.65rem;
+    font-size: 0.85rem;
+  }
+  .status-count {
+    font-size: 1.5rem;
   }
 }

@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  linkedSignal,
   OnInit,
   signal
 } from '@angular/core';
@@ -46,7 +47,7 @@ export class PatientsDetailComponent implements OnInit {
   caseData = computed(() =>
     this.data.caseData().filter(x => x.PatientId == this.patientData()?.PatientId)
   );
-  selectedCaseId = signal<string | undefined>(this.caseData()?.at(0)?.CaseId ?? undefined);
+  selectedCaseId = linkedSignal(() => this.patientData()?.CaseId ?? this.caseData().at(0)?.CaseId);
   patientDetailsRs = this.api.getRs<CaseDetail>(`case/${this.api?.tokenInfo()?.acctname}`, {
     baseUrl: environment.portalv11Url,
     parameter: this.selectedCaseId

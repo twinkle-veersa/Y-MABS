@@ -15,6 +15,8 @@ import { CaseData } from '../dashboard/dashboard.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DataService } from '@shared/services/data.service';
 import { DatePipe } from '@angular/common';
+import { DASHBOARD_STATUSES } from '@constants/dashboard';
+import { dashboardStatus } from '../dashboard/dashboard.model';
 
 @Component({
   providers: [DatePipe],
@@ -79,6 +81,8 @@ export class MyPatientsComponent implements OnInit {
           const patientVal = (patient[key as keyof CaseData] as string)?.toLowerCase();
           const targetVal = value.toLowerCase();
           if (key === 'EnrollmentStatus') {
+            const status = DASHBOARD_STATUSES.find(item => item.filter.toLowerCase() === targetVal);
+            if (status) return dashboardStatus(patient) === status.key;
             return patientVal?.includes(targetVal);
           }
           return patientVal === targetVal;
@@ -142,7 +146,7 @@ export class MyPatientsComponent implements OnInit {
     if (param) {
       const [key, value] = param.split('>>');
       const filterType = FILTERS.find(x => x.key === key);
-      if (filterType && filterType.options.filter(x => x.label === value))
+      if (filterType?.options.some(option => option.id === value || option.label === value))
         return [param, 'CaseStatus>>Open'];
     }
     return [];
@@ -153,9 +157,7 @@ const FILTERS = [
     label: 'Status',
     key: 'EnrollmentStatus',
     options: [
-      { id: 'Intake', label: 'Intake' },
-      { id: 'Benefit Investigation', label: 'Benefit Investigation' },
-      { id: 'Insurance Auth Required', label: 'Insurance Auth Required' },
+      ...DASHBOARD_STATUSES.map(status => ({ id: status.filter, label: status.label })),
       { id: 'Scan Scheduled/Ready to Schedule', label: 'Scan Scheduled/Ready to Schedule' }
     ]
   },
