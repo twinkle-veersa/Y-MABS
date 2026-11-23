@@ -1,0 +1,71 @@
+@use 'variables' as var;
+@use 'mixins' as mix;
+
+.e-sign {
+  color: var.$font-color;
+  line-height: 1.5;
+
+  h2 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var.$dark;
+  }
+
+  p {
+    margin: 0 0 1rem;
+  }
+
+  p > a {
+    color: var.$primary-color;
+    text-decoration: underline;
+  }
+
+  ul {
+    margin: 0 0 1rem;
+    padding-left: 1.25rem;
+  }
+
+  .contact {
+    margin-bottom: 0;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+}
+
+button.id-me-btn {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 1rem;
+  padding: 0;
+  color: var.$white;
+  background-color: var.$id-me-green;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    background-color: var.$id-me-green-hover;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .check {
+    @include mix.flexCentered;
+    padding: 0.5rem 0.75rem;
+    font-size: 1.5rem;
+    border-right: 1px solid rgba(var.$white, 0.6);
+  }
+
+  .label {
+    @include mix.flexCentered;
+    padding: 0.5rem 1.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+}

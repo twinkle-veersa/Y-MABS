@@ -23,7 +23,7 @@ import { AddressPipe } from '@shared/utils/address.pipe';
 import { PhonePipe } from '@shared/utils/phone.pipe';
 import { formatPhoneInObj, sanitizeObj, sanitizePhone } from '@shared/utils/utility.functions';
 import { ToastrService } from 'ngx-toastr';
-import { FacilityContact } from 'app/pages/home/settings/settings.component';
+import { FacilityContact } from 'app/pages/home/settings/settings.model';
 import { SeperatorComponent } from '@shared/components/seperator/seperator.component';
 import { firstValueFrom } from 'rxjs';
 

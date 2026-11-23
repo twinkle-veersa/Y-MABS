@@ -1,0 +1,77 @@
+<form [formGroup]="form">
+  <div class="wrap">
+    <app-form-title [title]="content.title" [subtitle]="content.subtitle" />
+    <div class="existing-bar">
+      <span id="existing-label">{{ content.existingLabel }}</span>
+      <button
+        type="button"
+        class="sm"
+        aria-describedby="existing-label"
+        aria-haspopup="dialog"
+        (click)="openDialog()">
+        Add
+      </button>
+    </div>
+    <div class="or-divider" role="separator"><span>OR</span></div>
+    <div class="row">
+      @for (field of fields; track field.name) {
+        <ng-container appDynamicField [field]="field" [group]="form" />
+      }
+    </div>
+  </div>
+  <div class="actions mb-5">
+    @if (editing()) {
+      <button class="outline" type="button" (click)="cancelEdit()">Cancel</button>
+    }
+    <button
+      type="button"
+      [disabled]="form.invalid"
+      (click)="editing() ? updateFacility() : addFacility()">
+      {{ editing() ? 'Update' : 'Add' }}
+    </button>
+  </div>
+  <app-table
+    [tableData]="practiceData()"
+    [columnConfigs]="practiceCols"
+    [actions]="rowActions"
+    [disabledRow]="editing()"
+    [paginated]="true"
+    [pageSize]="5"
+    (emitAction)="onRowAction($event)" />
+
+  <button
+    type="button"
+    class="d-block ms-auto mt-4"
+    [disabled]="!hasUnsavedChanges() || !!editing() || isSaving()"
+    (click)="save()">
+    Save
+  </button>
+</form>
+
+<app-popup
+  type="custom"
+  [heading]="content.dialogTitle"
+  [isVisible]="isDialogOpen()"
+  (closePopup)="closeDialog()">
+  <p class="mt-0">{{ content.dialogText }}</p>
+  <div class="search-bar">
+    <app-icon icon="search" />
+    <input
+      #search
+      type="text"
+      placeholder="Search"
+      aria-label="Search practice offices"
+      [value]="searchTerm()"
+      (input)="searchTerm.set(search.value)" />
+  </div>
+  @if (isDialogOpen()) {
+    <app-table
+      selection="multiple"
+      idKey="Id"
+      [tableData]="filteredFacilities()"
+      [preSelectedRows]="dialogInitial()"
+      [columnConfigs]="cols"
+      (emitSelection)="onDialogSelect($event)" />
+  }
+  <button type="button" class="action right-btn" (click)="confirmDialog()">Done</button>
+</app-popup>

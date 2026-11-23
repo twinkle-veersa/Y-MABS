@@ -1,4 +1,4 @@
-import { FacilityContact } from '../home/settings/settings.component';
+import { FacilityContact } from '../home/settings/settings.model';
 
 export interface ReqPass {
   CurrentPassword: string;

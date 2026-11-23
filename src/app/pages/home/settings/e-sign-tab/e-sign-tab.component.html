@@ -1,0 +1,31 @@
+<section class="e-sign" aria-labelledby="e-sign-title">
+  @if (isActive()) {
+    <h2 id="e-sign-title">{{ content.active.title }}</h2>
+    <p>
+      {{ content.active.content }}
+      <a [href]="content.verifyUrl" target="_blank" rel="noopener noreferrer">ID.me</a>.
+    </p>
+  } @else {
+    <h2 id="e-sign-title">{{ content.title }}</h2>
+    @for (paragraph of content.paragraphs; track $index) {
+      <p>{{ paragraph }}</p>
+    }
+    <p>{{ content.requirementsIntro }}</p>
+    <ul>
+      @for (item of content.requirements; track $index) {
+        <li>{{ item }}</li>
+      }
+    </ul>
+    <button
+      class="id-me-btn"
+      type="button"
+      [disabled]="isVerifying()"
+      [attr.aria-busy]="isVerifying()"
+      (click)="verify()">
+      <span class="check"><app-icon icon="check-circle" /></span>
+      <span class="label">{{ content.verifyLabel }}</span>
+    </button>
+  }
+  <p>{{ content.about }}</p>
+  <p class="contact">{{ content.contact }}</p>
+</section>
