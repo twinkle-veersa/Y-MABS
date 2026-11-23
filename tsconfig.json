@@ -22,6 +22,7 @@
     "strictTemplates": true
   },
   "files": [],
+  "include": ["generate-svg-sprite.ts"],
   "references": [
     {
       "path": "./tsconfig.app.json"

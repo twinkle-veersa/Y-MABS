@@ -23,7 +23,7 @@
               .toUpperCase()
           }}</span>
           <div class="sender">
-            <strong>{{ message.senderPortalAccount?.userAccountName || content.sender }}</strong>
+            <span>{{ message.senderPortalAccount?.userAccountName || content.sender }}</span>
             @if (message.senderPortalAccount?.emailAddress) {
               <span>&lt;{{ message.senderPortalAccount?.emailAddress }}&gt;</span>
             }

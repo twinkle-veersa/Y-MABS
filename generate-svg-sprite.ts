@@ -2,7 +2,7 @@ import { globSync } from 'glob';
 import fs from 'fs';
 import { HTMLElement, parse } from 'node-html-parser';
 import path from 'path';
-import { Config as SVGOConfig, optimize } from 'svgo'; // import `optimize` function
+import { type Config as SVGOConfig, optimize } from 'svgo';
 
 const svgoConfig: SVGOConfig = {
   plugins: [
@@ -19,23 +19,25 @@ const svgFiles = globSync('public/svgs/*.svg');
 const symbols: string[] = [];
 
 svgFiles.forEach(file => {
+  const fileName = path.basename(file, '.svg');
   const code = fs.readFileSync(file, 'utf-8');
-  const result = optimize(code, svgoConfig).data; // here goes `svgo` magic with optimization
+  const result = optimize(code, fileName === 'securemessaging' ? { plugins: [] } : svgoConfig).data;
   const svgElement = parse(result).querySelector('svg') as HTMLElement;
   const symbolElement = parse('<symbol/>').querySelector('symbol') as HTMLElement;
-  const fileName = path.basename(file, '.svg');
 
   svgElement.childNodes.forEach(child => symbolElement.appendChild(child));
 
   symbolElement.setAttribute('id', fileName);
 
-  if (svgElement.attributes['viewBox']) {
-    symbolElement.setAttribute('viewBox', svgElement.attributes['viewBox']);
+  for (const [name, value] of Object.entries(svgElement.attributes)) {
+    if (!['id', 'xmlns', 'width', 'height'].includes(name)) {
+      symbolElement.setAttribute(name, value);
+    }
   }
 
   symbols.push(symbolElement.toString());
 });
 
-const svgSprite = `<svg xmlns="http://www.w3.org/2000/svg">${symbols.join('').replace('id="bell"', 'id="bell" fill="none"')}</svg>`;
+const svgSprite = `<svg xmlns="http://www.w3.org/2000/svg">${symbols.join('')}</svg>`;
 
 fs.writeFileSync('public/sprite.svg', svgSprite);

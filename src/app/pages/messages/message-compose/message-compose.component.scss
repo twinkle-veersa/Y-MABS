@@ -191,21 +191,70 @@ footer {
   @include mix.flexCentered(null);
   gap: 0.75rem;
   justify-content: space-between;
-  padding: 1rem 1.25rem;
+  padding: 0.875rem 1.25rem;
   border-top: 1px solid var.$medium-grey;
 }
 .send-actions {
-  @include mix.flexCentered(null);
+  @include mix.flexCentered(flex-end);
   gap: 0.75rem;
+  margin-inline-start: auto;
+}
+.upload-control {
+  position: relative;
+  app-file-upload {
+    display: block;
+  }
+  app-icon {
+    position: absolute;
+    inset-inline-start: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var.$button-disabled;
+    font-size: 1rem;
+    line-height: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
 }
 :host button.cancel.outline {
-  color: var.$messaging-text-outline-action;
-  border: 1px solid var.$messaging-border;
-  font-weight: 500;
+  height: 2rem;
+  min-width: 5.5rem;
+  padding: 0 1.25rem;
+  color: var.$button-disabled;
+  border: 1px solid var.$button-disabled;
+  border-radius: 0.25rem;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 400;
 }
 :host button.send {
+  @include mix.flexCentered(null, center, inline-flex);
+  gap: 0;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.25rem;
   background: var.$accent-color;
-  border-color: var.$accent-color;
+  color: var.$white;
+  font-size: 0.875rem;
+  overflow: hidden;
+
+  app-icon {
+    @include mix.flexCentered;
+    align-self: stretch;
+    width: 2.25rem;
+    border-inline-end: 1px solid var.$white;
+    font-size: 1rem;
+  }
+  .send-label {
+    min-width: 5rem;
+    padding: 0 1rem;
+    text-align: center;
+  }
+  &:disabled {
+    background: var.$button-disabled;
+    color: var.$white;
+  }
 }
 .drop-label,
 .hint {
@@ -274,10 +323,6 @@ footer {
       border: 0;
       box-shadow: none;
       background: transparent;
-      &:focus-within {
-        outline: 2px solid var.$accent-color;
-        outline-offset: 2px;
-      }
     }
   }
   .subject-row app-input {
@@ -430,11 +475,16 @@ footer {
     .text-truncate {
       @include mix.visuallyHidden;
     }
-    button {
-      color: var.$messaging-text-outline-action;
-      border: 1px solid var.$messaging-border;
-      font-weight: 500;
+    .upload-input button {
+      @include mix.flexCentered;
+      height: 2rem;
+      padding: 0 0.9rem 0 2.5rem;
+      color: var.$button-disabled;
+      border: 1px solid var.$medium-grey;
+      border-radius: 0.25rem;
       background: transparent;
+      font-size: 0.875rem;
+      font-weight: 400;
     }
   }
   @include mix.responsive(medium) {

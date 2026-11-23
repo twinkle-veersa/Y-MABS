@@ -6,17 +6,18 @@ import {
   inject,
   signal
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import type { ChartData, ChartOptions } from 'chart.js';
 import { DASHBOARD, DASHBOARD_STATUSES, DashboardStatusKey } from '@constants/dashboard';
 import { ChartComponent } from '@shared/components/chart/chart.component';
 import { DataService } from '@shared/services/data.service';
+import { HomeHeaderComponent } from '@shared/layouts/home-header/home-header.component';
 import { sanitizeArrayResponse } from '@shared/utils/utility.functions';
 import { CaseData, dashboardStepSize, dashboardSummary, needsAction } from './dashboard.model';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [ChartComponent, RouterLink],
+  imports: [ChartComponent, HomeHeaderComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -28,7 +29,6 @@ export class DashboardComponent {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly loading = this.data.caseDataRs.isLoading;
   readonly error = computed(() => !!this.data.caseDataRs.error());
-  readonly canEnroll = computed(() => !!this.data.activePrescribers()?.length);
   readonly actionsExpanded = signal(true);
   readonly caseData = computed(
     () => sanitizeArrayResponse(this.data.caseDataRs.value()?.Payload) ?? []

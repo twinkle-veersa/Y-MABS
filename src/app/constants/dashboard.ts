@@ -1,6 +1,4 @@
 export const DASHBOARD = {
-  program: 'Y-mAbs Connect',
-  enrollment: 'Submit Enrollment Form',
   chart: 'Number of Patients',
   statuses: 'Patient enrollment status',
   actions: 'Actions Needed',

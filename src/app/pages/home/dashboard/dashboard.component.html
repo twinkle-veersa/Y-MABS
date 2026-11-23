@@ -1,9 +1,4 @@
-<header class="dashboard-header">
-  <h1>{{ content.program }}</h1>
-  <button type="button" class="enrollment" routerLink="/home/enrollment" [disabled]="!canEnroll()">
-    {{ content.enrollment }}
-  </button>
-</header>
+<app-home-header />
 
 <div class="dashboard" [attr.aria-busy]="loading()">
   @let ready = !loading() && !error();

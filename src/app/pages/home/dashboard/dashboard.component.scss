@@ -15,23 +15,6 @@
   }
 }
 
-.dashboard-header {
-  @include mix.flexCentered(space-between);
-  gap: 1rem;
-  padding: 1rem 1.75rem;
-  background: var.$white;
-
-  h1 {
-    margin: 0;
-    padding: 1rem 1.25rem;
-    border-radius: 0.4rem;
-    background: var.$secondary-color;
-    color: var.$white;
-    font-size: 1.1rem;
-    font-weight: 700;
-  }
-}
-
 :host button.status-card,
 :host button.actions-heading {
   @include mix.flexCentered(space-between);
@@ -40,13 +23,6 @@
   border: 0;
   font-weight: 400;
   text-align: left;
-}
-
-:host button.enrollment {
-  font-weight: 400;
-  padding: 0.9rem 1.25rem;
-  background: var.$accent-color;
-  border-color: var.$accent-color;
 }
 
 .dashboard {
@@ -225,18 +201,6 @@
 }
 
 @include mix.responsive(medium) {
-  .dashboard-header {
-    padding: 0.75rem;
-    flex-wrap: wrap;
-    h1 {
-      padding: 0.75rem;
-      font-size: 1rem;
-    }
-  }
-  :host button.enrollment {
-    padding: 0.65rem;
-    font-size: 0.85rem;
-  }
   .dashboard {
     padding: 0.75rem;
   }

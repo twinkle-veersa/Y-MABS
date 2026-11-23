@@ -4,6 +4,13 @@
 :host {
   display: block;
   padding: 2rem;
+  --p-select-focus-border-color: #{var.$medium-grey};
+  --p-select-focus-ring-width: 0;
+  --p-select-focus-ring-shadow: none;
+  --p-select-option-selected-background: transparent;
+  --p-select-option-selected-color: var(--p-select-option-color);
+  --p-select-option-selected-focus-background: transparent;
+  --p-select-option-selected-focus-color: var(--p-select-option-color);
 }
 .mailbox {
   border: 1px solid var.$container-border;
@@ -85,10 +92,14 @@ h1 {
     .input-wrap {
       input {
         border: 0;
+        outline: 0;
         padding: 0;
         min-height: 0;
         background: transparent;
         box-shadow: none;
+        &:active {
+          background: transparent;
+        }
       }
     }
   }

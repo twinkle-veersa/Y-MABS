@@ -165,10 +165,9 @@
                 [disabled]="sending()"></button>
             }
             <span class="format-picker alignment-picker"
-              ><app-icon
-                class="format-icon"
-                icon="messaging-hamburger"
-                aria-hidden="true" /><app-select [field]="editorFields.align" [group]="editorForm"
+              ><app-icon class="format-icon" icon="bars" aria-hidden="true" /><app-select
+                [field]="editorFields.align"
+                [group]="editorForm"
             /></span>
           </span>
         </div>
@@ -204,19 +203,23 @@
       {{ content.cancel }}
     </button>
     <div class="send-actions">
-      <span class="drop-label">{{ content.dropFiles }}</span
-      ><app-file-upload
-        [multiple]="true"
-        [fileTypes]="attachmentMimeType"
-        [label]="content.attachFiles"
-        [buttonText]="content.upload"
-        [disabled]="busy()"
-        (emitFiles)="addFiles($event)" />
+      <span class="drop-label">{{ content.dropFiles }}</span>
+      <div class="upload-control">
+        <app-icon icon="messaging-upload" aria-hidden="true" />
+        <app-file-upload
+          [multiple]="true"
+          [fileTypes]="attachmentMimeType"
+          [label]="content.attachFiles"
+          [buttonText]="content.upload"
+          [disabled]="busy()"
+          (emitFiles)="addFiles($event)" />
+      </div>
       <button
         class="send"
         type="submit"
         [disabled]="status() !== 'VALID' || invalidAssociation() || busy()">
-        <app-icon icon="messaging-sent" />{{ sending() ? content.sending : content.send }}
+        <app-icon icon="messaging-sent" aria-hidden="true" />
+        <span class="send-label">{{ sending() ? content.sending : content.send }}</span>
       </button>
     </div>
   </footer>

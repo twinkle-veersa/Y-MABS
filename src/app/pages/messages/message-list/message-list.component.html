@@ -6,13 +6,11 @@
     [attr.aria-expanded]="panelOpen()"
     aria-controls="messaging-sidebar"
     (click)="toggleSidebar()">
-    <app-icon icon="messaging-hamburger" [class.vertical]="!panelOpen()" />
+    <app-icon icon="bars" [class.vertical]="!panelOpen()" />
   </button>
   @if (panelOpen()) {
     <div class="filter-control">
-      <app-icon icon="messaging-calendar" /><app-select
-        [field]="fields.dateFilter"
-        [group]="filters" />
+      <app-icon icon="calendar" /><app-select [field]="fields.dateFilter" [group]="filters" />
     </div>
     <div class="filter-control">
       <app-icon icon="messaging-regarding" /><app-select
@@ -60,8 +58,14 @@
           class="group-heading transparent"
           [attr.aria-expanded]="!collapsed"
           (click)="toggleGroup(group.GroupByKey)">
-          <span aria-hidden="true">{{ collapsed ? '⌄' : '⌃' }}</span
-          >{{ groupLabels()[group.GroupByKey] || group.GroupByKey }}
+          <app-icon
+            class="accordion-arrow"
+            icon="messaging-chevron"
+            width="0.75rem"
+            height="0.4375rem"
+            [class.closed]="collapsed"
+            aria-hidden="true" />
+          {{ groupLabels()[group.GroupByKey] || group.GroupByKey }}
         </button>
         @if (!collapsed) {
           @for (thread of group.Threads; track thread.ThreadId) {
@@ -132,7 +136,13 @@
                     [attr.aria-expanded]="expanded"
                     (click)="toggleThread(thread.ThreadId)">
                     {{ thread.Mails.length }} {{ content.messages }}
-                    {{ expanded ? '⌃' : '⌄' }}
+                    <app-icon
+                      class="accordion-arrow"
+                      icon="messaging-chevron"
+                      width="0.75rem"
+                      height="0.4375rem"
+                      [class.closed]="!expanded"
+                      aria-hidden="true" />
                   </button>
                 }
               </div>
