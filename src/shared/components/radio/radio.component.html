@@ -2,7 +2,7 @@
   @if (f.label) {
     <app-input-label [field]="f" [isRequired]="isRequired" />
   }
-  <div class="input-wrap radio">
+  <div class="input-wrap radio" [class]="f.class">
     @for (item of f.options; track $index) {
       <div>
         <label [for]="f.name + item.option">

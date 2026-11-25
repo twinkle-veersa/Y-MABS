@@ -4,49 +4,44 @@ import { groupedIntoOne } from '@shared/utils/utility.functions';
 import { REGEX } from './regex';
 import { PopupType } from '@shared/components/popup/popup.component';
 
-const requestedServices: SelectOptions[] = [
-  {
-    option: 'Patient support and insurance navigation',
-    value: 1
-  },
-  { option: 'Patient support only', value: 2 },
-  { option: 'Insurance navigation only', value: 3 }
+const genderOptions: SelectOptions[] = [
+  { option: 'Male', value: 'Male' },
+  { option: 'Female', value: 'Female' }
 ];
-const preferredLanguage: SelectOptions[] = [
-  { option: 'English', value: 'English' },
-  { option: 'Spanish', value: 'Spanish' },
-  { option: 'Other', value: 'Other' }
-];
-const preferredPhone: SelectOptions[] = [
-  { option: 'Home', value: 'Home' },
-  { option: 'Mobile', value: 'Mobile' }
-];
-const contactMethod: SelectOptions[] = [
-  { option: 'Call', value: 'Phone' },
-  { option: 'Email', value: 'Email' },
-  { option: 'Text', value: 'SMS' }
-];
-const prefcontactMethod: SelectOptions[] = [
-  { option: 'Call', value: 'Phone' },
-  { option: 'Email', value: 'Email' },
-  { option: 'Fax', value: 'Fax' }
-];
-const contactTime: SelectOptions[] = [
-  { option: 'Morning', value: 'AM' },
-  { option: 'Afternoon', value: 'Day' },
-  { option: 'Evening', value: 'PM' }
-];
-const affirmation: SelectOptions[] = [
-  { option: 'Yes', value: 'Voicemail' },
-  { option: 'No', value: 'N' }
+const contactPreferences: SelectOptions[] = [
+  { option: 'Phone', value: 'Phone' },
+  { option: 'Voicemail', value: 'Voicemail' },
+  { option: 'Text', value: 'Text' },
+  { option: 'Mail', value: 'Mail' },
+  { option: 'Email', value: 'Email' }
 ];
 const relationShipToPatient: SelectOptions[] = [
   { option: 'Unknown', value: 'Unknown' },
   { option: 'Dependent', value: 'Dependent' },
   { option: 'Spouse', value: 'Spouse' },
   { option: 'Mother', value: 'Mother' },
-  { option: 'Father', value: 'Father' }
+  { option: 'Father', value: 'Father' },
+  { option: 'Parent / legal guardian', value: 'ParentLegalGuardian' }
 ];
+const contactTime: SelectOptions[] = [
+  { option: 'Morning', value: 'Morning' },
+  { option: 'Afternoon', value: 'Afternoon' },
+  { option: 'Evening', value: 'Evening' },
+  { option: 'Anytime', value: 'Anytime' }
+];
+const insurancePlans: SelectOptions[] = [
+  { option: 'Private/Commercial', value: 'Private/Commercial' },
+  { option: 'Medicaid', value: 'Medicaid' },
+  { option: 'Medicare', value: 'Medicare' },
+  { option: 'Medicare Advantage', value: 'Medicare Advantage' }
+];
+const relationShipToPatientInsurance: SelectOptions[] = [
+  { option: 'Self', value: 'Self' },
+  { option: 'Spouse', value: 'Spouse' },
+  { option: 'Children', value: 'Children' },
+  { option: 'Other', value: 'Other' }
+];
+
 const diagnosticCode: SelectOptions[] = [
   { option: 'C61 (primary)', value: 'C61' },
   { option: 'C79.82', value: 'C7982' },
@@ -64,520 +59,41 @@ const cptMofifier: SelectOptions[] = [
   { option: 'PI (Initial)', value: 'PI' },
   { option: 'PS (Recurrent)', value: 'PS' }
 ];
-const hospitalImagingPatient: SelectOptions[] = [
-  // { option: 'Inpatient', value: 'inPatient' },
-  { option: 'Outpatient', value: 'Outpatient' },
-  { option: 'Independent Scan Facility', value: 'IndependentScanFacility' }
-];
 const HCPCSCode: SelectOptions[] = [{ option: 'A9595', value: 'A9595' }];
-const policyHolder: SelectOptions[] = [
-  { option: 'Self', value: 'self' },
-  { option: 'Other', value: 'other' }
-];
-
-export const TABS = [
-  'prescriberSelected',
-  'servicesRequested',
-  'patientInformation',
-  'insuranceInformation',
-  'prescriberInformation',
-  'clinicalInformation'
-] as const;
-export type Tab = (typeof TABS)[number];
 
 export const STEPS = [
-  'requestedServices',
   'patientInfo',
-  'insuranceInfo',
   'prescriberInfo',
+  'insuranceInfo',
   'clinicalInfo',
   'attestAndSign'
 ] as const;
 export type EnrollmentStep = (typeof STEPS)[number];
 export const ENROLLMENT_STEPS: Record<EnrollmentStep, StepDetail> = {
-  requestedServices: { title: 'Services\nRequested', isEnabled: true },
   patientInfo: { title: 'Patient\nInformation', isEnabled: true },
-  insuranceInfo: { title: 'Insurance\nInformation', isEnabled: true },
   prescriberInfo: { title: 'Prescriber\nInformation', isEnabled: true },
+  insuranceInfo: { title: 'Insurance\nInformation', isEnabled: true },
   clinicalInfo: { title: 'Clinical\nInformation', isEnabled: true },
   attestAndSign: { title: 'Attestation\nand Signatures', isEnabled: true }
 };
 
 export const PATIENT_REFERRAL: {
-  prescriberSelected: FieldConfig[];
-  servicesRequested: FieldConfig[];
   patientInformation: {
     newPatient: FieldConfig[];
     existingPatient: FieldConfig[];
+  };
+  prescriberInformation: {
+    prescriberInfo: FieldConfig[];
   };
   insuranceInformation: {
     primaryInsurance: FieldConfig[];
     secondaryInsurance: FieldConfig[];
     noInsurance: FieldConfig[];
   };
-  prescriberInformation: {
-    prescriberInfo: FieldConfig[];
-    imagingLocation: FieldConfig[];
-  };
   clinicalInformation: FieldConfig[];
-  attestation: FieldConfig[];
 } = {
-  prescriberSelected: [
-    {
-      fieldType: 'select',
-      label: 'Select a Prescriber',
-      name: 'prescriberSelected',
-      placeholder: '--Select one--',
-      options: []
-    }
-  ],
-  servicesRequested: [
-    {
-      fieldType: 'radio',
-      name: 'servicesRequested',
-      options: requestedServices,
-      validation: {
-        required: true
-      }
-    }
-  ],
-
   patientInformation: {
     newPatient: groupedIntoOne({
-      left: [
-        {
-          fieldType: 'text',
-          label: 'First Name',
-          name: 'firstName',
-          placeholder: 'Enter your first name',
-          validation: { required: true, pattern: REGEX.character }
-        },
-        {
-          fieldType: 'text',
-          label: 'Last Name',
-          name: 'lastName',
-          placeholder: 'Enter your last name',
-          validation: { required: true, pattern: REGEX.character }
-        },
-        //Date of Birth
-        {
-          fieldType: 'date',
-          label: 'Date of birth',
-          name: 'dateOfBirth',
-          validation: { required: true, maxDate: new Date() }
-        },
-
-        {
-          fieldType: 'text',
-          label: 'Email',
-          name: 'email',
-          placeholder: 'Enter your email',
-          validation: { pattern: REGEX.email }
-        },
-        {
-          fieldType: 'text',
-          label: 'Address',
-          name: 'address',
-          placeholder: 'Enter your address',
-          validation: { required: true }
-        },
-        {
-          fieldType: 'text',
-          label: 'City',
-          name: 'city',
-          placeholder: 'Enter your city',
-          validation: { required: true, pattern: REGEX.character }
-        },
-        {
-          fieldType: 'select',
-          label: 'State',
-          name: 'state',
-          placeholder: 'Select your State',
-          options: stateOptions,
-          validation: { required: true }
-        }
-      ],
-      right: [
-        {
-          fieldType: 'text',
-          label: 'ZIP Code',
-          name: 'zip',
-          placeholder: 'Enter your ZIP code',
-          inputValidation: 'numberOnly',
-          validation: { required: true, pattern: REGEX.zip, maxLength: 5 }
-        },
-        // Preferred Phone
-        {
-          fieldType: 'radio',
-          label: 'Preferred Phone',
-          name: 'prefPhone',
-          options: preferredPhone,
-          validation: { required: true }
-        },
-        {
-          fieldType: 'text',
-          placeholder: 'Enter your Preferred Phone Number',
-          name: 'prefPhoneNumber',
-          options: preferredPhone,
-          inputValidation: 'phone',
-          validation: { required: true, pattern: REGEX.phone }
-        },
-        //Alternate Phone
-        {
-          fieldType: 'radio',
-          label: 'Alternate Phone Number',
-          name: 'altPhone',
-          options: preferredPhone
-        },
-        {
-          fieldType: 'text',
-          placeholder: 'Enter your Alternate Phone Number',
-          name: 'altPhoneNumber',
-          options: preferredPhone,
-          inputValidation: 'phone',
-          validation: { pattern: REGEX.phone }
-        },
-
-        {
-          fieldType: 'radio',
-          label: 'Preferred language',
-          name: 'language',
-          options: preferredLanguage
-        },
-        {
-          fieldType: 'text',
-          label: '',
-          dependsOn: 'language',
-          condition: 'Other',
-          name: 'otherLanguage',
-          placeholder: 'Enter other preferred language',
-          validation: { required: true }
-        },
-        {
-          fieldType: 'radio',
-          label: 'Preferred Contact Method',
-          name: 'contactMethod',
-          options: contactMethod,
-          validation: { required: true }
-        },
-        {
-          fieldType: 'radio',
-          label: 'Best Time to Contact',
-          name: 'contactTime',
-          options: contactTime
-        },
-        {
-          fieldType: 'radio',
-          label: 'Okay to Leave Voicemail',
-          name: 'affirmation',
-          options: affirmation
-        }
-      ]
-    }),
-
-    existingPatient: groupedIntoOne({
-      left: [
-        //Select Name
-        {
-          fieldType: 'select',
-          label: 'Select Name',
-          name: 'selectName',
-          placeholder: 'Select Name',
-          validation: { required: true },
-          options: []
-        },
-        //DOB
-        {
-          fieldType: 'date',
-          label: 'Date of birth',
-          name: 'dateOfBirth',
-          placeholder: ' ',
-          disabled: true,
-          validation: { required: true, maxDate: new Date() }
-        },
-        {
-          fieldType: 'text',
-          label: 'Email',
-          name: 'email',
-          placeholder: 'Enter your email',
-          validation: { pattern: REGEX.email }
-        },
-        {
-          fieldType: 'text',
-          label: 'Address',
-          name: 'address',
-          placeholder: 'Enter your address',
-          validation: { required: true }
-        },
-        {
-          fieldType: 'text',
-          label: 'City',
-          name: 'city',
-          placeholder: 'Enter your city',
-          validation: { required: true, pattern: REGEX.character }
-        },
-        {
-          fieldType: 'select',
-          label: 'State',
-          name: 'state',
-          placeholder: 'Select your State',
-          options: stateOptions,
-          validation: { required: true }
-        }
-      ],
-      right: [
-        // Preferred Phone
-        {
-          fieldType: 'text',
-          label: 'ZIP Code',
-          name: 'zip',
-          placeholder: 'Enter your ZIP code',
-          inputValidation: 'numberOnly',
-          validation: { required: true, pattern: REGEX.zip, maxLength: 5 }
-        },
-        {
-          fieldType: 'radio',
-          label: 'Preferred Phone',
-          name: 'prefPhone',
-          options: preferredPhone,
-          validation: { required: true }
-        },
-        {
-          fieldType: 'text',
-          placeholder: 'Enter your Preferred Phone',
-          name: 'prefPhoneNumber',
-          options: preferredPhone,
-          inputValidation: 'phone',
-          validation: { pattern: REGEX.phone }
-        },
-        {
-          fieldType: 'radio',
-          label: 'Alternate Phone Number',
-          name: 'altPhone',
-          options: preferredPhone
-        },
-        {
-          fieldType: 'text',
-          placeholder: 'Enter your alternate phone number',
-          name: 'altPhoneNumber',
-          options: preferredPhone,
-          inputValidation: 'phone',
-          validation: { pattern: REGEX.phone }
-        },
-        {
-          fieldType: 'radio',
-          label: 'Preferred language ',
-          name: 'language',
-          options: preferredLanguage
-        },
-        {
-          fieldType: 'text',
-          label: '',
-          dependsOn: 'language',
-          condition: 'Other',
-          name: 'otherLanguage',
-          placeholder: 'Enter other preferred language',
-          validation: { required: true }
-        },
-        {
-          fieldType: 'radio',
-          label: 'Preferred Contact Method',
-          name: 'contactMethod',
-          options: contactMethod,
-          validation: { required: true }
-        },
-        {
-          fieldType: 'radio',
-          label: 'Best Time to Contact',
-          name: 'contactTime',
-          options: contactTime
-        },
-        {
-          fieldType: 'radio',
-          label: 'Okay to Leave Voicemail',
-          name: 'affirmation',
-          options: affirmation
-        }
-      ]
-    })
-  },
-
-  insuranceInformation: {
-    primaryInsurance: groupedIntoOne({
-      left: [
-        {
-          fieldType: 'text',
-          label: 'Primary Medical Insurance',
-          name: 'planName',
-          placeholder: 'Enter the primary medical insurance',
-          validation: { required: true }
-        },
-        {
-          fieldType: 'text',
-          label: 'Primary Insurance Phone Number',
-          name: 'phone',
-          placeholder: 'Enter primary insurance phone number',
-          inputValidation: 'phone',
-          validation: {
-            required: true,
-            pattern: REGEX.phone
-          }
-        },
-        {
-          fieldType: 'text',
-          label: 'Plan Type',
-          name: 'planType',
-          placeholder: 'Enter the plan type',
-          validation: { required: true }
-        },
-        {
-          fieldType: 'text',
-          label: 'Group number',
-          name: 'groupNumber',
-          placeholder: 'Enter the group number',
-          validation: { required: true }
-        }
-      ],
-      right: [
-        {
-          fieldType: 'text',
-          label: 'Policy ID/MBI Number',
-          name: 'policyNumber',
-          placeholder: 'Enter the policy ID',
-          inputValidation: 'numberOnly',
-          validation: { required: true, pattern: REGEX.numeric }
-        },
-        {
-          fieldType: 'radio',
-          label: 'Policyholder',
-          name: 'primaryPolicyholder',
-          options: policyHolder,
-          value: 'self'
-        },
-        {
-          fieldType: 'text',
-          label: 'Subscriber’s Name',
-          name: 'subscriberName',
-          dependsOn: 'primaryPolicyholder',
-          condition: 'other',
-          placeholder: 'Enter the subscriber’s name',
-          validation: { required: true }
-        },
-        {
-          fieldType: 'select',
-          label: 'Relationship to Patient',
-          name: 'patientRelation',
-          dependsOn: 'primaryPolicyholder',
-          condition: 'other',
-          options: relationShipToPatient,
-          placeholder: 'Select Relationship',
-          validation: { required: true }
-        },
-        {
-          fieldType: 'text',
-          label: 'Subscriber’s Employer',
-          hint: '(if applicable)',
-          name: 'subscriberEmployer',
-          dependsOn: 'primaryPolicyholder',
-          condition: 'other',
-          placeholder: 'Enter the subscriber’s employer',
-          validation: { required: true }
-        }
-      ]
-    }),
-
-    secondaryInsurance: groupedIntoOne({
-      left: [
-        {
-          fieldType: 'text',
-          label: 'Secondary Medical Insurance',
-          name: 'planName',
-          placeholder: 'Enter the secondary medical insurance',
-          validation: { required: true }
-        },
-        {
-          fieldType: 'text',
-          label: 'Secondary Insurance Phone Number',
-          name: 'phone',
-          placeholder: 'Enter secondary insurance phone number',
-          inputValidation: 'phone',
-          validation: { required: true, pattern: REGEX.phone }
-        },
-        {
-          fieldType: 'text',
-          label: 'Plan Type',
-          name: 'planType',
-          placeholder: 'Enter the plan type',
-          validation: { required: true }
-        },
-        {
-          fieldType: 'text',
-          label: 'Group number',
-          name: 'groupNumber',
-          placeholder: 'Enter the group number',
-          validation: { required: true }
-        }
-      ],
-      right: [
-        {
-          fieldType: 'text',
-          label: 'Policy ID/MBI Number',
-          name: 'policyNumber',
-          placeholder: 'Enter the policy ID',
-          inputValidation: 'numberOnly',
-          validation: { required: true, pattern: REGEX.numeric }
-        },
-        {
-          fieldType: 'radio',
-          label: 'Policyholder',
-          name: 'secondaryPolicyholder',
-          options: policyHolder,
-          value: 'self'
-        },
-        {
-          fieldType: 'text',
-          label: 'Subscriber’s Name',
-          name: 'subscriberName',
-          dependsOn: 'secondaryPolicyholder',
-          condition: 'other',
-          placeholder: 'Enter the subscriber’s name',
-          validation: { required: true }
-        },
-        {
-          fieldType: 'select',
-          label: 'Relationship to Patient',
-          name: 'patientRelation',
-          dependsOn: 'secondaryPolicyholder',
-          condition: 'other',
-          options: relationShipToPatient,
-          placeholder: 'Select Relationship',
-          validation: { required: true }
-        },
-        {
-          fieldType: 'text',
-          label: 'Subscriber’s Employer',
-          hint: '(if applicable)',
-          name: 'subscriberEmployer',
-          dependsOn: 'secondaryPolicyholder',
-          condition: 'other',
-          placeholder: 'Enter the subscriber’s employer',
-          validation: { required: true }
-        }
-      ]
-    }),
-
-    noInsurance: [
-      {
-        fieldType: 'checkbox',
-        label: '',
-        name: 'noInsurance',
-        options: [{ option: 'Patient has no insurance', value: 'noInsurance' }]
-      }
-    ]
-  },
-
-  prescriberInformation: {
-    prescriberInfo: groupedIntoOne({
       left: [
         {
           fieldType: 'text',
@@ -611,36 +127,245 @@ export const PATIENT_REFERRAL: {
           fieldType: 'select',
           label: 'State',
           name: 'state',
-          placeholder: 'Select your State',
+          placeholder: 'Select state',
           options: stateOptions,
           validation: { required: true }
         },
         {
           fieldType: 'text',
-          label: 'ZIP Code',
+          label: 'Zip',
           name: 'zip',
-          placeholder: 'Enter your ZIP code',
+          placeholder: 'Enter Zip',
           inputValidation: 'numberOnly',
           validation: { required: true, pattern: REGEX.zip, maxLength: 5 }
         },
-        // Tax Id Number
         {
-          fieldType: 'text',
-          label: 'Tax ID Number',
-          name: 'taxId',
-          placeholder: 'Enter tax ID number',
-          inputValidation: 'numberOnly',
-          validation: {
-            required: true,
-            pattern: REGEX.taxId,
-            maxLength: 9
-          }
+          fieldType: 'date',
+          label: 'Date of Birth',
+          name: 'dateOfBirth',
+          placeholder: 'MM/DD/YYYY',
+          iconColor: '#0D62FF',
+          validation: { required: true, maxDate: new Date() }
         },
-        // Provider NPI Number
+        {
+          fieldType: 'radio',
+          label: 'Gender',
+          name: 'gender',
+          options: genderOptions
+        },
         {
           fieldType: 'text',
-          label: 'Provider NPI Number',
+          label: 'Patient Weight',
+          name: 'patientWeight',
+          placeholder: 'Enter weight in pounds',
+          inputValidation: 'numberOnly',
+          validation: { required: true, pattern: REGEX.numeric }
+        },
+        {
+          fieldType: 'text',
+          label: 'Email',
+          name: 'email',
+          placeholder: 'Enter email',
+          validation: { required: true, pattern: REGEX.email }
+        }
+      ],
+      right: [
+        {
+          fieldType: 'checkbox',
+          label: 'Please select all ways Y-MABS Connect may contact me:',
+          name: 'contactPreferences',
+          options: contactPreferences,
+          class: 'contact-preferences'
+        },
+        {
+          fieldType: 'text',
+          label: 'Patient’s Authorized Representative Name',
+          name: 'authRepName',
+          placeholder: 'Enter patient’s authorized representative name',
+          validation: { required: true, pattern: REGEX.character }
+        },
+        {
+          fieldType: 'text',
+          label: 'Patient’s Authorized Representative Primary Mobile Phone',
+          name: 'primaryMobile',
+          placeholder: 'Enter patient authorized rep primary mobile phone',
+          inputValidation: 'phone',
+          validation: { required: true, pattern: REGEX.phone }
+        },
+        {
+          fieldType: 'text',
+          label: 'Patient’s Authorized Representative Secondary Mobile Phone',
+          name: 'secondaryMobile',
+          placeholder: 'Enter secondary mobile phone',
+          inputValidation: 'phone',
+          validation: { required: true, pattern: REGEX.phone }
+        },
+        {
+          fieldType: 'select',
+          label: 'Relationship',
+          name: 'relationship',
+          placeholder: 'Select relationship',
+          options: relationShipToPatient
+        },
+        {
+          fieldType: 'radio',
+          label: 'Best Time to Call: Mon-Fri, 9-11 AM Central',
+          name: 'contactTime',
+          options: contactTime,
+          class: 'contact-time'
+        },
+        {
+          fieldType: 'text',
+          label: 'Patient’s Authorized Representative Email',
+          name: 'authRepEmail',
+          placeholder: 'Enter patient’s authorized representative email',
+          validation: { pattern: REGEX.email }
+        }
+      ]
+    }),
+
+    existingPatient: groupedIntoOne({
+      left: [
+        {
+          fieldType: 'select',
+          label: 'Select Name',
+          name: 'selectName',
+          placeholder: 'Select name',
+          validation: { required: true },
+          options: []
+        },
+        {
+          fieldType: 'text',
+          label: 'Address',
+          name: 'address',
+          placeholder: 'Enter address',
+          validation: { required: true }
+        },
+        {
+          fieldType: 'text',
+          label: 'City',
+          name: 'city',
+          placeholder: 'Enter city',
+          validation: { required: true, pattern: REGEX.character }
+        },
+        {
+          fieldType: 'select',
+          label: 'State',
+          name: 'state',
+          placeholder: 'Select state',
+          options: stateOptions,
+          validation: { required: true }
+        },
+        {
+          fieldType: 'text',
+          label: 'Zip',
+          name: 'zip',
+          placeholder: 'Enter Zip',
+          inputValidation: 'numberOnly',
+          validation: { required: true, pattern: REGEX.zip, maxLength: 5 }
+        },
+        {
+          fieldType: 'date',
+          label: 'Date of Birth',
+          name: 'dateOfBirth',
+          placeholder: 'MM/DD/YYYY',
+          disabled: true,
+          validation: { required: true, maxDate: new Date() }
+        },
+        {
+          fieldType: 'radio',
+          label: 'Gender',
+          name: 'gender',
+          options: genderOptions,
+          disabled: true
+        },
+        {
+          fieldType: 'text',
+          label: 'Patient Weight',
+          name: 'patientWeight',
+          placeholder: 'Enter weight in pounds',
+          inputValidation: 'numberOnly',
+          validation: { required: true, pattern: REGEX.numeric }
+        },
+        {
+          fieldType: 'text',
+          label: 'Email',
+          name: 'email',
+          placeholder: 'Enter email',
+          validation: { required: true, pattern: REGEX.email }
+        }
+      ],
+      right: [
+        {
+          fieldType: 'checkbox',
+          label: 'Please select all ways Y-MABS Connect may contact me:',
+          name: 'contactPreferences',
+          options: contactPreferences,
+          class: 'contact-preferences'
+        },
+        {
+          fieldType: 'text',
+          label: 'Patient’s Authorized Representative Name',
+          name: 'authRepName',
+          placeholder: 'Enter patient’s authorized representative name',
+          validation: { required: true, pattern: REGEX.character }
+        },
+        {
+          fieldType: 'text',
+          label: 'Patient’s Authorized Representative Primary Mobile Phone',
+          name: 'primaryMobile',
+          placeholder: 'Enter patient authorized rep primary mobile phone',
+          inputValidation: 'phone',
+          validation: { required: true, pattern: REGEX.phone }
+        },
+        {
+          fieldType: 'text',
+          label: 'Patient’s Authorized Representative Secondary Mobile Phone',
+          name: 'secondaryMobile',
+          placeholder: 'Enter secondary mobile phone',
+          inputValidation: 'phone',
+          validation: { required: true, pattern: REGEX.phone }
+        },
+        {
+          fieldType: 'select',
+          label: 'Relationship',
+          name: 'relationship',
+          placeholder: 'Select relationship',
+          options: relationShipToPatient
+        },
+        {
+          fieldType: 'radio',
+          label: 'Best Time to Call: Mon-Fri, 9-11 AM Central',
+          name: 'contactTime',
+          options: contactTime,
+          class: 'contact-time'
+        },
+        {
+          fieldType: 'text',
+          label: 'Patient’s Authorized Representative Email',
+          name: 'authRepEmail',
+          placeholder: 'Enter patient’s authorized representative email',
+          validation: { pattern: REGEX.email }
+        }
+      ]
+    })
+  },
+
+  prescriberInformation: {
+    prescriberInfo: groupedIntoOne({
+      left: [
+        {
+          fieldType: 'text',
+          label: 'Prescriber Name',
+          name: 'prescriberName',
+          placeholder: 'Enter prescriber name',
+          validation: { required: true }
+        },
+        {
+          fieldType: 'text',
+          label: 'NPI #',
           name: 'npiNumber',
+          placeholder: 'Enter NPI number',
           inputValidation: 'numberOnly',
           validation: {
             required: true,
@@ -648,101 +373,25 @@ export const PATIENT_REFERRAL: {
             minLength: 10,
             maxLength: 10
           }
-        }
-      ],
-      right: [
-        {
-          fieldType: 'text',
-          label: 'Practice Name',
-          name: 'practiceName',
-          placeholder: 'Enter practice name',
-          validation: { pattern: REGEX.character }
         },
         {
           fieldType: 'text',
-          label: 'Practice Phone Number',
-          name: 'phoneNumber',
-          placeholder: 'Enter practice phone number',
-          inputValidation: 'phone',
-          validation: { pattern: REGEX.phone }
+          label: 'Tax ID#',
+          name: 'taxId',
+          placeholder: 'Enter tax ID',
+          inputValidation: 'numberOnly',
+          validation: {
+            required: true,
+            pattern: REGEX.taxId,
+            maxLength: 9
+          }
         },
         {
           fieldType: 'text',
-          label: 'Office Contact Name',
-          name: 'officeName',
-          placeholder: 'Enter office contact name',
-          validation: { pattern: REGEX.character }
-        },
-        {
-          fieldType: 'text',
-          label: 'Office Contact Phone Number',
-          name: 'officePhoneNumber',
-          placeholder: 'Enter office contact phone number ',
-          inputValidation: 'phone',
-          validation: { pattern: REGEX.phone }
-        },
-        {
-          fieldType: 'text',
-          label: 'Office Fax Number',
-          name: 'officeNumber',
-          placeholder: 'Enter office fax number',
-          inputValidation: 'phone',
-          validation: { pattern: REGEX.phone }
-        },
-        {
-          fieldType: 'text',
-          label: 'State License Number',
-          name: 'licenseNumber',
-          placeholder: 'Enter state license number'
-        },
-        {
-          fieldType: 'text',
-          label: 'Medicare PTAN',
-          name: 'prescriberMedicarePtan',
-          placeholder: 'Enter medicare PTAN',
-          hint: '(Provider transaction access number)'
-        },
-        {
-          fieldType: 'text',
-          label: 'Office Email',
-          name: 'officeMail',
-          placeholder: 'Enter office email',
-          validation: { pattern: REGEX.email }
-        },
-        {
-          fieldType: 'radio',
-          label: 'Preferred Contact Method',
-          name: 'contactMethod',
-          options: prefcontactMethod
-        }
-      ]
-    }),
-
-    imagingLocation: groupedIntoOne({
-      left: [
-        //Hospital Centre
-        {
-          fieldType: 'text',
-          label: 'Hospital/Imaging Center Name',
-          name: 'hospitalCenterName',
-          placeholder: 'Enter hospital/imaging center name '
-        },
-        {
-          fieldType: 'radio',
-
-          name: 'hospitalservice',
-          options: hospitalImagingPatient
-        },
-        {
-          fieldType: 'checkbox',
-
-          name: 'orderSentInImaging',
-          options: [
-            {
-              option: 'Please check here if an order has been sent to the imaging location.',
-              value: 'orderSent'
-            }
-          ]
+          label: 'Center/Hospital Name',
+          name: 'centerName',
+          placeholder: 'Enter center/hospital name',
+          validation: { required: true }
         },
         {
           fieldType: 'text',
@@ -761,101 +410,270 @@ export const PATIENT_REFERRAL: {
           fieldType: 'select',
           label: 'State',
           name: 'state',
-          placeholder: 'Select your State',
+          placeholder: 'Select state',
           options: stateOptions
         },
         {
           fieldType: 'text',
-          label: 'ZIP Code',
+          label: 'Zip',
           name: 'zip',
-          placeholder: 'Enter zip code',
+          placeholder: 'Enter Zip',
           inputValidation: 'numberOnly',
           validation: { pattern: REGEX.zip, maxLength: 5 }
         },
         {
           fieldType: 'text',
-          label: 'Office Contact',
-          name: 'officeContact',
-          placeholder: 'Enter office contact'
+          label: 'Prescriber Direct Contact #',
+          name: 'prescriberDirectContact',
+          placeholder: 'Enter prescriber direct contact #',
+          inputValidation: 'phone',
+          validation: { pattern: REGEX.phone }
         },
         {
           fieldType: 'text',
-          label: 'Billing Contact',
-          name: 'billingContact',
-          placeholder: 'Enter billing contact',
-          validation: { pattern: REGEX.character }
+          label: 'Prescriber Email',
+          name: 'prescriberEmail',
+          placeholder: 'Enter prescriber email',
+          validation: { pattern: REGEX.email }
         }
       ],
       right: [
         {
           fieldType: 'text',
-          label: 'Office Contact Phone Number',
-          name: 'officeContactNumber',
-          placeholder: 'Enter office contact phone number',
-          inputValidation: 'phone',
-          validation: { pattern: REGEX.phone }
+          label: 'Primary Office Contact Name',
+          name: 'officeName',
+          placeholder: 'Enter primary office contact name',
+          validation: { required: true }
         },
         {
           fieldType: 'text',
-          label: 'Billing Contact Phone Number',
-          name: 'billingContactNumber',
-          placeholder: 'Enter billing contact phone number',
+          label: 'Primary Office Phone',
+          name: 'officePhoneNumber',
+          placeholder: 'Enter primary office phone',
           inputValidation: 'phone',
-          validation: { pattern: REGEX.phone }
+          validation: { required: true, pattern: REGEX.phone }
         },
         {
           fieldType: 'text',
-          label: 'Office Contact Email',
-          name: 'officeContactEmail',
-          placeholder: 'Enter office contact email',
+          label: 'Primary Office Phone Ext',
+          name: 'officeExt',
+          placeholder: 'Enter primary office ext'
+        },
+        {
+          fieldType: 'text',
+          label: 'Primary Office Email',
+          name: 'officeMail',
+          placeholder: 'Enter primary office email',
           validation: { pattern: REGEX.email }
         },
         {
           fieldType: 'text',
-          label: 'Fax Number',
-          name: 'faxNumber',
-          placeholder: 'Enter fax number',
+          label: 'Primary Office Fax',
+          name: 'officeFax',
+          placeholder: 'Enter primary office fax',
           inputValidation: 'phone',
           validation: { pattern: REGEX.phone }
         },
-        //Anticipated Scan Date
-        {
-          fieldType: 'date',
-          label: 'Anticipated Scan Date',
-          name: 'anticipatedScanDate'
-        },
-        //Tax ID Number
         {
           fieldType: 'text',
-          label: 'Tax ID Number',
-          name: 'taxNumber',
-          placeholder: 'Enter tax ID number',
-          inputValidation: 'numberOnly',
-          validation: { pattern: REGEX.taxId, maxLength: 9 }
+          label: 'Additional Office/Provider Contact Name',
+          name: 'additionalContactName',
+          placeholder: 'Enter office/provider contact name'
         },
         {
           fieldType: 'text',
-          label: 'Imaging Center NPI Number',
-          name: 'centerNpiNumber',
-          placeholder: 'Enter imaging center NPI number',
-          inputValidation: 'numberOnly',
-          validation: { pattern: REGEX.numeric, minLength: 10, maxLength: 10 }
+          label: 'Additional Office/Provider Contact Primary Phone',
+          name: 'additionalContactPhone',
+          placeholder: 'Enter office/provider contact primary phone',
+          inputValidation: 'phone',
+          validation: { pattern: REGEX.phone }
         },
         {
           fieldType: 'text',
-          label: 'Medicare PTAN',
-          name: 'otherMedicarePtan',
-          placeholder: 'Enter medicare PTAN',
-          hint: '(Provider transaction access number)'
+          label: 'Additional Office/Provider Contact Primary Phone Ext',
+          name: 'additionalContactExt',
+          placeholder: 'Enter office/provider contact primary phone ext'
         },
         {
-          fieldType: 'radio',
-          label: 'Preferred Contact Method',
-          name: 'otherContactMethod',
-          options: prefcontactMethod
+          fieldType: 'text',
+          label: 'Additional Office/Provider Contact Primary Email',
+          name: 'additionalContactEmail',
+          placeholder: 'Enter office/provider contact primary email',
+          validation: { pattern: REGEX.email }
         }
       ]
     })
+  },
+
+  insuranceInformation: {
+    primaryInsurance: groupedIntoOne({
+      top: [
+        {
+          fieldType: 'checkbox',
+          label: '',
+          name: 'primaryInsuranceType',
+          options: insurancePlans,
+          validation: { required: true }
+        }
+      ],
+      left: [
+        {
+          fieldType: 'text',
+          label: 'Primary Insurance Name',
+          name: 'primaryInsuranceName',
+          placeholder: 'Enter primary insurance name',
+          validation: { required: true }
+        },
+        {
+          fieldType: 'text',
+          label: 'Plan Name',
+          name: 'primaryPlanName',
+          placeholder: 'Enter plan name',
+          validation: { required: true }
+        },
+        {
+          fieldType: 'text',
+          label: 'Policy Holder Name',
+          name: 'primaryPolicyHolderName',
+          placeholder: 'Enter policy holder name',
+          validation: { required: true }
+        },
+        {
+          fieldType: 'select',
+          label: 'Relationship to Patient',
+          name: 'primaryPatientRelation',
+          options: relationShipToPatientInsurance,
+          placeholder: 'Select relationship',
+          validation: { required: true }
+        },
+        {
+          fieldType: 'text',
+          label: ' ',
+          name: 'primaryOtherRelationship',
+          placeholder: 'Enter Other Relationship',
+          validation: { required: true },
+          dependsOn: 'primaryPatientRelation',
+          condition: 'Other'
+        }
+      ],
+      right: [
+        {
+          fieldType: 'text',
+          label: 'Insurance Phone Number',
+          name: 'primaryInsurancePhone',
+          placeholder: 'Enter insurance phone number',
+          inputValidation: 'phone',
+          validation: {
+            required: true,
+            pattern: REGEX.phone
+          }
+        },
+        {
+          fieldType: 'text',
+          label: 'Member ID',
+          name: 'primaryMemberId',
+          placeholder: 'Enter member ID',
+          validation: { required: true }
+        },
+        {
+          fieldType: 'date',
+          label: 'Policy Holder Date of Birth',
+          name: 'primaryPolicyHolderDOB',
+          placeholder: 'MM/DD/YYYY',
+          iconColor: '#0D62FF',
+          validation: { required: true, maxDate: new Date() }
+        }
+      ]
+    }),
+
+    secondaryInsurance: groupedIntoOne({
+      top: [
+        {
+          fieldType: 'checkbox',
+          label: '',
+          name: 'secondaryInsuranceType',
+          options: insurancePlans,
+          validation: { required: true }
+        }
+      ],
+      left: [
+        {
+          fieldType: 'text',
+          label: 'Secondary Insurance Name',
+          name: 'secondaryInsuranceName',
+          placeholder: 'Enter secondary insurance name',
+          validation: { required: true }
+        },
+        {
+          fieldType: 'text',
+          label: 'Plan Name',
+          name: 'secondaryPlanName',
+          placeholder: 'Enter plan name',
+          validation: { required: true }
+        },
+        {
+          fieldType: 'text',
+          label: 'Policy Holder Name',
+          name: 'secondaryPolicyHolderName',
+          placeholder: 'Enter policy holder name',
+          validation: { required: true }
+        },
+        {
+          fieldType: 'select',
+          label: 'Relationship to Patient',
+          name: 'secondaryPatientRelation',
+          options: relationShipToPatientInsurance,
+          placeholder: 'Select relationship',
+          validation: { required: true }
+        },
+        {
+          fieldType: 'text',
+          label: ' ',
+          name: 'secondaryOtherRelationship',
+          placeholder: 'Enter Other Relationship',
+          validation: { required: true },
+          dependsOn: 'secondaryPatientRelation',
+          condition: 'Other'
+        }
+      ],
+      right: [
+        {
+          fieldType: 'text',
+          label: 'Insurance Phone Number',
+          name: 'secondaryInsurancePhone',
+          placeholder: 'Enter insurance phone number',
+          inputValidation: 'phone',
+          validation: {
+            required: true,
+            pattern: REGEX.phone
+          }
+        },
+        {
+          fieldType: 'text',
+          label: 'Member ID',
+          name: 'secondaryMemberId',
+          placeholder: 'Enter member ID',
+          validation: { required: true }
+        },
+        {
+          fieldType: 'date',
+          label: 'Policy Holder Date of Birth',
+          name: 'secondaryPolicyHolderDOB',
+          placeholder: 'MM/DD/YYYY',
+          iconColor: '#0D62FF',
+          validation: { required: true, maxDate: new Date() }
+        }
+      ]
+    }),
+
+    noInsurance: [
+      {
+        fieldType: 'checkbox',
+        label: '',
+        name: 'noInsurance',
+        options: [{ option: 'Patient has no insurance', value: 'noInsurance' }]
+      }
+    ]
   },
 
   clinicalInformation: groupedIntoOne({
@@ -902,9 +720,7 @@ export const PATIENT_REFERRAL: {
         validation: { required: true }
       }
     ]
-  }),
-
-  attestation: []
+  })
 };
 
 export const POPUP_CONTENT: EnrollmentPopups = {
@@ -944,7 +760,6 @@ export const POPUP_CONTENT: EnrollmentPopups = {
 
 export const EXIT_CONFIRMATION = `Are you sure you want to exit the patient enrollment process? <br/> All enrollment progress will be lost.`;
 export const E_SIGN_CONFIRMATION = `You are about to finalize the enrollment form and <br> proceed to e-sign the enrollment form.<br> You will not be able to edit the information once  <br> you proceed.`;
-export const INSURANCE_CONFIRMATION = `Are you sure attachment includes required info? <br /> <ul class="m-0 mt-3 left-list"> <li>Medical Insurance Company</li> <li>Phone Number</li> <li>Plan Type</li> <li>Group Number</li> <li>Policy ID/MBI Number</li></ul>`;
 
 export const VIEW_DOWNLOAD = {
   title: `You 're almost done!`,

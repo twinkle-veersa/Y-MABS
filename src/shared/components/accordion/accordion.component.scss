@@ -81,10 +81,6 @@
 }
 
 :host ::ng-deep .accordion-table {
-  thead th {
-    background-color: var.$white !important;
-  }
-
   tfoot td {
     padding: 3rem !important;
     font-size: 1rem;

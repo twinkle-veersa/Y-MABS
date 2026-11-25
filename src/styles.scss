@@ -79,6 +79,18 @@ body {
         flex-basis: 100%;
         margin-top: -0.5rem;
       }
+
+      &.contact-time {
+        display: grid;
+        grid-template-columns: repeat(2, 0fr);
+        gap: 15px;
+      }
+
+      &.contact-preferences {
+        display: grid;
+        grid-template-columns: repeat(3, 0fr);
+        gap: 15px;
+      }
     }
   }
 
@@ -188,7 +200,7 @@ button:not(.toolbarButton, .p-button, .p-ripple) {
 input[type='checkbox'],
 input[type='radio'] {
   cursor: pointer;
-  accent-color: var.$dark;
+  accent-color: #6287ae;
   margin: 0;
   margin-right: 0.25rem;
 }

@@ -2,10 +2,11 @@
 @use 'mixins' as mix;
 
 :host {
-  border: 0.125rem solid var.$medium-grey;
+  border: 1px solid #c3c3c3;
   display: block;
   border-radius: var.$container-radius;
-  overflow: auto;
+  overflow: hidden;
+  background-color: var.$white;
 }
 
 table {
@@ -20,26 +21,31 @@ thead {
   position: sticky;
   top: 0;
 }
+
 .table-container {
   overflow-y: auto;
   @include mix.scrollbars(0.3rem, var.$primary-color);
 }
+
 th {
-  background-color: #f4f3f3;
-  border-bottom: 1px solid #e9e9e9;
+  background-color: #e9f2fe;
+  border-bottom: 1px solid var.$table-row-border;
 
   .wrap {
     @include mix.flexCentered(flex-start, center);
     white-space: nowrap;
+
     .column-head {
       font-weight: 500;
       font-size: 1rem;
-      color: #56518e;
+      color: #10131a;
       cursor: pointer;
     }
+
     .sort-icon {
       font-size: 0.75rem;
       transform: rotate(90deg);
+
       app-icon {
         cursor: pointer;
       }
@@ -60,8 +66,9 @@ th {
 
 th,
 td {
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   text-align: left;
+  color: #181818;
 
   &.selection-column {
     width: 2rem;
@@ -70,17 +77,23 @@ td {
 
 tbody {
   tr {
+    td {
+      color: var.$font-color;
+    }
+
     &:nth-child(odd) {
       background-color: #f7fcfe;
-      td {
-        border-bottom: 0.4px solid #c6ddf3;
+
+      &:not(:last-child) td {
+        border-bottom: 1px solid #c6ddf3;
       }
     }
 
     &:nth-child(even) {
       background-color: var.$white;
-      td {
-        border-bottom: 0.4px solid #c3c3c3;
+
+      &:not(:last-child) td {
+        border-bottom: 1px solid var.$table-row-border;
       }
     }
 
@@ -109,9 +122,9 @@ tbody {
 }
 
 .pagination {
-  background-color: var.$panel-color;
+  background-color: #e9f2fe;
   @include mix.flexCentered;
-  padding: 0.25rem;
+  padding: 0.35rem;
   gap: 0.5rem;
 
   app-icon {
@@ -120,9 +133,13 @@ tbody {
   }
 
   .page {
-    background-color: var.$primary-color;
-    padding: 0.5rem 1rem;
+    background-color: #7bafe2;
+    padding: 0.4rem 0.75rem;
+    min-width: 2rem;
+    text-align: center;
+    border-radius: 0.25rem;
     color: var.$white;
+    font-weight: 600;
   }
 
   select {
@@ -135,7 +152,7 @@ tbody {
 
 .row-action {
   @include mix.flexCentered(flex-start);
-  gap: 1rem;
+  gap: 0.5rem;
 
   button {
     font-size: 0.8rem;
@@ -143,13 +160,15 @@ tbody {
     padding: 0.35rem 0.9rem;
     border: none;
     border-radius: 0.35rem;
+    background-color: var.$table-action-bg;
+    border-color: var.$table-action-bg;
     color: #fff;
     cursor: pointer;
 
     &:first-child,
     &.outline {
-      background-color: #6a8caf;
-      border-color: #6a8caf;
+      background-color: var.$table-action-bg;
+      border-color: var.$table-action-bg;
       color: #fff;
     }
 
@@ -158,6 +177,112 @@ tbody {
       background-color: #acbfc9;
       border-color: #acbfc9;
       color: #fff;
+    }
+  }
+}
+
+:host(.enrollment-facility-table) {
+  tbody tr.selected {
+    background-color: #472875;
+
+    td {
+      color: var.$white;
+    }
+  }
+}
+
+// Register / accordion: preserve prior flat white-header look
+:host(.accordion-table) {
+  border: 0;
+  border-radius: 0;
+
+  th {
+    background-color: var.$white;
+
+    .wrap .column-head {
+      color: #56518e;
+    }
+  }
+
+  tbody tr {
+    &:nth-child(odd) {
+      background-color: #f7fcfe;
+
+      &:not(:last-child) td {
+        border-bottom: 0.4px solid #c6ddf3;
+      }
+    }
+
+    &:nth-child(even) {
+      background-color: var.$white;
+
+      &:not(:last-child) td {
+        border-bottom: 0.4px solid #c3c3c3;
+      }
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  .row-action {
+    gap: 1rem;
+
+    button {
+      &:first-child,
+      &.outline {
+        background-color: #6a8caf;
+        border-color: #6a8caf;
+      }
+    }
+  }
+}
+
+:host(.table-wrap) {
+  border: 1px solid #d9e2ef;
+  border-radius: 0.5rem;
+  background: var.$white;
+
+  th {
+    background-color: var.$white;
+
+    .wrap .column-head {
+      color: #56518e;
+    }
+  }
+
+  tbody tr {
+    &:nth-child(odd) {
+      background-color: #f7fcfe;
+
+      &:not(:last-child) td {
+        border-bottom: 0.4px solid #c6ddf3;
+      }
+    }
+
+    &:nth-child(even) {
+      background-color: var.$white;
+
+      &:not(:last-child) td {
+        border-bottom: 0.4px solid #c3c3c3;
+      }
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  .row-action {
+    gap: 1rem;
+
+    button {
+      &:first-child,
+      &.outline {
+        background-color: #6a8caf;
+        border-color: #6a8caf;
+      }
     }
   }
 }

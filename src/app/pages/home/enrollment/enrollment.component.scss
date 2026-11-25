@@ -24,6 +24,11 @@ input[type='checkbox'] {
   font-weight: 400;
 }
 
+.table-container {
+  padding: 1rem;
+  background: #fafafa;
+}
+
 a {
   cursor: pointer;
   color: var.$primary-color;
@@ -41,25 +46,24 @@ a {
 
 .enrollment-header {
   @include mix.flexCentered(left);
-  background-color: var.$light-grey;
-  padding: 0.5rem 1.5rem;
+  background-color: #ffffff;
+  padding: 0.75rem 1.5rem;
   gap: 1rem;
 
   .prescriber {
     @include mix.flexCentered(space-between);
+    align-items: center;
 
-    div {
-      @include mix.flexCentered;
-      gap: 1rem;
+    > h2 {
+      margin: 0;
+      font-weight: 700;
+      color: var.$dark-grey;
     }
 
-    .wrap {
-      @include mix.flexCentered;
-      background-color: white;
-      border: var.$field-border;
-      border-radius: 0.3rem;
-      padding: 0 1rem;
-      gap: 1rem;
+    > div {
+      @include mix.flexCentered(flex-end, center);
+      gap: 0.75rem;
+      flex-shrink: 0;
     }
   }
 
@@ -74,26 +78,17 @@ a {
     }
   }
 
-  .select-prescriber {
-    color: var.$primary-color;
-    align-items: center;
-    padding-block: 1rem;
-    display: flex;
-    width: 100%;
-    gap: 1rem;
-    margin: 0;
-  }
-
   .stepper {
     @include mix.flexCentered();
     width: 80%;
+    border-left: 1px solid #d1d1d1;
   }
 
   .name {
-    font-size: 1.625rem;
-    font-weight: 500;
+    font-size: 1.25rem;
+    font-weight: 600;
     white-space: nowrap;
-    color: var.$primary-color;
+    color: #0e075d;
   }
 }
 
@@ -103,32 +98,35 @@ a {
   gap: 2rem;
 }
 
+.step-intro {
+  @include mix.flexCentered(flex-start, center);
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
 .toggle-button {
   border-radius: 0.3rem;
   overflow: hidden;
-  border: 0.15rem solid var.$dark;
-  position: absolute;
-  left: 50%;
-  -webkit-transform: translateX(-50%);
-  transform: translateX(-50%);
+  border: 0.15rem solid #472875;
+  flex-shrink: 0;
 
   .option {
     border-radius: 0;
     border: none;
     background: white;
-    color: black;
+    color: #000;
     cursor: pointer;
     transition: all 0.3s;
     font-size: 0.75rem;
     padding: 0.5rem 1.5rem;
     width: 10rem;
 
-    &:hover {
+    &:hover:not(.active) {
       background: #f2f2f2;
     }
 
     &.active {
-      background: var.$dark;
+      background: #472875;
       color: white;
     }
   }
@@ -144,23 +142,28 @@ a {
 }
 
 .insurance-toggle {
-  max-width: 50%;
+  max-width: 60%;
 
   h2 {
-    color: var.$dark;
-    font-weight: 500;
+    color: #472875;
+    font-weight: 700;
     margin: 0;
   }
 
   p {
     font-size: 1.125rem;
-    margin-block: 0.5rem;
+    margin-block: 0.75rem;
   }
 
   .toggle {
     @include mix.flexCentered(space-between, center);
     gap: 2rem;
   }
+}
+
+.insurance-type-row {
+  width: 100%;
+  margin-bottom: 1rem;
 }
 
 .radio {
@@ -174,33 +177,23 @@ a {
   min-height: 25rem;
 }
 
-.imaging {
-  margin-top: 1rem;
-}
-
-.info-box {
-  background-color: rgba(var.$light, 0.25);
-  border-radius: var.$container-radius;
-  border: 1px solid #adadad;
-  padding: 1rem;
-  line-height: 1.5rem;
-
-  ul {
-    margin: 0;
-  }
-}
-
 .title {
   padding: 1rem;
+  background: #fafafa;
+  border-radius: 0.5rem 0.5rem 0 0;
 
-  h2,
   h4 {
-    margin: 0;
+    color: #1b1b1b;
+    font-size: 1rem;
     font-weight: 500;
+    margin: 0;
   }
 
   h2 {
-    color: var.$dark;
+    color: #10131a;
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin: 1rem 0;
   }
 }
 
@@ -265,7 +258,7 @@ app-file-upload {
       }
     }
 
-    img {
+    app-icon {
       display: none;
     }
   }
@@ -282,11 +275,15 @@ app-file-upload {
     }
   }
 
+  .step-intro {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .toggle-button {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    width: 80%;
-    top: 0;
+    width: 100%;
 
     .option {
       width: auto;

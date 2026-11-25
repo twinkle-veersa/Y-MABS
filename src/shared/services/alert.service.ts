@@ -40,7 +40,7 @@ export class AlertService {
 
   private cleanup(componentRef: ComponentRef<AlertPopUpComponent>, el: HTMLElement): void {
     this.appRef.detachView(componentRef.hostView);
-    document.body.removeChild(el);
+    el.remove();
     componentRef.destroy();
   }
 }

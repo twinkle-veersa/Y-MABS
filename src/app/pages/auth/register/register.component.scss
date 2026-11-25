@@ -60,16 +60,3 @@ app-accordion {
 .step2 {
   border-left: 1px solid var.$border-color;
 }
-
-:host ::ng-deep {
-  .accordion-table {
-    border: 0 !important;
-    border-radius: 0 !important;
-  }
-
-  app-table.table-wrap {
-    th {
-      background-color: #ffffff !important;
-    }
-  }
-}

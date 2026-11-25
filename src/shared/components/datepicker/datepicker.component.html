@@ -8,8 +8,8 @@
       [class.ng-dirty]="control.touched"
       [minDate]="f.validation?.minDate ?? defaultMinDate"
       [maxDate]="f.validation?.maxDate ?? null"
-      placeholder="mm/dd/yyyy" />
-    <app-icon icon="calendar" />
+      [placeholder]="f.placeholder || 'mm/dd/yyyy'" />
+    <app-icon icon="calendar" [color]="f.iconColor || 'currentColor'" />
     @if (control.touched && control.invalid) {
       <app-error-msg [control]="control" [label]="f.label" />
     }

@@ -3,8 +3,8 @@
 
 .upload-file-table {
   width: 100%;
-  border: 1px solid var.$border-color;
-  border-radius: 0.63rem;
+  border: 1px solid #eaeaea;
+  border-radius: 0.5rem;
 
   .styled-table {
     width: 100%;
@@ -15,14 +15,14 @@
     overflow: hidden;
 
     thead {
-      background-color: white;
-      border-bottom: 0.125rem solid var.$border-color;
+      background-color: #e9f2fe;
 
       th {
         text-align: left;
         padding: 0.5rem;
-        color: var.$dark-green;
+        color: #472875;
         font-weight: bold;
+        border-bottom: 2px solid #eaeaea;
       }
     }
 
@@ -31,14 +31,13 @@
       font-weight: 400;
 
       tr {
-        background-color: var.$table-row-bg;
         .text-truncate {
           max-width: 15rem;
         }
 
         &:not(:last-child) {
           td {
-            border-bottom: 1px solid white;
+            border-bottom: 1px solid #eaeaea;
             padding-inline: 0.5rem;
           }
         }
@@ -54,9 +53,10 @@
 
 .delete-btn {
   min-width: 0;
+  padding: 0;
   background: none;
   border: none;
-  img {
-    vertical-align: middle;
-  }
+  color: #e72020;
+  cursor: pointer;
+  vertical-align: middle;
 }

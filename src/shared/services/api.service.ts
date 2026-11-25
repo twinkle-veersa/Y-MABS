@@ -20,7 +20,7 @@ export class ApiService {
   private http = inject(HttpClient);
   private toast = inject(ToastrService);
   private baseUrl = environment.portalUrl;
-  readonly secret = environment.secretKey;
+  readonly encryptedKey = environment.encryptionKey;
   public isRefreshTokenLoading = signal(false);
   isLoggedIn = computed(() => Boolean(this.token()));
   token = signal<string | null>(this.getDecryptedValue('token'));
@@ -52,8 +52,11 @@ export class ApiService {
     this.router.navigate([`/${navigateTo}`]);
   }
   saveTokens(token = this.token()!, refreshToken = this.refreshToken()!) {
-    sessionStorage.setItem('token', CryptoJS.AES.encrypt(token, this.secret).toString());
-    sessionStorage.setItem('rtoken', CryptoJS.AES.encrypt(refreshToken, this.secret).toString());
+    sessionStorage.setItem('token', CryptoJS.AES.encrypt(token, this.encryptedKey).toString());
+    sessionStorage.setItem(
+      'rtoken',
+      CryptoJS.AES.encrypt(refreshToken, this.encryptedKey).toString()
+    );
   }
   logout() {
     this.http
@@ -99,11 +102,11 @@ export class ApiService {
             this.refreshToken.set(RefreshToken);
             sessionStorage.setItem(
               'token',
-              CryptoJS.AES.encrypt(AccessToken, this.secret).toString()
+              CryptoJS.AES.encrypt(AccessToken, this.encryptedKey).toString()
             );
             sessionStorage.setItem(
               'rtoken',
-              CryptoJS.AES.encrypt(RefreshToken, this.secret).toString()
+              CryptoJS.AES.encrypt(RefreshToken, this.encryptedKey).toString()
             );
             this.isRefreshTokenLoading.set(false);
             this.getNewToken();
@@ -141,7 +144,7 @@ export class ApiService {
   }
 
   getSignedDocument(caseId: string): Observable<Blob> {
-    const docType = encodeURIComponent('RF - Lantheus Link Referral Form');
+    const docType = encodeURIComponent('RF - Referral Form - YmAbs Connect');
 
     return this.http.get(
       `https://ext-api.pharmacord.com/portalqa/api/v1.0/documents/signed/content/${caseId}?docType=${docType}`,
@@ -151,7 +154,9 @@ export class ApiService {
 
   getDecryptedValue(key: string) {
     return sessionStorage.getItem(key)
-      ? CryptoJS.AES.decrypt(sessionStorage.getItem(key)!, this.secret).toString(CryptoJS.enc.Utf8)
+      ? CryptoJS.AES.decrypt(sessionStorage.getItem(key)!, this.encryptedKey).toString(
+          CryptoJS.enc.Utf8
+        )
       : null;
   }
 

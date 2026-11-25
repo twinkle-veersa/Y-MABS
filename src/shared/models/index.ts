@@ -38,6 +38,7 @@ export interface FieldConfig {
   condition?: string;
   marginTop?: string;
   marginBottom?: string;
+  iconColor?: string;
 }
 
 export interface FieldValidations {

@@ -1,10 +1,8 @@
 <div class="header">
   <div class="header-left">
     <div class="trademark">
-      <span>PYLARIFY</span>
-      <span class="tm">TM</span>
+      <span>Y-mABs Connect</span>
     </div>
-    <span>{{ today | date: 'MMM d, y' }}</span>
   </div>
   <div class="actions">
     @if (hasUpload()) {
@@ -21,7 +19,6 @@
         class="submit-enrollment"
         [routerLink]="['/home/enrollment']"
         [disabled]="!hasEnrollment()">
-        <img src="submit-enrollment.png" alt="doctor-icon" width="24" />
         <span class="mobile-none">Submit Enrollment Form</span>
       </button>
       <span class="enroll">Enroll</span>

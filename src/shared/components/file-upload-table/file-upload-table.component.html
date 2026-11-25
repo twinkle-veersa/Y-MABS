@@ -11,8 +11,12 @@
         <tr>
           <td class="text-truncate">{{ file.name }}</td>
           <td>
-            <button class="delete-btn" (click)="removeFile(i)">
-              <img src="delete-icon.png" alt="delete-icon" />
+            <button
+              class="delete-btn"
+              type="button"
+              (click)="removeFile(i)"
+              aria-label="Delete file">
+              <app-icon icon="delete" />
             </button>
           </td>
         </tr>

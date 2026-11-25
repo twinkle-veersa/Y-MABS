@@ -13,14 +13,14 @@ $toggle-color: var.$border-color;
   width: 3.75rem;
   height: 2rem;
   border-radius: 1.5rem;
-  border: 0.125rem solid $toggle-color;
+  border: 0.125rem solid #dadada;
   overflow: hidden;
   &.disabled {
-    border-color: var.$disabled;
+    border-color: #dadada;
     .slider {
       cursor: not-allowed;
       .knob {
-        background-color: var.$disabled;
+        background-color: #dadada;
       }
     }
   }
@@ -43,7 +43,7 @@ $toggle-color: var.$border-color;
   .knob {
     width: 1.5rem;
     height: 1.5rem;
-    background-color: $toggle-color;
+    background-color: #dadada;
     border-radius: 50%;
   }
 }
@@ -52,10 +52,10 @@ input[type='checkbox']:checked + .slider {
   transform: translateX(1.65rem);
 
   .knob {
-    background-color: var.$dark;
+    background-color: #472875;
   }
 }
 
 .toggle-switch:has(> input[type='checkbox']:checked) {
-  border-color: var.$dark;
+  border-color: #472875;
 }

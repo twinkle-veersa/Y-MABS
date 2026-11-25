@@ -12,12 +12,9 @@ import {
 import {
   ENROLLMENT_STEPS,
   PATIENT_REFERRAL,
-  Tab,
-  TABS,
   POPUP_CONTENT,
   EXIT_CONFIRMATION,
   E_SIGN_CONFIRMATION,
-  INSURANCE_CONFIRMATION,
   VIEW_DOWNLOAD
 } from '@constants/submit-patient-referral';
 import { HeaderWrapComponent } from '@shared/layouts/header-wrap/header-wrap.component';
@@ -31,26 +28,17 @@ import { UtilityService } from '@shared/services/utility.service';
 import { IconComponent } from '@shared/components/icon/icon.component';
 import { KeyValuePipe, NgTemplateOutlet } from '@angular/common';
 import { Router } from '@angular/router';
-import { RequiredComponent } from '@shared/components/required.component';
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidatorFn,
-  Validators
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PopupComponent } from '@shared/components/popup/popup.component';
 import { FileUploadComponent } from '@shared/components/file-upload/file-upload.component';
 import {
   AttachFile,
   FileUploadTableComponent
 } from '@shared/components/file-upload-table/file-upload-table.component';
-import { SeperatorComponent } from '@shared/components/seperator/seperator.component';
 import { RadioComponent } from '@shared/components/radio/radio.component';
 import { FieldConfig } from '@shared/models';
 import { ApiService } from '@shared/services/api.service';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { of } from 'rxjs';
 import { AddressPipe } from '@shared/utils/address.pipe';
 import { PhonePipe } from '@shared/utils/phone.pipe';
 import { InputComponent } from '@shared/components/input/input.component';
@@ -61,12 +49,12 @@ import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { FullpageAlertsComponent } from '@shared/layouts/fullpage-alerts/fullpage-alerts.component';
 import { convertToBase64 } from '@shared/utils/utility.functions';
 import { REGEX } from '@constants/regex';
-import { Address } from 'app/pages/auth/register/register.component';
 import { DataService } from '@shared/services/data.service';
 import { CaseDetail, PatientDetails } from '../patients/case-details.model';
 import { environment } from 'environments/environment';
 import { PdfViewerComponent } from '@shared/components/pdf-viewer.component';
 import { AlertService } from '@shared/services/alert.service';
+import { RequiredComponent } from '@shared/components/required.component';
 
 @Component({
   selector: 'app-enrollment',
@@ -80,18 +68,17 @@ import { AlertService } from '@shared/services/alert.service';
     TableComponent,
     SelectComponent,
     NgTemplateOutlet,
-    RequiredComponent,
     ReactiveFormsModule,
     PopupComponent,
     FileUploadComponent,
     FileUploadTableComponent,
     KeyValuePipe,
-    SeperatorComponent,
     RadioComponent,
     InputComponent,
     NgxExtendedPdfViewerModule,
     FullpageAlertsComponent,
-    PdfViewerComponent
+    PdfViewerComponent,
+    RequiredComponent
   ],
   providers: [AddressPipe, PhonePipe],
   templateUrl: './enrollment.component.html',
@@ -102,21 +89,26 @@ import { AlertService } from '@shared/services/alert.service';
 export class EnrollmentComponent implements OnInit, OnDestroy {
   hasUnsavedChanges = signal(false);
   forms = PATIENT_REFERRAL;
-  readonly tabs = TABS;
   readonly popups = POPUP_CONTENT;
   readonly download = VIEW_DOWNLOAD;
-  activeTab: Tab = this.tabs[0];
   currentStep = signal(0);
+  stepHeading = computed(() => {
+    const headings: Record<number, string> = {
+      1: 'Patient Information',
+      2: 'Prescriber Information',
+      3: 'Insurance Information',
+      4: 'Clinical Information',
+      5: 'Attestation and Signatures'
+    };
+    return headings[this.currentStep()] ?? '';
+  });
   private api = inject(ApiService);
   util = inject(UtilityService);
   data = inject(DataService);
   alert = inject(AlertService);
   private router = inject(Router);
   groups = this.util.generateForm(this.forms);
-  currentTab = this.currentStep();
-  selectedFacility: unknown;
-  primary = 'primary';
-  secondary = 'secondary';
+  selectedFacility: EnrollmentFacility | undefined;
   isPrimaryInsuranceVisible = signal(false);
   isSecondaryInsuranceVisible = signal(false);
   disableInsuranceToggle = signal(false);
@@ -154,26 +146,28 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
     const formGroup = this.groups.patientInformation.existingPatient;
     this.patientSignatureName.setValue(`${patientDetails.FirstName} ${patientDetails.LastName}`);
 
+    const addressLine = [patientDetails.Address?.Line1, patientDetails.Address?.Line2]
+      .map(part => part?.trim())
+      .filter(Boolean)
+      .join(', ');
+
     formGroup.patchValue({
       dateOfBirth: patientDetails.DateOfBirth ? new Date(patientDetails.DateOfBirth) : null,
       email: patientDetails.Email,
-      address: patientDetails.Address.Line1,
+      address: addressLine,
       city: patientDetails.Address.City,
       state: patientDetails.Address.State,
       zip: patientDetails.Address.PostalCode,
-      prefPhone: patientDetails.MobilePhone ? 'Mobile' : 'Home',
-      prefPhoneNumber: formatPhone(patientDetails.MobilePhone || patientDetails.Phone || '') || null
+      primaryMobile: formatPhone(patientDetails.MobilePhone || patientDetails.Phone || '') || null
     });
 
-    // Handle gender radio button safely
-    if (patientDetails.Gender) {
-      const genderValue =
-        patientDetails.Gender === 'Female'
-          ? 'F'
-          : patientDetails.Gender === 'Not Asked'
-            ? 'U'
-            : 'M';
-      formGroup.get('gender')?.setValue(genderValue);
+    const genderControl = formGroup.get('gender');
+    if (patientDetails.Gender === 'Male' || patientDetails.Gender === 'Female') {
+      genderControl?.setValue(patientDetails.Gender);
+      genderControl?.disable({ emitEvent: false });
+    } else {
+      genderControl?.reset();
+      genderControl?.enable({ emitEvent: false });
     }
   }
 
@@ -315,93 +309,74 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
   togglePrimary(): void {
     this.selectedFilesPrimary.set([]);
     this.isPrimaryInsuranceVisible.update(visible => !visible);
-    this.groups.insuranceInformation.primaryInsurance.reset();
-    this.updateInsuraceValidations(this.groups.insuranceInformation.primaryInsurance, [
-      Validators.required
-    ]);
+    this.resetInsuranceForm(
+      this.groups.insuranceInformation.primaryInsurance,
+      this.forms.insuranceInformation.primaryInsurance
+    );
   }
 
   toggleSecondary(): void {
     this.selectedFilesSecondary.set([]);
     this.isSecondaryInsuranceVisible.update(visible => !visible);
-    this.groups.insuranceInformation.secondaryInsurance.reset();
-    this.updateInsuraceValidations(this.groups.insuranceInformation.secondaryInsurance, [
-      Validators.required
-    ]);
+    this.resetInsuranceForm(
+      this.groups.insuranceInformation.secondaryInsurance,
+      this.forms.insuranceInformation.secondaryInsurance
+    );
   }
+
   selectedFilesPrimary = signal<AttachFile[]>([]);
   selectedFilesSecondary = signal<AttachFile[]>([]);
   attachPOAFile = signal<AttachFile[]>([]);
 
-  async handleFiles(files: File[], saveTo: WritableSignal<AttachFile[]>, group?: FormGroup) {
+  async handleFiles(files: File[], saveTo: WritableSignal<AttachFile[]>, isPoa = false) {
     if (files.length) {
       this.api.isLoading.set(true);
-      this.existingPOAFiles.set(files);
+      if (isPoa) {
+        this.existingPOAFiles.set(files);
+      }
 
       files.forEach(async f => {
         const base64 = await convertToBase64(f);
         saveTo.update(x => [...x, { name: f.name, base64 }]);
         this.api.isLoading.set(false);
       });
-      if (group) {
-        this.alert.confirm(INSURANCE_CONFIRMATION).then(confirmed => {
-          if (confirmed) this.updateInsuraceValidations(group, []);
-        });
-      }
     } else {
       saveTo.set([]);
     }
   }
 
-  updateInsuraceValidations(group: FormGroup, validation: ValidatorFn[]) {
-    const val = group.value as Record<string, string>;
-    Object.keys(group.controls).forEach(c => {
-      const control = group.get(c);
-      if (!control) return;
-      if (c === 'primaryPolicyholder' || c === 'secondaryPolicyholder') {
-        control.clearValidators();
-        const conditionalFields = this.forms.insuranceInformation[
-          c === `primaryPolicyholder` ? `primaryInsurance` : `secondaryInsurance`
-        ].filter(x => x.dependsOn);
-        conditionalFields.forEach(
-          x => (x.validation = validation.length ? { required: true } : undefined)
-        );
-      } else {
-        control.setValidators(validation);
-        if (c === 'phone') control.addValidators(Validators.pattern(REGEX.phone));
-        control.reset();
-        control.updateValueAndValidity();
-      }
-      control.updateValueAndValidity();
-    });
-    group.patchValue(val);
-  }
-
-  deleteFile(i: number, from: WritableSignal<AttachFile[]>, group?: FormGroup) {
+  deleteFile(i: number, from: WritableSignal<AttachFile[]>) {
     this.alert.confirm(`Are you sure you want to delete this file?`).then(confirmed => {
       if (confirmed) {
-        const updated = from().filter((_, index) => index !== i);
-        from.set(updated);
-        if (group && from().length === 0)
-          this.updateInsuraceValidations(group, [Validators.required]);
+        from.set(from().filter((_, index) => index !== i));
       }
+    });
+  }
+
+  private resetInsuranceForm(group: FormGroup, fields: FieldConfig[]) {
+    group.reset();
+    fields.forEach(field => {
+      const control = group.get(field.name);
+      if (!control) return;
+      if (field.dependsOn) {
+        control.clearValidators();
+      } else {
+        control.setValidators(this.util.bindValidations(field.validation));
+      }
+      control.updateValueAndValidity({ emitEvent: false });
     });
   }
 
   get isValid() {
     if (this.currentStep() === 0) {
-      // Facility
       return Boolean(this.selectedFacility);
     } else if (this.currentStep() === 1) {
-      // Requested Services
-      return this.groups.servicesRequested.valid;
-    } else if (this.currentStep() === 2) {
-      // Patient Information
       return this.pageValue() === 'newPatient'
         ? this.groups.patientInformation.newPatient.valid
         : this.groups.patientInformation.existingPatient.valid;
+    } else if (this.currentStep() === 2) {
+      return this.groups.prescriberInformation.prescriberInfo.valid;
     } else if (this.currentStep() === 3) {
-      //insurance Information
       const hasNoInsurance = (
         this.groups.insuranceInformation.noInsurance.get('noInsurance')?.value as string[]
       )?.length;
@@ -416,16 +391,8 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
             : true))
       );
     } else if (this.currentStep() === 4) {
-      // Prescriber Information
-      return (
-        this.groups.prescriberInformation.prescriberInfo.valid &&
-        this.groups.prescriberInformation.imagingLocation.valid
-      );
-    } else if (this.currentStep() === 5) {
-      // Prescriber Information
       return this.groups.clinicalInformation.valid;
-    } else if (this.currentStep() === 6) {
-      // Attestation
+    } else if (this.currentStep() === 5) {
       const consentChecked = !!(this.attestation.value && this.signature.value);
       const nameValid = this.patientSignatureName.disabled
         ? !!this.patientSignatureName.value?.trim()
@@ -464,33 +431,19 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
   }
 
   colConfig: ColConfig[] = [
-    { key: 'PracticeGroup', title: 'Practice Name' },
-    { key: 'Address', title: 'Address', isArray: false, pipeName: 'address' },
-    { key: 'Phone', title: 'Phone', pipeName: 'phone' },
-    { key: 'Fax', title: 'Fax', pipeName: 'phone' },
-    { key: 'Email', title: 'Email' }
+    { key: 'PracticeGroup', title: 'Practice Name', sortable: true },
+    { key: 'Address', title: 'Address', isArray: false, pipeName: 'address', sortable: false },
+    { key: 'Phone', title: 'Phone', pipeName: 'phone', sortable: false },
+    { key: 'Fax', title: 'Fax', pipeName: 'phone', sortable: false },
+    { key: 'Email', title: 'Email', sortable: false }
   ];
 
-  selectPrescriberValue = toSignal(
-    this.groups.prescriberSelected.get('prescriberSelected')?.valueChanges || of()
-  );
-  selectedPrescriber = computed(
-    () =>
-      this.data.activePrescribers()?.find(x => x.ProviderId == this.selectPrescriberValue()) || null
-  );
+  selectedPrescriber = computed(() => this.data.activePrescribers()?.[0] ?? null);
 
   sanitizer = inject(DomSanitizer);
-  dataService = inject(DataService);
   constructor() {
     effect(() => {
-      if (this.data.activePrescribers()?.length) {
-        this.forms.prescriberSelected[0].options = this.data.activePrescribers()?.map(x => {
-          return { value: x.ProviderId, option: `${x.FirstName} ${x.LastName}` };
-        });
-      }
-    });
-    effect(() => {
-      const patients = this.dataService.pylarifyPatients();
+      const patients = this.data.pylarifyPatients();
       const selectNameField = this.forms.patientInformation.existingPatient.find(
         f => f.name === 'selectName'
       );
@@ -516,20 +469,20 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
     });
   }
 
-  prescriberSignatureValue = this.attestationGroup.controls.signatureOptions.value;
-
   tooglesOff() {
     this.disableInsuranceToggle.set(true);
     this.isPrimaryInsuranceVisible.set(false);
     this.isSecondaryInsuranceVisible.set(false);
     this.selectedFilesPrimary.set([]);
     this.selectedFilesSecondary.set([]);
-    this.updateInsuraceValidations(this.groups.insuranceInformation.primaryInsurance, [
-      Validators.required
-    ]);
-    this.updateInsuraceValidations(this.groups.insuranceInformation.secondaryInsurance, [
-      Validators.required
-    ]);
+    this.resetInsuranceForm(
+      this.groups.insuranceInformation.primaryInsurance,
+      this.forms.insuranceInformation.primaryInsurance
+    );
+    this.resetInsuranceForm(
+      this.groups.insuranceInformation.secondaryInsurance,
+      this.forms.insuranceInformation.secondaryInsurance
+    );
   }
 
   tableData = computed(() =>
@@ -537,21 +490,60 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
   );
 
   onRowSelection(e: unknown[]) {
-    const selectedFacilities = e as Facility[];
+    const selectedFacilities = e as EnrollmentFacility[];
     this.selectedFacility = selectedFacilities[0];
-    const facility = this.selectedFacility as Facility;
-    const grp = this.groups.prescriberInformation.prescriberInfo;
-    const obj = {
-      firstName: this.selectedPrescriber()?.FirstName,
-      lastName: this.selectedPrescriber()?.LastName,
-      npiNumber: this.selectedPrescriber()?.NPI,
-      address: facility.Address.Line1,
-      city: facility.Address.City,
-      state: facility.Address.State,
-      zip: facility.Address.Zipcode
+    const facility = this.selectedFacility;
+    if (!facility) return;
+
+    const provider = this.selectedPrescriber();
+    const address = Array.isArray(facility.Address) ? facility.Address[0] : facility.Address;
+    const contact = facility.FacilityContacts?.[0] ?? facility.Contacts?.[0];
+    const providerWithTax = provider as typeof provider & {
+      PrescriberTaxId?: string | null;
+      TaxId?: string | null;
     };
-    grp.patchValue(obj);
-    Object.keys(obj).forEach(k => grp.get(k)?.disable());
+    const officePhoneRaw = contact?.Phone || facility.Phone || '';
+    const officeFaxRaw = contact?.Fax || facility.Fax || '';
+    const grp = this.groups.prescriberInformation.prescriberInfo;
+    const lockWhenPresent: Record<string, string> = {
+      prescriberName: `${provider?.FirstName ?? ''} ${provider?.LastName ?? ''}`.trim(),
+      npiNumber: provider?.NPI?.trim() || '',
+      taxId: this.resolveTaxIdForPrefill(providerWithTax?.PrescriberTaxId, providerWithTax?.TaxId),
+      officeName: contact ? `${contact.FirstName ?? ''} ${contact.LastName ?? ''}`.trim() : '',
+      officePhoneNumber: formatPhone(officePhoneRaw) || officePhoneRaw,
+      officeExt: (contact?.Extension || facility.Extension || '').trim(),
+      officeMail: (contact?.Email || facility.Email || '').trim(),
+      officeFax: formatPhone(officeFaxRaw) || officeFaxRaw
+    };
+    const editablePrefill: Record<string, string> = {
+      centerName: (facility.OfficeName || facility.PracticeGroup || '').trim(),
+      address: [address?.Line1, address?.Line2]
+        .map(part => (part ?? '').trim())
+        .filter(Boolean)
+        .join(', '),
+      city: (address?.City ?? '').trim(),
+      state: (address?.State ?? '').trim(),
+      zip: (address?.Zipcode ?? '').trim()
+    };
+
+    Object.entries(lockWhenPresent).forEach(([key, value]) => {
+      const control = grp.get(key);
+      if (!control) return;
+      if (value) {
+        control.setValue(value);
+        control.disable();
+      } else {
+        control.setValue('');
+        control.enable();
+      }
+    });
+
+    Object.entries(editablePrefill).forEach(([key, value]) => {
+      const control = grp.get(key);
+      if (!control) return;
+      control.enable();
+      control.setValue(value || '');
+    });
   }
 
   stepperSteps = Object.fromEntries(
@@ -559,9 +551,10 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
   );
 
   pageValue = signal<'newPatient' | 'existingPatient'>('newPatient');
-  toggleSelection(): void {
-    this.pageValue.set(this.pageValue() === 'newPatient' ? 'existingPatient' : 'newPatient');
-    if (this.pageValue() === 'existingPatient') {
+  setPatientMode(mode: 'newPatient' | 'existingPatient'): void {
+    if (this.pageValue() === mode) return;
+    this.pageValue.set(mode);
+    if (mode === 'existingPatient') {
       this.groups.patientInformation.newPatient.reset();
     } else {
       this.groups.patientInformation.existingPatient.reset();
@@ -580,7 +573,7 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
 
   prevPage() {
     if (this.eSignatureScreen()) {
-      this.currentStep.update(() => 6);
+      this.currentStep.update(() => 5);
 
       this.eSignatureScreen.set(false);
       this.hasAlert.set(null);
@@ -593,17 +586,6 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
       }
     }
   }
-  handleWarning(event: string) {
-    if (event === 'clicked') {
-      this.router.navigate(['home/dashboard']);
-    }
-  }
-  handleConfirmPdf(event: string) {
-    if (event === 'clicked') {
-      console.log('Clicked Confirmation for pdf');
-    }
-  }
-
   onPopupButtonClick(action: string | boolean, key: string) {
     if (key in this.popups) {
       const typedKey = key as keyof typeof this.popups;
@@ -624,6 +606,25 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
       console.warn('Invalid fax format:', fax);
       return '';
     }
+  }
+
+  resolveTaxIdForPrefill(
+    prescriberTaxId: string | null | undefined,
+    taxId: string | null | undefined
+  ): string {
+    return this.normalizeTaxIdForPrefill(prescriberTaxId) || this.normalizeTaxIdForPrefill(taxId);
+  }
+
+  normalizeTaxIdForPrefill(taxId: string | null | undefined): string {
+    if (!taxId) {
+      return '';
+    }
+    const raw = taxId.toString().trim();
+    if (/[A-Za-z]/.test(raw)) {
+      return '';
+    }
+    const cleaned = raw.replace(/\D/g, '');
+    return cleaned.length === 9 ? cleaned : '';
   }
 
   formatTaxId(taxId: string | null | undefined): string {
@@ -651,23 +652,40 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
     };
   }
 
-  extractInsuranceDetails(insurance: PrimaryInsurance, planRank: string) {
-    const planDetails = insurance;
+  extractInsuranceDetails(insurance: InsuranceFormValue, planRank: 'Primary' | 'Secondary') {
+    const isPrimary = planRank === 'Primary';
+    const insuranceName = isPrimary
+      ? insurance.primaryInsuranceName
+      : insurance.secondaryInsuranceName;
+    const planName = isPrimary ? insurance.primaryPlanName : insurance.secondaryPlanName;
+    const phone = isPrimary ? insurance.primaryInsurancePhone : insurance.secondaryInsurancePhone;
+    const planTypes = isPrimary ? insurance.primaryInsuranceType : insurance.secondaryInsuranceType;
+    const memberId = isPrimary ? insurance.primaryMemberId : insurance.secondaryMemberId;
+    const policyHolderName = isPrimary
+      ? insurance.primaryPolicyHolderName
+      : insurance.secondaryPolicyHolderName;
+    const relation = isPrimary
+      ? insurance.primaryPatientRelation
+      : insurance.secondaryPatientRelation;
+    const otherRelation = isPrimary
+      ? insurance.primaryOtherRelationship
+      : insurance.secondaryOtherRelationship;
+    const dob = isPrimary ? insurance.primaryPolicyHolderDOB : insurance.secondaryPolicyHolderDOB;
+
     const files =
       planRank === 'Primary' ? this.selectedFilesPrimary() : this.selectedFilesSecondary();
+
     return {
-      PlanName: planDetails.planName || '',
-      Phone: planDetails.phone ? sanitizePhone(planDetails.phone) : null,
-      PlanType: planDetails.planType || '',
+      InsuranceName: insuranceName || '',
+      PlanName: planName || '',
+      PlanType: Array.isArray(planTypes) ? planTypes.filter(Boolean).join(', ') : '',
       PlanRank: planRank,
-      PolicyID: planDetails.policyNumber || '',
-      GroupNo: planDetails.groupNumber || '',
-      SubscriberName: planDetails.subscriberName || '',
-      RelationshipToSubscriber: planDetails.patientRelation || 'Self',
-      PolicyHolderEmployer: planDetails.subscriberEmployer || 'N/A',
-      AttachDoc: files.map(x => {
-        return { File: x.base64 };
-      })
+      SubscriberName: policyHolderName || '',
+      RelationshipToSubscriber: relation === 'Other' ? otherRelation || '' : relation || '',
+      Phone: phone ? sanitizePhone(phone) : null,
+      PolicyID: memberId || '',
+      PolicyHolderDOB: dob ? formatDate(new Date(dob)) : null,
+      AttachDoc: files.map(x => ({ File: x.base64 }))
     };
   }
 
@@ -677,7 +695,8 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
     const patientInfo: PatientInformation = this.groups.patientInformation[
       selectedPage
     ].getRawValue() as PatientInformation;
-    if (this.currentStep() === 2) {
+
+    if (this.currentStep() === 1) {
       if (selectedPage === 'newPatient') {
         this.patientName = `${patientInfo.firstName || ''} ${patientInfo.lastName || ''}`;
         this.attestationGroup.controls.patientSignatureName.setValue(this.patientName);
@@ -691,206 +710,172 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
         this.attestationGroup.controls.patientSignatureEmail.setValue(emailToUse);
       }
       if (this.groups.patientInformation.existingPatient.get('email')?.value) {
-        console.log(this.groups.patientInformation.existingPatient.get('email')?.value);
         this.patientSignatureEmail.disable();
       } else {
         this.patientSignatureEmail.enable();
       }
     }
-    if (this.currentStep() === 6) {
-      const hasInsurance = !(
-        this.groups.insuranceInformation.noInsurance.get('noInsurance')?.value as string[]
-      )?.length;
-      const diagnosticCodes: ClinicalInformation =
-        this.groups.clinicalInformation.getRawValue() as ClinicalInformation;
-      const medicalPlans = [];
-      const addressParts: { part1: string; part2: string } = this.breakAddress(
-        patientInfo.address as string
-      );
-      const { part1, part2 } = addressParts;
 
-      if (hasInsurance) {
-        if (this.isPrimaryInsuranceVisible()) {
-          const insuranceData =
-            this.groups.insuranceInformation.primaryInsurance.getRawValue() as PrimaryInsurance;
-          medicalPlans.push(this.extractInsuranceDetails({ ...insuranceData }, 'Primary'));
-        }
+    const hasNoInsurance = !!(
+      this.groups.insuranceInformation.noInsurance.get('noInsurance')?.value as string[]
+    )?.length;
+    const diagnosticCodes: ClinicalInformation =
+      this.groups.clinicalInformation.getRawValue() as ClinicalInformation;
+    const medicalPlans = [];
+    const { part1, part2 } = this.breakAddress(patientInfo.address as string);
 
-        if (this.isSecondaryInsuranceVisible()) {
-          const insuranceData =
-            this.groups.insuranceInformation.secondaryInsurance.getRawValue() as PrimaryInsurance;
-          medicalPlans.push(this.extractInsuranceDetails({ ...insuranceData }, 'Secondary'));
-        }
+    if (!hasNoInsurance) {
+      if (this.isPrimaryInsuranceVisible()) {
+        const insuranceData =
+          this.groups.insuranceInformation.primaryInsurance.getRawValue() as InsuranceFormValue;
+        medicalPlans.push(this.extractInsuranceDetails({ ...insuranceData }, 'Primary'));
       }
-      const serviceReqValue = this.groups.servicesRequested.getRawValue() as ServiceRequested;
+      if (this.isSecondaryInsuranceVisible()) {
+        const insuranceData =
+          this.groups.insuranceInformation.secondaryInsurance.getRawValue() as InsuranceFormValue;
+        medicalPlans.push(this.extractInsuranceDetails({ ...insuranceData }, 'Secondary'));
+      }
+    }
 
-      const prescriberInfo: PrescriberInfo =
-        this.groups.prescriberInformation.prescriberInfo.getRawValue() as PrescriberInfo;
-      const imagingInfo: ImagingLocationControls =
-        this.groups.prescriberInformation.imagingLocation.getRawValue() as ImagingLocationControls;
-      const imagingCheckboxValue: string[] = this.groups.prescriberInformation.imagingLocation.get(
-        'orderSentInImaging'
-      )?.value as string[];
-      const extractedValue: string = Array.isArray(imagingCheckboxValue as string[])
-        ? imagingCheckboxValue[0]
-        : ('' as string);
+    const prescriberInfo: PrescriberInfo =
+      this.groups.prescriberInformation.prescriberInfo.getRawValue() as PrescriberInfo;
+    const [prescriberFirstName = '', ...prescriberLastParts] = (prescriberInfo.prescriberName || '')
+      .trim()
+      .split(/\s+/);
+    const prescriberLastName = prescriberLastParts.join(' ');
 
-      const noInsurance = this.groups.insuranceInformation.noInsurance;
+    const data = [
+      diagnosticCodes.CptModifier,
+      diagnosticCodes.cptCode,
+      diagnosticCodes.cptModifier,
+      diagnosticCodes.diagnosticCode
+    ];
+    const facility = this.selectedFacility;
 
-      const data = [
-        diagnosticCodes.CptModifier,
-        diagnosticCodes.cptCode,
-        diagnosticCodes.cptModifier,
-        diagnosticCodes.diagnosticCode
-      ];
-      const facility = this.selectedFacility as Facility;
+    const flattenedValues: string[] = data.flat().filter(Boolean);
+    const preferredMethods = Array.isArray(patientInfo.contactPreferences)
+      ? patientInfo.contactPreferences
+      : [];
 
-      const flattenedValues: string[] = data.flat().filter(Boolean);
-      const reqBody = {
-        ExtRefId: new Date().valueOf().toString(),
-        PopulatePdfFlag: true,
-        DrugGroup: 'Pylarify',
-        EnrollmentServiceRequests: [{ Id: serviceReqValue.servicesRequested }],
-        Patient: {
-          FirstName: patientInfo.firstName || this.caseDetails()?.FirstName || '',
-          LastName: patientInfo.lastName || this.caseDetails()?.LastName || '',
-          DOB: formatDate(new Date(patientInfo.dateOfBirth)),
-          PatientId: this.caseDetails()?.PatientID || null,
-
-          PatientPreferredLanguage:
-            patientInfo.language !== 'Other' ? patientInfo.language : patientInfo.otherLanguage,
-          Address1: part1,
-          Address2: part2,
-          City: patientInfo.city,
-          State: patientInfo.state,
-          Zip: patientInfo.zip,
-          PatientEmailAddress: patientInfo.email || null,
-          BestContactTime: patientInfo.contactTime || '',
-          PreferredContactMethod: patientInfo.contactMethod,
-
-          Phones: [
-            {
-              Number: sanitizePhone(patientInfo.prefPhoneNumber) || null,
-              Type: patientInfo.prefPhone,
-              Primary: true
+    const reqBody = {
+      ExtRefId: new Date().valueOf().toString(),
+      PopulatePdfFlag: true,
+      DrugGroup: 'Pylarify',
+      Patient: {
+        FirstName: patientInfo.firstName || this.caseDetails()?.FirstName || '',
+        LastName: patientInfo.lastName || this.caseDetails()?.LastName || '',
+        DOB: formatDate(new Date(patientInfo.dateOfBirth)),
+        PatientId: this.caseDetails()?.PatientID || null,
+        Gender: patientInfo.gender || null,
+        Weight: patientInfo.patientWeight || null,
+        Address1: part1,
+        Address2: part2,
+        City: patientInfo.city,
+        State: patientInfo.state,
+        Zip: patientInfo.zip,
+        PatientEmailAddress: patientInfo.email || null,
+        BestContactTime: patientInfo.contactTime || '',
+        PreferredContactMethod: preferredMethods,
+        Phones: [
+          {
+            Number: sanitizePhone(patientInfo.primaryMobile ?? '') || null,
+            Type: 'Mobile',
+            Primary: true
+          }
+        ],
+        AlternateContact: patientInfo.authRepName
+          ? {
+              FirstName: patientInfo.authRepName,
+              Phone: sanitizePhone(patientInfo.secondaryMobile ?? '') || null,
+              Email: patientInfo.authRepEmail || null,
+              Relationship: patientInfo.relationship || null
             }
-          ],
-          AlternateContact: patientInfo.altPhoneNumber
-            ? {
-                // FirstName: patientInfo.firstName,
-                // LastName: patientInfo.lastName,
-                Phone: sanitizePhone(patientInfo.altPhoneNumber ?? '') || null,
-                ...(patientInfo.altPhone ? { AltContactPhoneType: patientInfo.altPhone } : {})
-              }
-            : {},
-          DiagnosisCodes: flattenedValues,
-          OtherDiagnosisCodes: diagnosticCodes.otherCptCode?.trim()
-            ? String(diagnosticCodes.otherCptCode)
-            : null
-        },
-        Insurance: {
-          MedicalInsurance: noInsurance ? 'Y' : 'N',
-          MedicalPlans: medicalPlans
-        },
-
-        Provider: {
-          FirstName: prescriberInfo.firstName,
-          LastName: prescriberInfo.lastName,
-          DEA: prescriberInfo.dea,
+          : {},
+        DiagnosisCodes: flattenedValues,
+        OtherDiagnosisCodes: diagnosticCodes.otherCptCode?.trim()
+          ? String(diagnosticCodes.otherCptCode)
+          : null
+      },
+      Insurance: {
+        MedicalInsurance: hasNoInsurance ? 'Y' : 'N',
+        MedicalPlans: medicalPlans
+      },
+      Provider: {
+        FirstName: prescriberFirstName,
+        LastName: prescriberLastName,
+        NPI: prescriberInfo.npiNumber,
+        TaxID: this.formatTaxId(prescriberInfo.taxId),
+        OfficeContactName: prescriberInfo.officeName,
+        OfficeContactPhone: sanitizePhone(prescriberInfo.officePhoneNumber ?? '') || null,
+        OfficeContactExt: (prescriberInfo.officeExt || '').trim() || null,
+        OfficeContactFax: this.formatFax(prescriberInfo.officeFax as string) || null,
+        Email: prescriberInfo.officeMail || null,
+        PrescriberEmail: prescriberInfo.prescriberEmail || null,
+        Fax: this.formatFax(prescriberInfo.officeFax as string) || null,
+        Phones: prescriberInfo.prescriberDirectContact
+          ? [{ Number: sanitizePhone(prescriberInfo.prescriberDirectContact ?? '') || null }]
+          : [],
+        AdditionalOfficeContactName: (prescriberInfo.additionalContactName || '').trim() || null,
+        AdditionalOfficeContactPhone:
+          sanitizePhone(prescriberInfo.additionalContactPhone ?? '') || null,
+        AdditionalOfficeContactExt: (prescriberInfo.additionalContactExt || '').trim() || null,
+        AdditionalOfficeContactEmail: (prescriberInfo.additionalContactEmail || '').trim() || null,
+        Facility: {
+          Id: facility?.Id,
           NPI: prescriberInfo.npiNumber,
-          TaxID: this.formatTaxId(prescriberInfo.taxId),
-          OfficeContactName: prescriberInfo.officeName,
-          OfficeContactPhone: sanitizePhone(prescriberInfo.officePhoneNumber ?? '') || null,
-          OfficeContactFax: this.formatFax(prescriberInfo.officeNumber as string) || null,
-          Email: prescriberInfo.officeMail || null,
-          Fax: this.formatFax(prescriberInfo.fax as string) || null,
-          ContactPreference: prescriberInfo.contactMethod ? [prescriberInfo.contactMethod] : [],
-          StateMedicalLicense: prescriberInfo.licenseNumber,
-          PTan: prescriberInfo.prescriberMedicarePtan,
-          Phones: prescriberInfo.phoneNumber
-            ? [{ Number: sanitizePhone(prescriberInfo.phoneNumber ?? '') || null }]
-            : [],
-
-          Facility: {
-            Id: facility.Id,
-            NPI: prescriberInfo.npiNumber,
-            Name: prescriberInfo.practiceName,
-            Address1: prescriberInfo.address,
-            Address2: null,
-            City: prescriberInfo.city,
-            State: prescriberInfo.state,
-            Zip: prescriberInfo.zip,
-            Phone: sanitizePhone(prescriberInfo.phoneNumber ?? '') || null,
-            TaxId: this.formatTaxId(prescriberInfo.taxId),
-            OfficeContactName: prescriberInfo.officeName
-          },
-          OtherFacilities: [
-            {
-              ImagingLocation: extractedValue === 'orderSent' ? true : false,
-              Name: imagingInfo.hospitalCenterName,
-              Address1: imagingInfo.address || '',
-              City: imagingInfo.city || '',
-              State: imagingInfo.state || null,
-              Zip: imagingInfo.zip,
-              OfficeContactName: imagingInfo.officeContact,
-              Phone: sanitizePhone(imagingInfo.officeContactNumber) || null,
-              BillingContactName: imagingInfo.billingContact,
-              BillingContactPhone: sanitizePhone(imagingInfo.billingContactNumber) || null,
-              Fax: this.formatFax(imagingInfo.faxNumber as string) || null,
-              Email: imagingInfo.officeContactEmail || null,
-              TaxId: this.formatTaxId(imagingInfo.taxNumber) || null,
-              NPI: imagingInfo.centerNpiNumber || null,
-              ContactPreference: imagingInfo.otherContactMethod
-                ? [imagingInfo.otherContactMethod]
-                : [],
-              AnticipatedInjectionDate: imagingInfo.anticipatedScanDate
-                ? formatDate(new Date(imagingInfo.anticipatedScanDate))
-                : '',
-              PTan: imagingInfo.otherMedicarePtan,
-              ...(imagingInfo.hospitalservice ? { FacilityType: imagingInfo.hospitalservice } : {})
-            }
-          ]
-        },
-
-        Attestation: {
-          CommunicationOptIn: patientInfo.affirmation == 'Voicemail' ? ['voicemail'] : [],
-          IsPatientAttestationConsent: this.attestation.value ? true : false,
-          PatientSignature: this.signatureOptions.value,
-          // PatientDeclaration: null,
-          TextingOptIn: this.patientSignSupport.value ? true : false,
-          ShareHealthConsent: this.patientSignHealthInfo.value ? true : false,
-          PatientRelationship:
-            this.patientSignatureOptions.value === 'guardian'
-              ? (this.attestationGroup.controls.guardianSignatureName.value ?? null)
-              : this.patientName,
-          UploadPOADocuments:
-            this.attestationGroup.controls.guardian.value === 'upload-poa' ? true : false,
-          ObtainPOADocuments:
-            this.attestationGroup.controls.guardian.value === 'reach-out' ? true : false,
-          PatientRepresentativeName:
-            this.patientSignatureOptions.value !== 'guardian'
-              ? this.patientSignatureName.value
-              : ((this.attestationGroup.controls.guardianSignatureName.value as string) ?? null),
-          PatientOrRepresentativeEmail:
-            this.patientSignatureOptions.value === 'guardian'
-              ? (this.attestationGroup.controls.guardianSignatureEmail.value as string)
-              : null,
-          PatientEmail:
-            this.patientSignatureOptions.value !== 'guardian'
-              ? (this.attestationGroup.controls.patientSignatureEmail.value as string)
-              : null,
-          ESignRequested:
-            this.attestationGroup.controls.guardian.value === 'reach-out' ? false : true,
-          AttachDoc:
-            this.attestationGroup.controls.guardian.value === 'upload-poa' &&
-            this.patientSignatureOptions.value === 'guardian'
-              ? this.attachPOAFile().map(x => {
-                  return { File: x.base64 };
-                })
-              : [{}]
+          Name: prescriberInfo.centerName,
+          Address1: prescriberInfo.address,
+          Address2: null,
+          City: prescriberInfo.city,
+          State: prescriberInfo.state,
+          Zip: prescriberInfo.zip,
+          Phone: sanitizePhone(prescriberInfo.officePhoneNumber ?? '') || null,
+          Extension: (prescriberInfo.officeExt || '').trim() || null,
+          TaxId: this.formatTaxId(prescriberInfo.taxId),
+          OfficeContactName: prescriberInfo.officeName
         }
-      };
+      },
+      Attestation: {
+        CommunicationOptIn: preferredMethods.includes('Voicemail') ? ['voicemail'] : [],
+        IsPatientAttestationConsent: this.attestation.value ? true : false,
+        PatientSignature: this.signatureOptions.value,
+        TextingOptIn: this.patientSignSupport.value ? true : false,
+        ShareHealthConsent: this.patientSignHealthInfo.value ? true : false,
+        PatientRelationship:
+          this.patientSignatureOptions.value === 'guardian'
+            ? (this.attestationGroup.controls.guardianSignatureName.value ?? null)
+            : this.patientName,
+        UploadPOADocuments:
+          this.attestationGroup.controls.guardian.value === 'upload-poa' ? true : false,
+        ObtainPOADocuments:
+          this.attestationGroup.controls.guardian.value === 'reach-out' ? true : false,
+        PatientRepresentativeName:
+          this.patientSignatureOptions.value !== 'guardian'
+            ? this.patientSignatureName.value
+            : ((this.attestationGroup.controls.guardianSignatureName.value as string) ?? null),
+        PatientOrRepresentativeEmail:
+          this.patientSignatureOptions.value === 'guardian'
+            ? (this.attestationGroup.controls.guardianSignatureEmail.value as string)
+            : null,
+        PatientEmail:
+          this.patientSignatureOptions.value !== 'guardian'
+            ? (this.attestationGroup.controls.patientSignatureEmail.value as string)
+            : null,
+        ESignRequested:
+          this.attestationGroup.controls.guardian.value === 'reach-out' ? false : true,
+        AttachDoc:
+          this.attestationGroup.controls.guardian.value === 'upload-poa' &&
+          this.patientSignatureOptions.value === 'guardian'
+            ? this.attachPOAFile().map(x => {
+                return { File: x.base64 };
+              })
+            : [{}]
+      }
+    };
 
+    console.log(`Step ${this.currentStep()} → Request body:`, reqBody);
+
+    if (this.currentStep() === 5) {
       this.api.submitEnrollment(reqBody).subscribe({
         next: ({ docID, caseID }) => {
           this.docId = docID;
@@ -903,7 +888,7 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
           this.hasUnsavedChanges.set(false);
         },
         error: error => {
-          this.currentStep.set(7);
+          this.currentStep.set(6);
           console.error('API Error:', error);
           this.hasAlert.set('enrollmentFailScreen');
           this.showPdfViewer.set(false);
@@ -945,7 +930,7 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
       },
       error => {
         this.api.isLoading.set(false);
-        this.currentStep.set(7);
+        this.currentStep.set(6);
 
         this.hasAlert.set('enrollmentFailScreen');
         console.error('Error fetching document', error);
@@ -1024,61 +1009,77 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
   }
 }
 
-interface PrimaryInsurance {
-  phone: string;
-  planName: string;
-  planType: string;
-  groupNumber: string;
-  policyNumber: string;
-  policyholder: string;
-  subscriberName: string;
-  patientRelation: string;
-  subscriberEmployer: string;
+interface InsuranceFormValue {
+  primaryInsuranceType?: string[];
+  primaryInsuranceName?: string;
+  primaryPlanName?: string;
+  primaryPolicyHolderName?: string;
+  primaryPatientRelation?: string;
+  primaryOtherRelationship?: string;
+  primaryInsurancePhone?: string;
+  primaryMemberId?: string;
+  primaryPolicyHolderDOB?: string | Date;
+  secondaryInsuranceType?: string[];
+  secondaryInsuranceName?: string;
+  secondaryPlanName?: string;
+  secondaryPolicyHolderName?: string;
+  secondaryPatientRelation?: string;
+  secondaryOtherRelationship?: string;
+  secondaryInsurancePhone?: string;
+  secondaryMemberId?: string;
+  secondaryPolicyHolderDOB?: string | Date;
   AttachDoc?: { File: Base64URLString }[];
 }
 
 interface PatientInformation {
-  firstName?: string; // Only for new patients
-  lastName?: string; // Only for new patients
-  selectName?: string; // Only for existing patients
+  firstName?: string;
+  lastName?: string;
+  selectName?: string;
   dateOfBirth: string;
   gender?: string;
+  patientWeight?: string;
   address: string;
   city: string;
   state: string;
   zip: string;
-  email?: string; // Only for new patients
-  prefPhone: string;
-  prefPhoneNumber: string;
-  otherLanguage: string;
-  altPhone?: string;
-  altPhoneNumber?: string;
-  language?: string;
-  otherCptCode?: string;
-  contactMethod: string;
+  email?: string;
+  contactPreferences?: string[];
+  authRepName?: string;
+  primaryMobile?: string;
+  secondaryMobile?: string;
+  relationship?: string;
   contactTime?: string;
-  affirmation?: string; // Okay to leave voicemail
+  authRepEmail?: string;
 }
-interface ServiceRequested {
-  servicesRequested: number;
+interface FacilityContact {
+  FirstName?: string;
+  LastName?: string;
+  Phone?: string;
+  Extension?: string | null;
+  Email?: string;
+  Fax?: string;
 }
-interface Phone {
-  Number: string;
-  Ext?: string; // Optional field
+
+interface FacilityAddress {
+  Line1?: string;
+  Line2?: string | null;
+  City?: string;
+  State?: string;
+  Zipcode?: string;
 }
-interface Facility {
-  Id: string | null;
-  NPI: string;
-  Name: string;
-  Address: Address;
-  Address1?: string | null;
-  Address2?: string | null;
-  City: string;
-  State: string;
-  Zip: string;
-  Phone: string;
-  TaxId?: string | null;
-  OfficeContactName: string;
+
+interface EnrollmentFacility {
+  Id?: string | number | null;
+  PracticeGroup?: string;
+  OfficeName?: string;
+  AccountStatus?: string;
+  Address?: FacilityAddress | FacilityAddress[];
+  FacilityContacts?: FacilityContact[];
+  Contacts?: FacilityContact[];
+  Phone?: string | null;
+  Extension?: string | null;
+  Fax?: string | null;
+  Email?: string | null;
 }
 interface ClinicalInformation {
   diagnosticCode: string;
@@ -1087,57 +1088,26 @@ interface ClinicalInformation {
   cptModifier: string;
   CptModifier: string;
 }
-
-interface ImagingLocationControls {
-  hospitalCenterName: string;
-  hospitalservice: string;
-  orderSentInImaging: boolean;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  officeContact: string;
-  billingContact: string;
-  officeContactNumber: string;
-  billingContactNumber: string;
-  officeContactEmail: string;
-  faxNumber: string;
-  anticipatedScanDate: string;
-  taxNumber: string;
-  centerNpiNumber: string;
-  otherMedicarePtan: string;
-  imagingContactMethod: string;
-  otherContactMethod: string;
-  AttachDoc?: string;
-}
 interface PrescriberInfo {
-  firstName: string;
-  lastName: string;
+  prescriberName: string;
+  npiNumber: string;
+  taxId: string;
+  centerName?: string;
   address: string;
   city: string;
   state: string;
   zip: string;
-  taxId: string;
-  npiNumber: string;
-  practiceName?: string;
-  phoneNumber?: string;
+  prescriberDirectContact?: string;
+  prescriberEmail?: string;
   officeName?: string;
   officePhoneNumber?: string;
-  officeNumber?: string;
-  licenseNumber?: string;
-  prescriberMedicarePtan?: string;
+  officeExt?: string;
   officeMail?: string;
-  contactMethod?: string;
-
-  dea?: string | null;
-  fax?: string;
-  email?: string;
-  contactPreference?: string[];
-  stateMedicalLicense?: string;
-  otherMedicarePtan?: string;
-  phones?: Phone[];
-  facility?: Facility;
-  otherFacilities?: Facility[];
+  officeFax?: string;
+  additionalContactName?: string;
+  additionalContactPhone?: string;
+  additionalContactExt?: string;
+  additionalContactEmail?: string;
 }
 export interface PdfResponse {
   data: ArrayBuffer | Uint8Array;

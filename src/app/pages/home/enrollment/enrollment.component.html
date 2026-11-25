@@ -2,22 +2,17 @@
   <div class="enrollment-header">
     @if (currentStep() === 0) {
       <div class="w-100 prescriber">
-        <h2>
-          Submit <span class="text-nowrap">LANTHEUS<sup>TM</sup></span> Enrollment Form
-        </h2>
+        <h2>Submit Y-mAbs Connect Enrollment Form</h2>
         <div>
-          <img src="doctor.png" alt="doctor-icon" width="59" />
-          <div class="wrap">
-            <app-select
-              class="select-prescriber"
-              [field]="forms.prescriberSelected[0]"
-              [group]="groups.prescriberSelected" />
-          </div>
+          <app-icon icon="doctor-icon" height="2.5rem" width="2.5rem" />
+          <h3 class="name">
+            {{ selectedPrescriber()?.FirstName }} {{ selectedPrescriber()?.LastName }}
+          </h3>
         </div>
       </div>
     }
     @if (currentStep() > 0 && selectedPrescriber()) {
-      <img src="doctor.png" alt="doctor-icon" width="59" />
+      <app-icon icon="doctor-icon" height="2.5rem" width="2.5rem" />
       <h3 class="name mobile-none">
         {{ selectedPrescriber()?.FirstName }} {{ selectedPrescriber()?.LastName }}
       </h3>
@@ -28,84 +23,56 @@
   <div>
     @if (!hasAlert()) {
       @if (currentStep() === 0) {
-        @if (groups.prescriberSelected.get('prescriberSelected')?.value) {
+        @if (selectedPrescriber()) {
           <app-header-wrap [noContentPadding]="true" [bordered]="true">
             <div class="title">
               <h2>
-                Locations for {{ selectedPrescriber()?.FirstName }}
+                Locations For {{ selectedPrescriber()?.FirstName }}
                 {{ selectedPrescriber()?.LastName }}
               </h2>
-              <h4>
-                Please select the practice/facility that will be associated with this enrollment
-                form.
-              </h4>
+              <h4>Please select the facility that will be associated with this enrollment form.</h4>
             </div>
-            <app-table
-              [tableData]="tableData() ?? []"
-              [columnConfigs]="colConfig"
-              [paginated]="true"
-              [selection]="'single'"
-              [preSelectedRows]="[selectedFacility]"
-              (emitSelection)="onRowSelection($event)" />
+            <div class="table-container">
+              <app-table
+                class="enrollment-facility-table"
+                [tableData]="tableData() ?? []"
+                [columnConfigs]="colConfig"
+                [paginated]="true"
+                [sortingEnabled]="true"
+                [selection]="'single'"
+                [preSelectedRows]="[selectedFacility]"
+                (emitSelection)="onRowSelection($event)" />
+            </div>
+            <button action (click)="prevPage()" class="outline" type="button">
+              <app-icon icon="chevron-left" /> Back
+            </button>
+            <button action (click)="nextPage()" [disabled]="!isValid" type="button">
+              Next <app-icon icon="chevron-right" />
+            </button>
           </app-header-wrap>
         }
       } @else {
-        <app-header-wrap>
+        <app-header-wrap [heading]="stepHeading()" [bordered]="true">
           @if (currentStep() === 1) {
-            <div class="step-wrap">
-              <app-form-title
-                [highlight]="true"
-                [required]="false"
-                title="Services Requested"
-                subtitle="Please select that apply." />
-              <form class="mt-4">
-                @for (field of forms.servicesRequested; track field.name) {
-                  <ng-container
-                    appDynamicField
-                    [field]="field"
-                    [group]="groups.servicesRequested"
-                    [flex]="true" />
-                }
-              </form>
-              <div class="info-box">
-                <ul>
-                  <li>
-                    Patient support may include identifying an imaging center, appointment
-                    reminders, patient education, options for transportation assistance and
-                    foundation assistance.
-                  </li>
-                  <li>
-                    Insurance navigation may include benefits verification, prior authorization
-                    assistance, appeal and/or claims assistance.
-                  </li>
-                </ul>
-              </div>
-            </div>
-          }
-
-          @if (currentStep() === 2) {
-            <div
-              style="position: relative"
-              [style]="util.screenWidth() < 768 ? { 'padding-top': '4rem' } : {}">
+            <div class="step-intro">
+              <app-form-title subtitle="Please enter the patient's information." />
               <div class="toggle-button">
                 <button
+                  type="button"
                   class="option"
                   [class.active]="pageValue() === 'newPatient'"
-                  (click)="toggleSelection()">
+                  (click)="setPatientMode('newPatient')">
                   New Patient
                 </button>
                 <button
+                  type="button"
                   class="option"
                   [class.active]="pageValue() === 'existingPatient'"
-                  (click)="toggleSelection()">
+                  (click)="setPatientMode('existingPatient')">
                   Existing Patient
                 </button>
               </div>
             </div>
-            <app-form-title
-              [highlight]="true"
-              title="Patient Information"
-              subtitle="Please enter the patient's information." />
             @if (pageValue() === 'newPatient') {
               <form>
                 <div class="row">
@@ -146,151 +113,14 @@
             }
           }
 
-          @if (currentStep() === 3) {
-            <div class="insurance-toggle">
-              <h2>Primary Insurance</h2>
-              <div class="toggle">
-                <p>Does the Patient have primary medical insurance?</p>
-                <app-toggle
-                  (change)="togglePrimary()"
-                  [toggleDisabled]="disableInsuranceToggle()"
-                  [toggleChecked]="isPrimaryInsuranceVisible()"></app-toggle>
-              </div>
-            </div>
-            @if (this.isPrimaryInsuranceVisible()) {
-              @let group = groups.insuranceInformation.primaryInsurance;
-              <span class="red">* Required field</span>
-              <form>
-                <div class="row">
-                  @let ctx = { form: forms.insuranceInformation.primaryInsurance, group };
-                  <div class="col-md-6 border-right">
-                    <ng-container
-                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'left' }" />
-                  </div>
-                  <div class="col-md-6">
-                    <ng-container
-                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'right' }" />
-                  </div>
-                </div>
-              </form>
-              <app-seperator />
-              <div class="row my-5 mobile-row">
-                <div class="col-md-6">
-                  <app-file-upload
-                    [multiple]="true"
-                    fileTypes="application/pdf"
-                    label="Attach front and back Copy of insurance card (Only pdf, up to 10 MB)"
-                    [disabled]="selectedFilesPrimary().length >= 2"
-                    (emitFiles)="
-                      handleFiles(
-                        $event,
-                        selectedFilesPrimary,
-                        groups.insuranceInformation.primaryInsurance
-                      )
-                    ">
-                  </app-file-upload>
-                </div>
-                <div class="col-md-6">
-                  @if (this.selectedFilesPrimary().length > 0) {
-                    <app-file-upload-table
-                      [selectedFiles]="selectedFilesPrimary()"
-                      (deleteFile)="deleteFile($event, selectedFilesPrimary, group)" />
-                  }
-                </div>
-              </div>
-            }
-            <div class="insurance-toggle mt-4">
-              <h2>Secondary Insurance</h2>
-              <div class="toggle">
-                <p>Does the Patient have secondary medical insurance?</p>
-                <app-toggle
-                  (change)="toggleSecondary()"
-                  [toggleDisabled]="disableInsuranceToggle()"
-                  [toggleChecked]="isSecondaryInsuranceVisible()"></app-toggle>
-              </div>
-            </div>
-            @if (isSecondaryInsuranceVisible()) {
-              @let group = groups.insuranceInformation.secondaryInsurance;
-              <span class="red">* Required field</span>
-              <form>
-                <div class="row">
-                  @let ctx = { form: forms.insuranceInformation.secondaryInsurance, group };
-                  <div class="col-md-6 border-right">
-                    <ng-container
-                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'left' }" />
-                  </div>
-                  <div class="col-md-6">
-                    <ng-container
-                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'right' }" />
-                  </div>
-                </div>
-              </form>
-              <app-seperator />
-              <div class="row my-5 mobile-row">
-                <div class="col-md-6">
-                  <app-file-upload
-                    [multiple]="true"
-                    fileTypes="application/pdf"
-                    [disabled]="selectedFilesSecondary().length >= 2"
-                    label="Attach front and back Copy of insurance card (Only pdf, up to 10 MB)"
-                    (emitFiles)="handleFiles($event, selectedFilesSecondary, group)" />
-                </div>
-                <div class="col-md-6">
-                  @if (this.selectedFilesSecondary().length > 0) {
-                    <app-file-upload-table
-                      [selectedFiles]="selectedFilesSecondary()"
-                      (deleteFile)="deleteFile($event, selectedFilesSecondary, group)" />
-                  }
-                </div>
-              </div>
-            }
-            <form class="mt-4">
-              @for (field of forms.insuranceInformation.noInsurance; track field.name) {
-                <ng-container
-                  appDynamicField
-                  [field]="field"
-                  [group]="groups.insuranceInformation.noInsurance"
-                  [flex]="true" />
-              }
-            </form>
-          }
-
-          @if (currentStep() === 4) {
-            <app-form-title
-              [highlight]="true"
-              title="Prescriber Information"
-              subtitle="Please provide the prescriber information." />
-            @if (forms.prescriberInformation.prescriberInfo) {
-              <form>
-                <div class="row">
-                  @let ctx =
-                    {
-                      form: forms.prescriberInformation.prescriberInfo,
-                      group: groups.prescriberInformation.prescriberInfo
-                    };
-                  <div class="col-md-6 border-right">
-                    <ng-container
-                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'left' }" />
-                  </div>
-                  <div class="col-md-6">
-                    <ng-container
-                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'right' }" />
-                  </div>
-                </div>
-              </form>
-            }
-            <app-form-title
-              [highlight]="true"
-              title="Imaging Location Information"
-              subtitle="Please leave this section blank if you would like Lantheus Link to assist in finding an
-                        in-network imaging center in patient’s area."
-              [required]="false" />
-            <form class="imaging">
+          @if (currentStep() === 2) {
+            <app-form-title subtitle="Please enter the prescriber's information." />
+            <form>
               <div class="row">
                 @let ctx =
                   {
-                    form: forms.prescriberInformation.imagingLocation,
-                    group: groups.prescriberInformation.imagingLocation
+                    form: forms.prescriberInformation.prescriberInfo,
+                    group: groups.prescriberInformation.prescriberInfo
                   };
                 <div class="col-md-6 border-right">
                   <ng-container
@@ -304,11 +134,115 @@
             </form>
           }
 
-          @if (currentStep() === 5) {
-            <app-form-title
-              [highlight]="true"
-              title="Clinical Information"
-              subtitle="Please provide the clinical information." />
+          @if (currentStep() === 3) {
+            <form class="mt-4">
+              @for (field of forms.insuranceInformation.noInsurance; track field.name) {
+                <ng-container
+                  appDynamicField
+                  [field]="field"
+                  [group]="groups.insuranceInformation.noInsurance"
+                  [flex]="true" />
+              }
+            </form>
+
+            <div class="insurance-toggle mb-4">
+              <h2>Primary Medical Insurance Information</h2>
+              <div class="toggle">
+                <p>Does the Patient have primary medical insurance?</p>
+                <app-toggle
+                  (change)="togglePrimary()"
+                  [toggleDisabled]="disableInsuranceToggle()"
+                  [toggleChecked]="isPrimaryInsuranceVisible()"></app-toggle>
+              </div>
+            </div>
+            @if (isPrimaryInsuranceVisible()) {
+              @let group = groups.insuranceInformation.primaryInsurance;
+              <form>
+                @let ctx = { form: forms.insuranceInformation.primaryInsurance, group };
+                <div class="insurance-type-row">
+                  <ng-container
+                    *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'top' }" />
+                </div>
+                <div class="row">
+                  <div class="col-md-6 border-right">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'left' }" />
+                  </div>
+                  <div class="col-md-6">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'right' }" />
+                  </div>
+                </div>
+                <div class="row my-3 mobile-row">
+                  <div class="col-md-6">
+                    <app-file-upload
+                      [multiple]="true"
+                      fileTypes="application/pdf"
+                      label="Attach front and back Copy of insurance card (Only pdf, up to 10 MB)"
+                      [disabled]="selectedFilesPrimary().length >= 2"
+                      (emitFiles)="handleFiles($event, selectedFilesPrimary)" />
+                  </div>
+                  <div class="col-md-6">
+                    @if (selectedFilesPrimary().length > 0) {
+                      <app-file-upload-table
+                        [selectedFiles]="selectedFilesPrimary()"
+                        (deleteFile)="deleteFile($event, selectedFilesPrimary)" />
+                    }
+                  </div>
+                </div>
+              </form>
+            }
+            <div class="insurance-toggle mt-4 mb-4">
+              <h2>Secondary Medical Insurance Information</h2>
+              <div class="toggle">
+                <p>Does the Patient have Secondary/Supplemental medical insurance?</p>
+                <app-toggle
+                  (change)="toggleSecondary()"
+                  [toggleDisabled]="disableInsuranceToggle()"
+                  [toggleChecked]="isSecondaryInsuranceVisible()"></app-toggle>
+              </div>
+            </div>
+            @if (isSecondaryInsuranceVisible()) {
+              @let group = groups.insuranceInformation.secondaryInsurance;
+              <form>
+                @let ctx = { form: forms.insuranceInformation.secondaryInsurance, group };
+                <div class="insurance-type-row">
+                  <ng-container
+                    *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'top' }" />
+                </div>
+                <div class="row">
+                  <div class="col-md-6 border-right">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'left' }" />
+                  </div>
+                  <div class="col-md-6">
+                    <ng-container
+                      *ngTemplateOutlet="tmp; context: { $implicit: ctx, position: 'right' }" />
+                  </div>
+                </div>
+                <div class="row my-3 mobile-row">
+                  <div class="col-md-6">
+                    <app-file-upload
+                      [multiple]="true"
+                      fileTypes="application/pdf"
+                      [disabled]="selectedFilesSecondary().length >= 2"
+                      label="Attach front and back Copy of insurance card (Only pdf, up to 10 MB)"
+                      (emitFiles)="handleFiles($event, selectedFilesSecondary)" />
+                  </div>
+                  <div class="col-md-6">
+                    @if (selectedFilesSecondary().length > 0) {
+                      <app-file-upload-table
+                        [selectedFiles]="selectedFilesSecondary()"
+                        (deleteFile)="deleteFile($event, selectedFilesSecondary)" />
+                    }
+                  </div>
+                </div>
+              </form>
+            }
+          }
+
+          @if (currentStep() === 4) {
+            <app-form-title subtitle="Please provide the clinical information." />
             <form>
               <div class="row">
                 @let ctx =
@@ -328,9 +262,9 @@
             </form>
           }
 
-          @if (currentStep() === 6) {
+          @if (currentStep() === 5) {
             <p class="red float-end">* Required field</p>
-            <h1 class="heading">Attestation</h1>
+            <h2 class="heading">Attestation</h2>
             <form class="attest">
               <div class="input-wrap radio">
                 <input
@@ -349,7 +283,7 @@
                 </label>
               </div>
 
-              <h1 class="heading">Prescriber Signature</h1>
+              <h2 class="heading">Prescriber Signature</h2>
               <p>
                 Please review the consent by opening the link and confirming to add your consent.
               </p>
@@ -379,7 +313,7 @@
               </div>
 
               @if (signatureOptions.value !== 'download') {
-                <h1 class="heading">Patient Signature</h1>
+                <h2 class="heading">Patient Signature</h2>
                 <p>Please select the submission method below for the patient authorization.</p>
                 <div class="row">
                   <div class="col-md-7">
@@ -478,6 +412,25 @@
               }
             </form>
           }
+          <button action (click)="prevPage()" class="outline" type="button">
+            <app-icon icon="chevron-left" /> Back
+          </button>
+          <button
+            action
+            (click)="eSignatureScreen() ? handleESign() : nextPage()"
+            [class]="{ 'e-sign': eSignatureScreen() }"
+            [disabled]="!isValid"
+            type="button">
+            @if (
+              currentStep() === 5 && !eSignatureScreen() && signatureOptions.value === 'download'
+            ) {
+              Submit
+            } @else if (eSignatureScreen()) {
+              <app-icon icon="e-signature" /> E-Signature
+            } @else {
+              Next <app-icon icon="chevron-right" />
+            }
+          </button>
         </app-header-wrap>
       }
     } @else {
@@ -486,6 +439,9 @@
           <div style="height: 100%">
             <app-pdf-viewer [pdfSrc]="pdfSrc()" style="min-height: 400px" />
           </div>
+          <button action (click)="prevPage()" class="outline" type="button">
+            <app-icon icon="chevron-left" /> Back
+          </button>
         </app-header-wrap>
       }
       @if (hasAlert() === 'enrollmentFailScreen') {
@@ -494,10 +450,15 @@
           <h1>Uh oh... Something went wrong!</h1>
           <p>
             We could not process your electronic signature at this time. Please select the 'Back'
-            button below to return to step 6 and change your 'Prescriber Signature' preference to
+            button below to return to step 5 and change your 'Prescriber Signature' preference to
             'Download to print and sign' to complete your enrollment.
           </p>
         </app-fullpage-alerts>
+        <div class="container inner page-actions">
+          <button (click)="prevPage()" class="outline" type="button">
+            <app-icon icon="chevron-left" /> Back
+          </button>
+        </div>
       }
       @if (hasAlert() === 'docuSignMultipleApiCalls') {
         <app-fullpage-alerts>
@@ -533,39 +494,6 @@
           </div>
         </app-header-wrap>
       }
-    }
-
-    @if (
-      groups.prescriberSelected.get('prescriberSelected')?.value &&
-      hasAlert() !== 'showIframe' &&
-      hasAlert() !== 'docuScreen' &&
-      hasAlert() !== 'docuSignSuccess' &&
-      hasAlert() !== 'downloadDocument' &&
-      hasAlert() !== 'docuSignSuccess' &&
-      hasAlert() !== 'docuSignMultipleApiCalls'
-    ) {
-      <div class="container inner page-actions">
-        <button (click)="prevPage()" class="outline" type="button">
-          <app-icon icon="chevron-left" /> Back
-        </button>
-        @if (hasAlert() !== 'enrollmentFailScreen') {
-          <button
-            (click)="eSignatureScreen() ? handleESign() : nextPage()"
-            [class]="{ 'e-sign': eSignatureScreen() }"
-            [disabled]="!isValid"
-            type="button">
-            @if (
-              currentStep() === 6 && !eSignatureScreen() && signatureOptions.value === 'download'
-            ) {
-              Submit
-            } @else if (eSignatureScreen()) {
-              <app-icon icon="e-signature" /> E-Signature
-            } @else {
-              Next <app-icon icon="chevron-right" />
-            }
-          </button>
-        }
-      </div>
     }
   </div>
 
