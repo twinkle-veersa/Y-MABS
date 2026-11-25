@@ -1,44 +1,61 @@
 @use 'variables' as var;
 @use 'mixins' as mix;
 
-.tab-bar {
+// Tab strip mirrors the profile screen: full-width bar, tabs grouped in a rounded shell.
+.tab-wrap {
+  padding: 0.5rem;
+  background: #f7f8f9;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.tab-shell {
   display: flex;
-  gap: 0.25rem;
-  padding: 0.375rem;
-  margin: 0.5rem;
-  background-color: var.$panel-color;
-  border-radius: var.$container-radius;
+  gap: 0.125rem;
+  width: fit-content;
+  padding: 0.1875rem;
+  background: #eeeeee;
+  border-radius: 0.5rem;
 }
 
 .tab-btn {
-  flex: 0 1 9.75rem;
+  flex: 0 0 9.75rem;
   min-width: 0;
   padding: 0.5rem 1rem;
   font-size: 1rem;
   font-weight: 500;
-  color: var.$font-color;
-  background-color: var.$medium-grey;
+  color: #000;
+  background: transparent;
   border: none;
-  border-radius: 0.25rem;
+  border-radius: 0.375rem;
   cursor: pointer;
 
   &.active {
-    color: var.$white;
     font-weight: 700;
-    background-color: var.$accent-color;
+    color: var.$white;
+    background: #472875;
   }
 }
 
 .tab-content {
-  padding: 1.5rem;
-  border-top: 1px solid var.$container-border;
+  --tab-padding: 2rem;
+  padding: var(--tab-padding);
+  border-top: 1px solid #d6d6d6;
 }
 
-@include mix.responsive(medium) {
+@include mix.responsive(bs-large) {
+  .tab-wrap {
+    width: 100%;
+  }
+
+  .tab-shell {
+    width: 100%;
+  }
+
   .tab-btn {
     flex: 1;
   }
+
   .tab-content {
-    padding: 1rem;
+    --tab-padding: 1rem;
   }
 }

@@ -1,23 +1,33 @@
 @use 'variables' as var;
 @use 'mixins' as mix;
 
-.wrap {
-  padding: 1.5rem;
-  background-color: var.$panel-color;
+:host {
+  display: block;
 }
 
-.actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  padding: 0.5rem;
-  border: 0.125rem solid var.$panel-color;
+// Add / Update / Cancel buttons share the Email field's row, sized like the inputs.
+.form-actions {
+  .input-wrap {
+    display: flex;
+    gap: 1rem;
+  }
+
+  button {
+    flex: 0.75;
+    box-sizing: border-box;
+    margin: 0;
+    padding: var.$field-padding 1rem;
+    border-width: 1px;
+    font-family: var.$primary-font;
+    font-size: 0.8rem;
+    line-height: normal;
+  }
 }
 
 .existing-bar {
   @include mix.flexCentered(space-between, center);
-  margin-block: 1rem;
-  padding: 0.75rem 1rem;
+  margin-block: 1rem 2rem;
+  padding: 0.5rem 1rem;
   font-weight: 600;
   color: var.$dark;
   background-color: var.$table-row-bg;
@@ -35,7 +45,7 @@
 .or-divider {
   @include mix.flexCentered(center, center);
   gap: 2rem;
-  margin-block: 1.5rem;
+  margin-block: 0 1.5rem;
   font-weight: 700;
   color: var.$dark-grey;
 
@@ -46,6 +56,32 @@
     height: 1px;
     background-color: var.$border-color;
   }
+}
+
+app-table {
+  background-color: var.$table-row-bg;
+  border: 1px solid #d3e3f3;
+  border-radius: 0.5rem;
+
+  // Edit / Delete buttons: equal width with a small gap, as in the design.
+  ::ng-deep .row-action {
+    gap: 0.5rem;
+
+    button {
+      min-width: 3rem;
+      padding-inline: 0.5rem;
+      text-align: center;
+    }
+  }
+}
+
+// Save footer spans the full card width with a top divider, like the profile screen.
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  margin: 1.5rem calc(-1 * var(--tab-padding, 2rem)) calc(-1 * var(--tab-padding, 2rem));
+  padding: 1rem;
+  border-top: 1px solid #dbdbdb;
 }
 
 .search-bar {

@@ -1,18 +1,20 @@
-<app-header-wrap [noContentPadding]="true">
-  <div class="tab-bar" role="tablist">
-    @for (tab of tabs; track tab.id) {
-      <button
-        class="tab-btn"
-        type="button"
-        role="tab"
-        [id]="'tab-' + tab.id"
-        [class.active]="tab.id === activeTab()"
-        [attr.aria-selected]="tab.id === activeTab()"
-        [attr.aria-controls]="'panel-' + tab.id"
-        (click)="activeTab.set(tab.id)">
-        {{ tab.label }}
-      </button>
-    }
+<app-header-wrap [noContentPadding]="true" [bordered]="true">
+  <div class="tab-wrap">
+    <div class="tab-shell" role="tablist">
+      @for (tab of tabs; track tab.id) {
+        <button
+          class="tab-btn"
+          type="button"
+          role="tab"
+          [id]="'tab-' + tab.id"
+          [class.active]="tab.id === activeTab()"
+          [attr.aria-selected]="tab.id === activeTab()"
+          [attr.aria-controls]="'panel-' + tab.id"
+          (click)="activeTab.set(tab.id)">
+          {{ tab.label }}
+        </button>
+      }
+    </div>
   </div>
 
   <div

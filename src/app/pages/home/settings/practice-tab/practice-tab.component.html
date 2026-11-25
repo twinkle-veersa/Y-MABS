@@ -17,18 +17,22 @@
       @for (field of fields; track field.name) {
         <ng-container appDynamicField [field]="field" [group]="form" />
       }
+      <!-- Same structure as a form field (label + input-wrap) so the buttons line up with the Email input -->
+      <div class="col-md-3 ms-auto field-wrap form-actions">
+        <div aria-hidden="true"><span>&nbsp;</span></div>
+        <div class="input-wrap">
+          @if (editing()) {
+            <button class="outline" type="button" (click)="cancelEdit()">Cancel</button>
+          }
+          <button
+            type="button"
+            [disabled]="form.invalid"
+            (click)="editing() ? updateFacility() : addFacility()">
+            {{ editing() ? 'Update' : 'Add' }}
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="actions mb-5">
-    @if (editing()) {
-      <button class="outline" type="button" (click)="cancelEdit()">Cancel</button>
-    }
-    <button
-      type="button"
-      [disabled]="form.invalid"
-      (click)="editing() ? updateFacility() : addFacility()">
-      {{ editing() ? 'Update' : 'Add' }}
-    </button>
   </div>
   <app-table
     [tableData]="practiceData()"
@@ -39,13 +43,14 @@
     [pageSize]="5"
     (emitAction)="onRowAction($event)" />
 
-  <button
-    type="button"
-    class="d-block ms-auto mt-4"
-    [disabled]="!hasUnsavedChanges() || !!editing() || isSaving()"
-    (click)="save()">
-    Save
-  </button>
+  <div class="footer">
+    <button
+      type="button"
+      [disabled]="!hasUnsavedChanges() || !!editing() || isSaving()"
+      (click)="save()">
+      Save
+    </button>
+  </div>
 </form>
 
 <app-popup
