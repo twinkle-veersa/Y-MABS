@@ -1,8 +1,7 @@
 <nav>
   @for (nav of navs(); track $index) {
-    <a [routerLink]="['/'].concat(nav.link)" routerLinkActive="active">
-      <img src="{{ nav.icon }}" alt="" />
-      <!-- <app-icon [icon]="nav.icon"></app-icon> -->
+    <a [routerLink]="['/'].concat(nav.link)" routerLinkActive="active" ariaCurrentWhenActive="page">
+      <img [ngSrc]="nav.icon" width="48" height="48" alt="" />
       <span>{{ nav.label }}</span>
     </a>
   }

@@ -3,22 +3,22 @@ import { Nav } from '@shared/models';
 export const NAVIGATION: Nav[] = [
   {
     label: 'Dashboard',
-    icon: 'dashboard.png',
+    icon: 'icons/sidebar/dashboard.png',
     link: ['home', 'dashboard']
   },
   {
     label: 'My Patients',
-    icon: 'patient.png',
+    icon: 'icons/sidebar/my-patient.png',
     link: ['home', 'my-patients']
   },
   {
     label: 'Tools and Forms',
-    icon: 'tool.png',
+    icon: 'icons/sidebar/tools.png',
     link: ['home', 'tools']
   },
   {
     label: 'Account Settings',
-    icon: 'setting.png',
+    icon: 'icons/sidebar/settings.png',
     link: ['home', 'settings']
   }
 ];

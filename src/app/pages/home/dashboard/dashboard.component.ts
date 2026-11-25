@@ -111,10 +111,6 @@ export class DashboardComponent {
     };
   });
 
-  toggleActionsList() {
-    this.actionsExpanded.update(expanded => !expanded);
-  }
-
   retry() {
     this.data.caseDataRs.reload();
   }

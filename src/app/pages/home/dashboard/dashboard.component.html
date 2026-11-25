@@ -37,12 +37,7 @@
 
   <aside class="actions-panel">
     <h2>
-      <button
-        type="button"
-        class="actions-heading"
-        [attr.aria-expanded]="actionsExpanded()"
-        aria-controls="dashboard-actions"
-        (click)="toggleActionsList()">
+      <button type="button" class="actions-heading">
         <span>{{ content.actions }}</span>
         <span class="count-circle">{{ cases().length }}</span>
       </button>

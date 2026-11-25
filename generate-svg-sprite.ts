@@ -9,7 +9,8 @@ const svgoConfig: SVGOConfig = {
     {
       name: 'convertColors',
       params: {
-        currentColor: true
+        // Keep pattern and gradient references used by masked icons.
+        currentColor: /^(?!none$|url\().+$/i
       }
     }
   ]
