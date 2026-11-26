@@ -17,7 +17,6 @@
       @for (field of fields; track field.name) {
         <ng-container appDynamicField [field]="field" [group]="form" />
       }
-      <!-- Same structure as a form field (label + input-wrap) so the buttons line up with the Email input -->
       <div class="col-md-3 ms-auto field-wrap form-actions">
         <div aria-hidden="true"><span>&nbsp;</span></div>
         <div class="input-wrap">
@@ -57,17 +56,21 @@
   type="custom"
   [heading]="content.dialogTitle"
   [isVisible]="isDialogOpen()"
-  (closePopup)="closeDialog()">
+  (closePopup)="isDialogOpen.set(false)">
   <p class="mt-0">{{ content.dialogText }}</p>
   <div class="search-bar">
-    <app-icon icon="search" />
-    <input
-      #search
-      type="text"
-      placeholder="Search"
-      aria-label="Search practice offices"
-      [value]="searchTerm()"
-      (input)="searchTerm.set(search.value)" />
+    <div class="search-input">
+      <app-icon icon="search" />
+      <input
+        #search
+        type="text"
+        placeholder="Search"
+        aria-label="Search practice offices"
+        [value]="searchTerm()"
+        (input)="searchTerm.set(search.value)"
+        (keydown.enter)="searchTerm.set(search.value)" />
+    </div>
+    <button type="button" class="search-btn" (click)="searchTerm.set(search.value)">Search</button>
   </div>
   @if (isDialogOpen()) {
     <app-table

@@ -5,11 +5,11 @@
   display: block;
 }
 
-// Add / Update / Cancel buttons share the Email field's row, sized like the inputs.
 .form-actions {
   .input-wrap {
     display: flex;
     gap: 1rem;
+    justify-content: flex-end;
   }
 
   button {
@@ -29,8 +29,8 @@
   margin-block: 1rem 2rem;
   padding: 0.5rem 1rem;
   font-weight: 600;
-  color: var.$dark;
-  background-color: var.$table-row-bg;
+  color: #0e075d;
+  background-color: #438dd626;
   border-radius: 0.25rem;
 
   button {
@@ -63,7 +63,6 @@ app-table {
   border: 1px solid #d3e3f3;
   border-radius: 0.5rem;
 
-  // Edit / Delete buttons: equal width with a small gap, as in the design.
   ::ng-deep .row-action {
     gap: 0.5rem;
 
@@ -75,7 +74,6 @@ app-table {
   }
 }
 
-// Save footer spans the full card width with a top divider, like the profile screen.
 .footer {
   display: flex;
   justify-content: flex-end;
@@ -84,22 +82,45 @@ app-table {
   border-top: 1px solid #dbdbdb;
 }
 
+::ng-deep app-popup {
+  .popup-header {
+    background: #6287ae !important;
+  }
+
+  .popup-footer {
+    justify-content: flex-end !important;
+  }
+}
+
 .search-bar {
-  position: relative;
+  @include mix.flexCentered(start, center);
+  gap: 0.5rem;
   width: fit-content;
   margin-bottom: 1rem;
 
-  app-icon {
-    position: absolute;
-    top: 0.6rem;
-    left: 0.5rem;
-    color: var.$grey;
+  .search-input {
+    position: relative;
+
+    app-icon {
+      position: absolute;
+      top: 0.6rem;
+      left: 0.5rem;
+      color: var.$grey;
+    }
+
+    input {
+      width: 15rem;
+      padding: 0.5rem 1rem 0.5rem 2rem;
+      border: var.$field-border;
+      border-radius: 0.25rem;
+    }
   }
 
-  input {
-    width: 15rem;
-    padding: 0.5rem 1rem 0.5rem 2rem;
-    border: var.$field-border;
-    border-radius: 0.25rem;
+  .search-btn {
+    min-width: 4.5rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.8rem;
+    background-color: var.$table-action-button;
+    border-color: var.$table-action-button;
   }
 }

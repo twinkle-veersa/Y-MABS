@@ -64,6 +64,7 @@
                     <button
                       type="button"
                       [class.outline]="$index === 0 && firstActionOutline()"
+                      [class.delete]="item.type === 'delete'"
                       [disabled]="disabledRow() === data"
                       (click)="rowAction(item.type, data, $index)">
                       {{ item.name }}
@@ -83,7 +84,10 @@
     @if (!tableData().length) {
       <tfoot>
         @let span = columnConfigs().length;
-        <td [attr.colspan]="selection() === 'multiple' ? span + 1 : span" class="text-center">
+        <td
+          [attr.colspan]="selection() === 'multiple' ? span + 1 : span"
+          class="text-center"
+          style="background: #ffffff; padding: 1rem">
           No data found.
         </td>
       </tfoot>

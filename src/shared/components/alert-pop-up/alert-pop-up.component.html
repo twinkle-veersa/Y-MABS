@@ -1,20 +1,33 @@
-<div class="overlay">
-  <div class="modal">
-    <div class="header">
-      <span>{{ config().heading }}</span>
-      <app-icon icon="cross" (click)="close()" tabindex="1" (keyup.enter)="close()" />
+<div class="popup-overlay">
+  <div class="popup-content">
+    <div class="popup-header">
+      <h2>{{ config().heading }}</h2>
+      <app-icon
+        icon="cross"
+        class="close-btn"
+        (click)="close()"
+        (keydown.enter)="close()"
+        (keydown.space)="close()"
+        tabindex="0" />
     </div>
-    <div class="body">
-      <div class="wrap">
+
+    <div class="popup-body">
+      <div class="popup-body-alert">
         @if (config().showIcon) {
           <app-icon class="alertIcon" [icon]="config().alertIcon" />
         }
-        <p [innerHTML]="message()"></p>
+        <div
+          class="popup-text"
+          [class.full-width]="!config().showIcon"
+          [innerHTML]="message()"></div>
       </div>
     </div>
-    <div class="footer pt-0">
-      <button class="outline" (click)="close()">{{ config().firstButton }}</button>
-      <button (click)="confirmation.emit(true)">{{ config().secondButton }}</button>
+
+    <div class="popup-footer">
+      <button class="outline left-btn" (click)="close()">{{ config().firstButton }}</button>
+      <button class="right-btn" (click)="confirmation.emit(true)">
+        {{ config().secondButton }}
+      </button>
     </div>
   </div>
 </div>

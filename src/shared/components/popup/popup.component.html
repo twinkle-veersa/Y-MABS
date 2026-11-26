@@ -84,7 +84,7 @@
         <div class="popup-body">
           <div class="popup-body-container">
             @if (content()) {
-              {{ content() }}
+              <div [innerHTML]="content()"></div>
             } @else {
               <ng-content />
             }

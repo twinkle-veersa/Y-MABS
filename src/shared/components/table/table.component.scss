@@ -172,6 +172,11 @@ tbody {
       color: #fff;
     }
 
+    &.delete {
+      background-color: #472875;
+      border-color: #472875;
+    }
+
     &:disabled {
       cursor: not-allowed;
       background-color: #acbfc9;

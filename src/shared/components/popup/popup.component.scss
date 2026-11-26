@@ -15,7 +15,6 @@
     background: #fff;
     border-radius: 0.5rem;
     padding: 0;
-    // padding: 0.63rem;
 
     min-width: 50rem;
     width: auto;
@@ -23,7 +22,8 @@
     @include mix.flexColumn;
 
     .popup-header {
-      background: var.$primary-color;
+      background: #472875;
+      border-radius: 0.5rem;
       color: #fff;
       padding: 0.63rem 1.25rem;
       @include mix.flexCentered(space-between, center);
@@ -55,7 +55,6 @@
       border-top: 1px solid rgba(var.$border-color, 0.5);
 
       .popup-body-container {
-        // @include mix.flexCentered(flex-start, flex-start);
         gap: 0.94rem;
 
         .popup-image {
@@ -89,10 +88,10 @@
     }
 
     &.no-padding {
-      border: 0.3rem solid var.$dark-grey;
+      border: 1px solid #dbdbdb;
+      border-radius: 0.5rem;
 
       .popup-header {
-        margin: 0;
         border: none;
       }
     }

@@ -9,8 +9,6 @@ export const SETTING_TABS = [
 ] as const;
 export type SettingTab = (typeof SETTING_TABS)[number]['id'];
 
-const phone = '1-833-339-6227';
-
 export const E_SIGN_STORAGE_KEY = 'esign-verified';
 
 export const SETTING: {
@@ -48,20 +46,20 @@ export const SETTING: {
       `If you have an existing Adobe Sign username, please create a new ID.me account as soon as possible. We're bringing you an improved e-prescribing experience.`,
       `If you're a new user, please create an account with ID.me. You can also sign in with an existing ID.me account.`
     ],
-    requirementsIntro: `Follow the link below to log-in or create an ID.me account. Once you have secured your ID.me account, you will need to verify your identity using your mobile device. You will need the following items for this process.`,
+    requirementsIntro: `Follow the link below to log-in or create an ID.me account. Once you have secured your ID.me account, you will need to verify your identity using your mobile device.  You will need the following items for this process.`,
     requirements: [
-      `Photo ID (Driver's License, Passport, Passport Card, or State ID card)`,
-      `A "live" selfie using your mobile device`,
+      `Photo ID (Driver’s License, Passport, Passport Card, or State ID card)`,
+      `A “live” selfie using your mobile device`,
       `Your Social Security Number`,
       `Prescribing information such as DEA and NPI numbers`
     ],
     verifyUrl: `https://www.id.me/`,
     verifyLabel: `Verify With ID.me`,
     about: `ID.me is our trusted technology provider in helping to keep your personal information safe. They specialize in digital identity protection and help us make sure you're you—and not someone pretending to be you—before we give you the ability to e-prescribe. We have partnered with ID.me to elevate our verification security level to the highest identity verification standards set by the National Institute of Standards and Technology (NIST).`,
-    contact: `Please call the Y-mAbs Connect with any questions at ${phone}.`,
+    contact: `Please call the Y-mAbs Connect with any questions at 1-833-339-6227.`,
     active: {
       title: `Your E-Signature Account is Active`,
-      content: `You have verified your identity with ID.me and can use the e-prescribing capabilities of the Y-mAbs Connect enrollment process. To change any ID.me account details or multi-factor authentication methods, please visit`
+      content: `You have verified your identity with ID.me and can use the e-prescribing capabilities of the ViiVConnect enrollment process. To change any ID.me account details or multi-factor authentication methods, please visit ID.me.`
     }
   },
   forms: {
@@ -71,12 +69,7 @@ export const SETTING: {
         label: 'Practice Name',
         name: 'PracticeGroup',
         fieldSize: 3,
-        validation: {
-          required: true
-          // pattern: REGEX.character,
-          // minLength: 3,
-          // maxLength: 20
-        }
+        validation: { required: true }
       },
       {
         fieldType: 'text',
@@ -84,7 +77,7 @@ export const SETTING: {
         name: 'Phone',
         fieldSize: 3,
         inputValidation: 'phone',
-        validation: { pattern: REGEX.phone }
+        validation: { required: true, pattern: REGEX.phone }
       },
       {
         fieldType: 'text',
@@ -92,7 +85,7 @@ export const SETTING: {
         name: 'Fax',
         fieldSize: 3,
         inputValidation: 'phone',
-        validation: { pattern: REGEX.phone }
+        validation: { required: true, pattern: REGEX.phone }
       },
       {
         fieldType: 'text',
@@ -134,54 +127,9 @@ export const SETTING: {
         label: 'Email',
         name: 'Email',
         fieldSize: 3,
-        validation: { pattern: REGEX.email }
+        validation: { required: true, pattern: REGEX.email }
       }
     ]
-    // officeContact: [
-    //   {
-    //     fieldType: 'text',
-    //     label: 'Office Contact First Name',
-    //     name: 'firstName',
-    //     fieldSize: 3
-    //   },
-    //   {
-    //     fieldType: 'text',
-    //     label: 'Office Contact Last Name',
-    //     name: 'lastName',
-    //     fieldSize: 3
-    //   },
-    //   {
-    //     fieldType: 'text',
-    //     label: 'Office Contact Phone',
-    //     name: 'phone',
-    //     fieldSize: 3,
-    //     inputValidation: 'phone',
-    //     validation: { pattern: REGEX.phone }
-    //   },
-    //   {
-    //     fieldType: 'text',
-    //     label: 'Office Contact Alternate Phone',
-    //     name: 'altPhone',
-    //     fieldSize: 3,
-    //     inputValidation: 'phone',
-    //     validation: { pattern: REGEX.phone }
-    //   },
-    //   {
-    //     fieldType: 'text',
-    //     label: 'Office Contact Fax',
-    //     name: 'fax',
-    //     fieldSize: 3,
-    //     inputValidation: 'phone',
-    //     validation: { pattern: REGEX.phone }
-    //   },
-    //   {
-    //     fieldType: 'text',
-    //     label: 'Office Contact Email',
-    //     name: 'email',
-    //     fieldSize: 3,
-    //     validation: { pattern: REGEX.email }
-    //   }
-    // ]
   },
   exitConfirmation: `Are you sure you want to exit the account settings? <br /> You have not saved your changes.`
 };

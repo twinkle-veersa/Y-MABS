@@ -38,7 +38,6 @@ import {
 
 const idOf = (f: Facility): string | null => (f.Id != null ? String(f.Id) : null);
 
-/** Manually added facilities have no Id yet, so they can only be matched by reference. */
 const isSame = (a: Facility, b: Facility) => a === b || (idOf(a) !== null && idOf(a) === idOf(b));
 
 const isLinkedAndActive = (f: Facility) =>
@@ -152,7 +151,7 @@ export class PracticeTabComponent {
     const facility = this.fromForm();
     const name = facility.OfficeName?.trim();
     if (this.practiceData().some(x => x.OfficeName?.trim() === name)) {
-      this.toast.warning(`${facility.OfficeName} is already added`);
+      this.toast.warning(`Facility is already added`);
       return;
     }
     this.practiceData.update(list => [facility, ...list]);
@@ -207,10 +206,6 @@ export class PracticeTabComponent {
       .filter(f => idOf(f) !== null && !selectedIds.has(idOf(f)))
       .forEach(f => this.unlinkFacility(f));
 
-    this.isDialogOpen.set(false);
-  }
-
-  closeDialog() {
     this.isDialogOpen.set(false);
   }
 
@@ -309,13 +304,13 @@ export class PracticeTabComponent {
     )
       .then(res => {
         if (res.Status === 'SUCCESS') {
-          this.toast.success(`Facility "${facility.OfficeName}" saved successfully`);
+          this.toast.success(`Facility saved successfully`);
         } else {
-          this.toast.error(`Failed to save facility "${facility.OfficeName}"`);
+          this.toast.error(`Failed to save facility`);
         }
       })
       .catch(() => {
-        this.toast.error(`Failed to save facility "${facility.OfficeName}"`);
+        this.toast.error(`Failed to save facility`);
       });
   }
 
