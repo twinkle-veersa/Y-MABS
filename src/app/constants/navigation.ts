@@ -27,7 +27,7 @@ export const HAM_NAVIGATION: Nav[] = [
   NAVIGATION[0],
   {
     label: 'My Profile',
-    icon: 'svgs/user.svg',
+    icon: 'user.svg',
     link: ['home', 'profile']
   },
   ...NAVIGATION.slice(1)

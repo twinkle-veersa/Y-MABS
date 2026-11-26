@@ -15,7 +15,7 @@ export class UtilityService {
 
   createGroup<T extends object>(fieldArr: FieldConfig[]) {
     const group = {};
-    fieldArr.forEach(f =>
+    fieldArr.forEach(f => {
       Object.assign(group, {
         [f.name]: new FormControl(
           { value: f.value || f.fieldType === 'checkbox' ? [] : f.value, disabled: !!f.disabled },
@@ -23,8 +23,14 @@ export class UtilityService {
             validators: f.dependsOn ? [] : this.bindValidations(f.validation)
           }
         )
-      })
-    );
+      });
+      f.options?.forEach(opt => {
+        if (!opt.inputName) return;
+        Object.assign(group, {
+          [opt.inputName]: new FormControl('')
+        });
+      });
+    });
     return new FormGroup(group as FieldsGroup<T>);
   }
 

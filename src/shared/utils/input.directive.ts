@@ -1,7 +1,7 @@
 import { Directive, inject, input } from '@angular/core';
 import { NgControl } from '@angular/forms';
 
-export const VAL_TYPES = ['charOnly', 'numberOnly', 'alphaNum', 'phone'] as const;
+export const VAL_TYPES = ['charOnly', 'numberOnly', 'alphaNum', 'phone', 'taxId'] as const;
 export type ValType = (typeof VAL_TYPES)[number];
 
 @Directive({
@@ -28,6 +28,8 @@ export class InputDirective {
       formattedValue = value.replace(/[^a-zA-Z0-9 ,\-/.&()]/g, '');
     } else if (valType === 'phone') {
       formattedValue = this.formatPhone(value);
+    } else if (valType === 'taxId') {
+      formattedValue = this.formatTaxId(value);
     }
 
     if (formattedValue !== value) {
@@ -42,5 +44,12 @@ export class InputDirective {
     if (digits.length <= 3) return digits;
     if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
     return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+
+  private formatTaxId(value: string): string {
+    const digits = value.replace(/\D/g, '').slice(0, 9);
+    if (!digits.length) return '';
+    if (digits.length <= 2) return digits;
+    return `${digits.slice(0, 2)}-${digits.slice(2)}`;
   }
 }

@@ -3,18 +3,33 @@
     <app-input-label [field]="f" [isRequired]="isRequired" />
   }
   <div class="input-wrap radio" [class]="f.class">
-    @for (item of f.options; track $index) {
-      <div>
-        <label [for]="f.name + item.option">
+    @for (item of f.options; track item.value) {
+      <div
+        class="checkbox-option"
+        [class.has-linked-input]="!!item.inputName"
+        [class.checkbox-option-below]="item.inputLayout === 'below'"
+        [class.checkbox-option-inline]="item.inputLayout === 'inline'">
+        <label [for]="f.name + '-' + item.value">
           <input
             type="checkbox"
             [name]="f.name"
             [value]="item.value"
-            (change)="onCheckboxChange($event, item.value)"
+            (change)="onCheckboxChange($event, item)"
             [checked]="control.value?.includes(item.value)"
-            [id]="f.name + item.option" />
-          {{ item.option }}
+            [id]="f.name + '-' + item.value" />
+          @if (item.option) {
+            {{ item.option }}
+          }
         </label>
+        @if (
+          item.inputName && (!item.showInputWhenChecked || control.value?.includes(item.value))
+        ) {
+          <input
+            type="text"
+            class="option-input"
+            [formControl]="linkedControl(item.inputName)"
+            [placeholder]="item.inputPlaceholder || ''" />
+        }
       </div>
     }
 

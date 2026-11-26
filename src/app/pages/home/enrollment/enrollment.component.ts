@@ -15,7 +15,8 @@ import {
   POPUP_CONTENT,
   EXIT_CONFIRMATION,
   E_SIGN_CONFIRMATION,
-  VIEW_DOWNLOAD
+  VIEW_DOWNLOAD,
+  MARKETING_CONTACT_OPTIONS
 } from '@constants/submit-patient-referral';
 import { HeaderWrapComponent } from '@shared/layouts/header-wrap/header-wrap.component';
 import { FormTitleComponent } from '@shared/layouts/form-title/form-title.component';
@@ -35,7 +36,6 @@ import {
   AttachFile,
   FileUploadTableComponent
 } from '@shared/components/file-upload-table/file-upload-table.component';
-import { RadioComponent } from '@shared/components/radio/radio.component';
 import { FieldConfig } from '@shared/models';
 import { ApiService } from '@shared/services/api.service';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -73,7 +73,6 @@ import { RequiredComponent } from '@shared/components/required.component';
     FileUploadComponent,
     FileUploadTableComponent,
     KeyValuePipe,
-    RadioComponent,
     InputComponent,
     NgxExtendedPdfViewerModule,
     FullpageAlertsComponent,
@@ -118,7 +117,6 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
   caseId = '';
   docuSignCaseId = signal('');
   apiCallCount = 0;
-  existingPOAFiles = signal<File[]>([]);
 
   selectedCaseId = toSignal<string | undefined>(
     this.groups.patientInformation.existingPatient.get('selectName')!.valueChanges,
@@ -178,6 +176,10 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     window.addEventListener('message', this.handleMessage.bind(this));
+    this.groups.clinicalInformation.productInformation.patchValue({
+      productName: 'Danyelza® (Naxitamab)',
+      productNdc: '50633-230-01'
+    });
   }
 
   downloadPdf(): void {
@@ -200,69 +202,52 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
     }
   }
 
-  attestation = new FormControl();
-  signature = new FormControl({ value: null, disabled: true });
+  signature = new FormControl<boolean | null>({ value: null, disabled: true });
   signatureOptions = new FormControl('docusign', Validators.required);
-
-  patientSignSupport = new FormControl({ value: null, disabled: true });
-  patientSignHealthInfo = new FormControl({ value: null, disabled: true });
-
-  patientSignatureOptions = new FormControl('docusign', Validators.required);
+  patientAuthorization = new FormControl<boolean | null>({ value: null, disabled: true });
+  marketingOptIn = new FormControl<boolean | null>({ value: null, disabled: true });
+  marketingContactMethods = new FormControl<string[]>([]);
+  patientSignatureOptions = new FormControl('patient', Validators.required);
   patientSignatureName = new FormControl({ value: '', disabled: true }, Validators.required);
-  patientSignatureEmail = new FormControl('', [Validators.email]);
-
-  guardianSignatureName = new FormControl('', Validators.required);
-  guardianSignatureEmail = new FormControl('', [
+  patientSignatureEmail = new FormControl('', [
+    Validators.required,
+    Validators.pattern(REGEX.email)
+  ]);
+  alternateContactName = new FormControl('', Validators.required);
+  relationshipToPatient = new FormControl('', Validators.required);
+  alternateContactEmail = new FormControl('', [
     Validators.required,
     Validators.pattern(REGEX.email)
   ]);
 
-  representativeConsent = new FormControl();
-  representativeName = new FormControl();
-  representativeSignature = new FormControl();
-
   attestationGroup = new FormGroup({
-    guardian: new FormControl(),
     prescriberLegalContent: this.signature,
-    patientSignSupport: this.patientSignSupport,
-    patientSignHealthInfo: this.patientSignHealthInfo,
+    patientAuthorization: this.patientAuthorization,
+    marketingOptIn: this.marketingOptIn,
+    marketingContactMethods: this.marketingContactMethods,
     signatureOptions: this.signatureOptions,
     patientSignatureOptions: this.patientSignatureOptions,
-    guardianSignatureName: this.guardianSignatureName,
-    guardianSignatureEmail: this.guardianSignatureEmail,
     patientSignatureName: this.patientSignatureName,
-    patientSignatureEmail: this.patientSignatureEmail
+    patientSignatureEmail: this.patientSignatureEmail,
+    alternateContactName: this.alternateContactName,
+    relationshipToPatient: this.relationshipToPatient,
+    alternateContactEmail: this.alternateContactEmail
   });
 
-  guadianField: FieldConfig = {
-    name: 'guardian',
-    label: ' ',
-    fieldType: 'radio',
-    options: [
-      { option: 'Upload POA documents', value: 'upload-poa' },
-      {
-        option: 'Lantheus Link to reach out to obtain POA Documents',
-        value: 'reach-out'
-      }
-    ]
-  };
+  readonly marketingContactOptions = MARKETING_CONTACT_OPTIONS;
 
   signOptions = [
     { value: 'docusign', option: 'E-Sign the enrollment form via DocuSign' },
-    { value: 'download', option: 'Download to print and sign' }
+    { value: 'download', option: 'Print and Sign Enrollment Form' }
   ];
   patientSignOptions = [
     {
-      value: 'docusign',
+      value: 'patient',
       option: 'Patient will E-Sign the enrollment form via DocuSign'
     },
     {
-      value: 'lantheus',
-      option: 'Lantheus Link to reach out to Patient for required...'
-    },
-    {
-      value: 'guardian',
-      option: 'Legal Guardian will E-Sign the enrollment Form'
+      value: 'patientContact',
+      option: 'Patient Contact will E-Sign the enrollment form via DocuSign'
     }
   ];
 
@@ -270,38 +255,57 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
     name: 'signatureOptions',
     label: 'Signature Options',
     fieldType: 'select',
-    options: this.signOptions
+    options: this.signOptions,
+    validation: { required: true }
   };
   patientSignatureOptionsField: FieldConfig = {
     name: 'patientSignatureOptions',
     label: 'Signature Options',
     fieldType: 'select',
-    options: this.patientSignOptions
-  };
-
-  legalGuardianNameField: FieldConfig = {
-    name: 'guardianSignatureName',
-    label: 'Legal Guardian Name',
-    fieldType: 'text',
-    placeholder: 'Enter Name'
-  };
-  legalGuardianEmailField: FieldConfig = {
-    name: 'guardianSignatureEmail',
-    label: `Legal Guardian's Email`,
-    fieldType: 'text',
-    placeholder: 'Enter Email'
+    options: this.patientSignOptions,
+    validation: { required: true }
   };
   patientNameField: FieldConfig = {
     name: 'patientSignatureName',
     label: 'Patient Name',
-    placeholder: ' ',
-    fieldType: 'text'
+    placeholder: 'Enter Name',
+    fieldType: 'text',
+    validation: { required: true }
   };
   patientEmailField: FieldConfig = {
     name: 'patientSignatureEmail',
-    placeholder: ' ',
-    label: `Email`,
-    fieldType: 'text'
+    placeholder: 'Enter Email',
+    label: 'Email of Patient',
+    fieldType: 'text',
+    validation: { required: true, email: true }
+  };
+  alternateContactNameField: FieldConfig = {
+    name: 'alternateContactName',
+    label: 'Alternate Contact Name',
+    placeholder: 'Enter Name',
+    fieldType: 'text',
+    validation: { required: true }
+  };
+  relationshipToPatientField: FieldConfig = {
+    name: 'relationshipToPatient',
+    label: 'Relationship to Patient',
+    fieldType: 'select',
+    options: [
+      { option: 'Unknown', value: 'Unknown' },
+      { option: 'Dependent', value: 'Dependent' },
+      { option: 'Spouse', value: 'Spouse' },
+      { option: 'Mother', value: 'Mother' },
+      { option: 'Father', value: 'Father' },
+      { option: 'Parent / legal guardian', value: 'ParentLegalGuardian' }
+    ],
+    validation: { required: true }
+  };
+  alternateContactEmailField: FieldConfig = {
+    name: 'alternateContactEmail',
+    label: 'Alternate Contact Email',
+    placeholder: 'Enter Email',
+    fieldType: 'text',
+    validation: { required: true, email: true }
   };
   srcIframe!: SafeResourceUrl | null;
   pdfSrc = signal<string | Uint8Array | ArrayBuffer | Blob | URL>('');
@@ -326,15 +330,10 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
 
   selectedFilesPrimary = signal<AttachFile[]>([]);
   selectedFilesSecondary = signal<AttachFile[]>([]);
-  attachPOAFile = signal<AttachFile[]>([]);
 
-  async handleFiles(files: File[], saveTo: WritableSignal<AttachFile[]>, isPoa = false) {
+  async handleFiles(files: File[], saveTo: WritableSignal<AttachFile[]>) {
     if (files.length) {
       this.api.isLoading.set(true);
-      if (isPoa) {
-        this.existingPOAFiles.set(files);
-      }
-
       files.forEach(async f => {
         const base64 = await convertToBase64(f);
         saveTo.update(x => [...x, { name: f.name, base64 }]);
@@ -391,39 +390,27 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
             : true))
       );
     } else if (this.currentStep() === 4) {
-      return this.groups.clinicalInformation.valid;
+      const { copayEligibility, diagnosisInformation, productInformation } =
+        this.groups.clinicalInformation;
+      return copayEligibility.valid && diagnosisInformation.valid && productInformation.valid;
     } else if (this.currentStep() === 5) {
-      const consentChecked = !!(this.attestation.value && this.signature.value);
-      const nameValid = this.patientSignatureName.disabled
-        ? !!this.patientSignatureName.value?.trim()
-        : this.patientSignatureName.value;
-      const emailValid = this.patientSignatureEmail.disabled
-        ? !!this.patientSignatureEmail.value
-        : this.patientSignatureEmail.valid;
-      if (this.signatureOptions.value === 'download') return consentChecked;
-      if (this.signatureOptions.value === 'docusign') {
-        if (this.patientSignatureOptions.value === 'docusign') {
-          return (
-            !!(this.patientSignSupport.value && this.patientSignHealthInfo.value) &&
-            consentChecked &&
-            nameValid &&
-            emailValid
-          );
-        }
-        if (this.patientSignatureOptions.value === 'lantheus') return consentChecked;
-        if (this.patientSignatureOptions.value === 'guardian') {
-          const guardianDetailsValid =
-            this.guardianSignatureName.valid && this.guardianSignatureEmail.valid;
-          return (
-            consentChecked &&
-            guardianDetailsValid &&
-            (this.attestationGroup.controls.guardian.value === 'reach-out'
-              ? true
-              : this.attestationGroup.controls.guardian.value === 'upload-poa'
-                ? !!this.attachPOAFile().length
-                : false)
-          );
-        }
+      const prescriberConsent = !!this.signature.value;
+      if (this.signatureOptions.value === 'download') return prescriberConsent;
+      if (this.signatureOptions.value !== 'docusign' || !prescriberConsent) return false;
+      if (!this.patientAuthorization.value) return false;
+
+      const nameValid = this.isPopulatedControlValid(this.patientSignatureName);
+
+      if (this.patientSignatureOptions.value === 'patient') {
+        return nameValid && this.isPopulatedControlValid(this.patientSignatureEmail);
+      }
+      if (this.patientSignatureOptions.value === 'patientContact') {
+        return (
+          nameValid &&
+          this.isPopulatedControlValid(this.alternateContactName) &&
+          this.isPopulatedControlValid(this.relationshipToPatient) &&
+          this.isPopulatedControlValid(this.alternateContactEmail)
+        );
       }
       return false;
     }
@@ -508,7 +495,9 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
     const lockWhenPresent: Record<string, string> = {
       prescriberName: `${provider?.FirstName ?? ''} ${provider?.LastName ?? ''}`.trim(),
       npiNumber: provider?.NPI?.trim() || '',
-      taxId: this.resolveTaxIdForPrefill(providerWithTax?.PrescriberTaxId, providerWithTax?.TaxId),
+      taxId: this.formatTaxId(
+        this.resolveTaxIdForPrefill(providerWithTax?.PrescriberTaxId, providerWithTax?.TaxId)
+      ),
       officeName: contact ? `${contact.FirstName ?? ''} ${contact.LastName ?? ''}`.trim() : '',
       officePhoneNumber: formatPhone(officePhoneRaw) || officePhoneRaw,
       officeExt: (contact?.Extension || facility.Extension || '').trim(),
@@ -586,16 +575,41 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
       }
     }
   }
-  onPopupButtonClick(action: string | boolean, key: string) {
-    if (key in this.popups) {
-      const typedKey = key as keyof typeof this.popups;
-      this.popups[typedKey].open = false;
-      this.attestationGroup.get(key)?.setValue(true);
-      this.attestationGroup.get(key)?.enable();
-      if (typedKey === 'confirmation' && action === 'proceed') {
-        this.router.navigate(['home/dashboard']);
-      }
+  onPopupButtonClick(_action: string | boolean, key: string) {
+    if (!(key in this.popups)) return;
+    const typedKey = key as keyof typeof this.popups;
+    this.popups[typedKey].open = false;
+    const control = this.attestationGroup.get(typedKey) as FormControl<boolean | null> | null;
+    if (control) {
+      control.enable({ emitEvent: false });
+      control.setValue(true);
     }
+  }
+
+  onMarketingMethodChange(event: Event, value: string) {
+    const checked = (event.target as HTMLInputElement).checked;
+    const current = this.marketingContactMethods.value ?? [];
+    this.marketingContactMethods.setValue(
+      checked ? [...current, value] : current.filter(item => item !== value)
+    );
+  }
+
+  private setAttestationPrefill(control: FormControl, value: string | null | undefined) {
+    const trimmed = value?.toString().trim() || '';
+    if (trimmed) {
+      control.setValue(trimmed);
+      control.disable({ emitEvent: false });
+    } else {
+      control.enable({ emitEvent: false });
+      control.setValue('');
+    }
+  }
+
+  private isPopulatedControlValid(control: FormControl): boolean {
+    if (control.disabled) {
+      return !!String(control.value ?? '').trim();
+    }
+    return control.valid;
   }
   formatFax(fax: string): string {
     if (!fax) return '';
@@ -652,6 +666,66 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
     };
   }
 
+  extractClinicalDetails(clinical: ClinicalInformation) {
+    const selectedPrimary = clinical.primaryIcd10Codes ?? [];
+    const primaryCodes = [
+      ...(selectedPrimary.includes('C74.90') ? [clinical.primaryIcdC7490?.trim() || ''] : []),
+      ...(selectedPrimary.includes('Other') ? [clinical.primaryIcdOther?.trim() || ''] : [])
+    ].filter(Boolean);
+
+    const secondaryCodes = [
+      ...(clinical.secondaryIcdCodes?.includes('secondary1')
+        ? [clinical.secondaryIcdCode1?.trim() || '']
+        : []),
+      ...(clinical.secondaryIcdCodes?.includes('secondary2')
+        ? [clinical.secondaryIcdCode2?.trim() || '']
+        : [])
+    ].filter(Boolean);
+
+    return {
+      CopayEligibility: clinical.federalProgramEnrollment || null,
+      PrimaryIcd10Codes: primaryCodes,
+      SecondaryIcd10Codes: secondaryCodes,
+      AdditionalInformation: clinical.additionalInformation ?? [],
+      TreatmentSetting: clinical.treatmentSetting ?? [],
+      ProductName: 'Danyelza® (Naxitamab)',
+      ProductNDC: '50633-230-01',
+      EstimatedQuantity: clinical.estimatedQuantity?.trim() || null,
+      AnticipatedInfusionDate: clinical.anticipatedInfusionDate
+        ? formatDate(new Date(clinical.anticipatedInfusionDate))
+        : null
+    };
+  }
+
+  private buildAttestationPayload(): AttestationPayload {
+    const isDownload = this.signatureOptions.value === 'download';
+    const isPatientContact = this.patientSignatureOptions.value === 'patientContact';
+    const isPatient = this.patientSignatureOptions.value === 'patient';
+
+    return {
+      PrescriberConsent: !!this.signature.value,
+      PrescriberSignatureOption: (this.signatureOptions.value as 'docusign' | 'download') || null,
+      PatientAuthorizationConsent: isDownload ? false : !!this.patientAuthorization.value,
+      MarketingOptIn: isDownload ? false : !!this.marketingOptIn.value,
+      CommunicationOptIn: isDownload ? [] : [...(this.marketingContactMethods.value ?? [])],
+      PatientSignatureOption: isDownload
+        ? null
+        : ((this.patientSignatureOptions.value as 'patient' | 'patientContact') ?? null),
+      PatientName: isDownload
+        ? null
+        : this.patientSignatureName.value?.trim() || this.patientName || null,
+      PatientEmail:
+        !isDownload && isPatient ? (this.patientSignatureEmail.value as string) || '' : '',
+      AlternateContactName:
+        !isDownload && isPatientContact ? this.alternateContactName.value?.trim() || '' : '',
+      RelationshipToPatient:
+        !isDownload && isPatientContact ? (this.relationshipToPatient.value as string) || '' : '',
+      AlternateContactEmail:
+        !isDownload && isPatientContact ? (this.alternateContactEmail.value as string) || '' : '',
+      ESignRequested: !isDownload
+    };
+  }
+
   extractInsuranceDetails(insurance: InsuranceFormValue, planRank: 'Primary' | 'Secondary') {
     const isPrimary = planRank === 'Primary';
     const insuranceName = isPrimary
@@ -678,7 +752,7 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
     return {
       InsuranceName: insuranceName || '',
       PlanName: planName || '',
-      PlanType: Array.isArray(planTypes) ? planTypes.filter(Boolean).join(', ') : '',
+      PlanType: Array.isArray(planTypes) ? planTypes.filter(Boolean) : [],
       PlanRank: planRank,
       SubscriberName: policyHolderName || '',
       RelationshipToSubscriber: relation === 'Other' ? otherRelation || '' : relation || '',
@@ -697,30 +771,26 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
     ].getRawValue() as PatientInformation;
 
     if (this.currentStep() === 1) {
-      if (selectedPage === 'newPatient') {
-        this.patientName = `${patientInfo.firstName || ''} ${patientInfo.lastName || ''}`;
-        this.attestationGroup.controls.patientSignatureName.setValue(this.patientName);
-        this.attestationGroup.controls.patientSignatureEmail.setValue(patientInfo.email || null);
-      } else if (selectedPage === 'existingPatient') {
-        this.patientName = `${this.caseDetails()?.FirstName || ''} ${this.caseDetails()?.LastName || ''}`;
-        this.attestationGroup.controls.patientSignatureName.setValue(this.patientName);
-        const formEmail = this.groups.patientInformation.existingPatient.get('email')
-          ?.value as string;
-        const emailToUse = formEmail || null;
-        this.attestationGroup.controls.patientSignatureEmail.setValue(emailToUse);
-      }
-      if (this.groups.patientInformation.existingPatient.get('email')?.value) {
-        this.patientSignatureEmail.disable();
-      } else {
-        this.patientSignatureEmail.enable();
-      }
+      this.patientName =
+        selectedPage === 'existingPatient'
+          ? `${this.caseDetails()?.FirstName || ''} ${this.caseDetails()?.LastName || ''}`.trim()
+          : `${patientInfo.firstName || ''} ${patientInfo.lastName || ''}`.trim();
+
+      this.setAttestationPrefill(this.patientSignatureName, this.patientName);
+      this.setAttestationPrefill(this.patientSignatureEmail, patientInfo.email);
+      this.setAttestationPrefill(this.alternateContactName, patientInfo.authRepName);
+      this.setAttestationPrefill(this.relationshipToPatient, patientInfo.relationship);
+      this.setAttestationPrefill(this.alternateContactEmail, patientInfo.authRepEmail);
     }
 
     const hasNoInsurance = !!(
       this.groups.insuranceInformation.noInsurance.get('noInsurance')?.value as string[]
     )?.length;
-    const diagnosticCodes: ClinicalInformation =
-      this.groups.clinicalInformation.getRawValue() as ClinicalInformation;
+    const clinical: ClinicalInformation = {
+      ...(this.groups.clinicalInformation.copayEligibility.getRawValue() as Partial<ClinicalInformation>),
+      ...(this.groups.clinicalInformation.diagnosisInformation.getRawValue() as Partial<ClinicalInformation>),
+      ...(this.groups.clinicalInformation.productInformation.getRawValue() as Partial<ClinicalInformation>)
+    };
     const medicalPlans = [];
     const { part1, part2 } = this.breakAddress(patientInfo.address as string);
 
@@ -744,15 +814,8 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
       .split(/\s+/);
     const prescriberLastName = prescriberLastParts.join(' ');
 
-    const data = [
-      diagnosticCodes.CptModifier,
-      diagnosticCodes.cptCode,
-      diagnosticCodes.cptModifier,
-      diagnosticCodes.diagnosticCode
-    ];
     const facility = this.selectedFacility;
 
-    const flattenedValues: string[] = data.flat().filter(Boolean);
     const preferredMethods = Array.isArray(patientInfo.contactPreferences)
       ? patientInfo.contactPreferences
       : [];
@@ -790,11 +853,7 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
               Email: patientInfo.authRepEmail || null,
               Relationship: patientInfo.relationship || null
             }
-          : {},
-        DiagnosisCodes: flattenedValues,
-        OtherDiagnosisCodes: diagnosticCodes.otherCptCode?.trim()
-          ? String(diagnosticCodes.otherCptCode)
-          : null
+          : {}
       },
       Insurance: {
         MedicalInsurance: hasNoInsurance ? 'Y' : 'N',
@@ -835,42 +894,8 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
           OfficeContactName: prescriberInfo.officeName
         }
       },
-      Attestation: {
-        CommunicationOptIn: preferredMethods.includes('Voicemail') ? ['voicemail'] : [],
-        IsPatientAttestationConsent: this.attestation.value ? true : false,
-        PatientSignature: this.signatureOptions.value,
-        TextingOptIn: this.patientSignSupport.value ? true : false,
-        ShareHealthConsent: this.patientSignHealthInfo.value ? true : false,
-        PatientRelationship:
-          this.patientSignatureOptions.value === 'guardian'
-            ? (this.attestationGroup.controls.guardianSignatureName.value ?? null)
-            : this.patientName,
-        UploadPOADocuments:
-          this.attestationGroup.controls.guardian.value === 'upload-poa' ? true : false,
-        ObtainPOADocuments:
-          this.attestationGroup.controls.guardian.value === 'reach-out' ? true : false,
-        PatientRepresentativeName:
-          this.patientSignatureOptions.value !== 'guardian'
-            ? this.patientSignatureName.value
-            : ((this.attestationGroup.controls.guardianSignatureName.value as string) ?? null),
-        PatientOrRepresentativeEmail:
-          this.patientSignatureOptions.value === 'guardian'
-            ? (this.attestationGroup.controls.guardianSignatureEmail.value as string)
-            : null,
-        PatientEmail:
-          this.patientSignatureOptions.value !== 'guardian'
-            ? (this.attestationGroup.controls.patientSignatureEmail.value as string)
-            : null,
-        ESignRequested:
-          this.attestationGroup.controls.guardian.value === 'reach-out' ? false : true,
-        AttachDoc:
-          this.attestationGroup.controls.guardian.value === 'upload-poa' &&
-          this.patientSignatureOptions.value === 'guardian'
-            ? this.attachPOAFile().map(x => {
-                return { File: x.base64 };
-              })
-            : [{}]
-      }
+      Clinical: this.extractClinicalDetails(clinical),
+      Attestation: this.buildAttestationPayload()
     };
 
     console.log(`Step ${this.currentStep()} → Request body:`, reqBody);
@@ -948,10 +973,7 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
         next: res => {
           this.api.isLoading.set(true);
 
-          // this.srcIframe = res.Payload.docusignURL;
           this.srcIframe = this.sanitizer.bypassSecurityTrustResourceUrl(res.Payload.docusignURL);
-          // this.srcIframe = null;
-          // this.srcIframe = null;
           if (res.Payload.docusignURL) {
             this.api.isLoading.set(false);
 
@@ -1082,11 +1104,33 @@ interface EnrollmentFacility {
   Email?: string | null;
 }
 interface ClinicalInformation {
-  diagnosticCode: string;
-  cptCode: string;
-  otherCptCode: string;
-  cptModifier: string;
-  CptModifier: string;
+  federalProgramEnrollment?: string;
+  primaryIcd10Codes?: string[];
+  primaryIcdC7490?: string;
+  primaryIcdOther?: string;
+  secondaryIcdCodes?: string[];
+  secondaryIcdCode1?: string;
+  secondaryIcdCode2?: string;
+  additionalInformation?: string[];
+  treatmentSetting?: string[];
+  productName?: string;
+  productNdc?: string;
+  estimatedQuantity?: string;
+  anticipatedInfusionDate?: string | Date;
+}
+interface AttestationPayload {
+  PrescriberConsent: boolean;
+  PrescriberSignatureOption: 'docusign' | 'download' | null;
+  PatientAuthorizationConsent: boolean;
+  MarketingOptIn: boolean;
+  CommunicationOptIn: string[];
+  PatientSignatureOption: 'patient' | 'patientContact' | null;
+  PatientName: string | null;
+  PatientEmail: string;
+  AlternateContactName: string;
+  RelationshipToPatient: string;
+  AlternateContactEmail: string;
+  ESignRequested: boolean;
 }
 interface PrescriberInfo {
   prescriberName: string;
@@ -1124,11 +1168,8 @@ interface DocuSignResponse {
 type AlertTypes =
   | 'showIframe'
   | 'docuScreen'
-  | 'getDocumentSuccess'
-  | 'documentFail'
   | 'showPdfViewer'
   | 'docuSignSuccess'
   | 'downloadDocument'
   | 'enrollmentFailScreen'
-  | 'docuSignMultipleApiCalls'
-  | 'showConfirmationPopUp';
+  | 'docuSignMultipleApiCalls';

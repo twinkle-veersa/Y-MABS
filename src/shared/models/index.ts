@@ -10,6 +10,10 @@ export interface Nav {
 export interface SelectOptions {
   value: string | number;
   option: string;
+  inputName?: string;
+  inputPlaceholder?: string;
+  inputLayout?: 'below' | 'inline';
+  showInputWhenChecked?: boolean;
 }
 
 export const fieldTypes = ['text', 'select', 'radio', 'checkbox', 'date', 'line'] as const;

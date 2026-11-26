@@ -41,25 +41,54 @@ const relationShipToPatientInsurance: SelectOptions[] = [
   { option: 'Children', value: 'Children' },
   { option: 'Other', value: 'Other' }
 ];
-
-const diagnosticCode: SelectOptions[] = [
-  { option: 'C61 (primary)', value: 'C61' },
-  { option: 'C79.82', value: 'C7982' },
-  { option: 'Z19.1', value: 'Z191' },
-  { option: 'Z19.2', value: 'Z192' },
-  { option: 'Z85.46', value: 'Z8546' },
-  { option: 'R97.21', value: 'R9721' }
+const yesNoOptions: SelectOptions[] = [
+  { option: 'Yes', value: 'Yes' },
+  { option: 'No', value: 'No' }
 ];
-const procedureCode: SelectOptions[] = [
-  { option: '78815', value: '78815' },
-  { option: '78816', value: '78816' },
-  { option: 'Other', value: 'other' }
+const primaryIcd10Options: SelectOptions[] = [
+  {
+    option: 'C74.90: Malignant neoplasm of unspecified part of unspecified adrenal gland ',
+    value: 'C74.90',
+    inputName: 'primaryIcdC7490',
+    inputPlaceholder: 'Enter C74.90 code',
+    inputLayout: 'below',
+    showInputWhenChecked: true
+  },
+  {
+    option: 'Other',
+    value: 'Other',
+    inputName: 'primaryIcdOther',
+    inputPlaceholder: 'Enter other primary ICD 10 code',
+    inputLayout: 'inline',
+    showInputWhenChecked: true
+  }
 ];
-const cptMofifier: SelectOptions[] = [
-  { option: 'PI (Initial)', value: 'PI' },
-  { option: 'PS (Recurrent)', value: 'PS' }
+const secondaryIcd10Options: SelectOptions[] = [
+  {
+    option: '',
+    value: 'secondary1',
+    inputName: 'secondaryIcdCode1',
+    inputPlaceholder: 'Enter secondary ICD 10 code',
+    inputLayout: 'inline'
+  },
+  {
+    option: '',
+    value: 'secondary2',
+    inputName: 'secondaryIcdCode2',
+    inputPlaceholder: 'Enter secondary ICD 10 code',
+    inputLayout: 'inline'
+  }
 ];
-const HCPCSCode: SelectOptions[] = [{ option: 'A9595', value: 'A9595' }];
+const additionalInformationOptions: SelectOptions[] = [
+  {
+    option: 'Relapsed or Refractory High-risk Neuroblastoma with Bone or Bone Marrow involvement',
+    value: 'Relapsed'
+  }
+];
+const treatmentSettingOptions: SelectOptions[] = [
+  { option: 'In-Patient', value: 'In-Patient' },
+  { option: 'Outpatient', value: 'Outpatient' }
+];
 
 export const STEPS = [
   'patientInfo',
@@ -90,7 +119,11 @@ export const PATIENT_REFERRAL: {
     secondaryInsurance: FieldConfig[];
     noInsurance: FieldConfig[];
   };
-  clinicalInformation: FieldConfig[];
+  clinicalInformation: {
+    copayEligibility: FieldConfig[];
+    diagnosisInformation: FieldConfig[];
+    productInformation: FieldConfig[];
+  };
 } = {
   patientInformation: {
     newPatient: groupedIntoOne({
@@ -379,11 +412,11 @@ export const PATIENT_REFERRAL: {
           label: 'Tax ID#',
           name: 'taxId',
           placeholder: 'Enter tax ID',
-          inputValidation: 'numberOnly',
+          inputValidation: 'taxId',
           validation: {
             required: true,
             pattern: REGEX.taxId,
-            maxLength: 9
+            maxLength: 10
           }
         },
         {
@@ -676,85 +709,101 @@ export const PATIENT_REFERRAL: {
     ]
   },
 
-  clinicalInformation: groupedIntoOne({
-    left: [
+  clinicalInformation: {
+    copayEligibility: [
       {
-        class: 'grid-3',
+        fieldType: 'radio',
+        label:
+          'Is the patient enrolled in any state or federal health care program, including but not limited to, Medicare, Medicaid, Managed Medicare, Managed Medicaid, Medigap, Veterans Affairs, TRICARE, CHIP, CHAMPUS, or Indian Health?',
+        name: 'federalProgramEnrollment',
+        options: yesNoOptions,
+        class: 'federal-program-enrollment'
+      }
+    ],
+    diagnosisInformation: [
+      {
         fieldType: 'checkbox',
-        label: 'ICD-10 Diagnosis Code(s)',
-        name: 'diagnosticCode',
-        options: diagnosticCode,
+        label: 'Primary ICD 10 Code(s)',
+        name: 'primaryIcd10Codes',
+        options: primaryIcd10Options,
+        validation: { required: true },
+        class: 'primary-icd10-codes'
+      },
+      {
+        fieldType: 'checkbox',
+        label: 'Secondary ICD 10 Code(s)',
+        name: 'secondaryIcdCodes',
+        options: secondaryIcd10Options,
+        validation: { required: true },
+        class: 'secondary-icd10-codes'
+      },
+      {
+        fieldType: 'checkbox',
+        label: 'Additional Information',
+        name: 'additionalInformation',
+        options: additionalInformationOptions,
         validation: { required: true }
       },
       {
-        class: 'grid-3',
         fieldType: 'checkbox',
-        label: 'Procedure (CPT) Code',
-        name: 'cptCode',
-        options: procedureCode,
-        validation: { required: true }
+        label: 'Anticipated Treatment Setting',
+        name: 'treatmentSetting',
+        options: treatmentSettingOptions,
+        validation: { required: true },
+        class: 'treatment-setting'
+      }
+    ],
+    productInformation: [
+      {
+        fieldType: 'text',
+        label: 'Product Name',
+        name: 'productName',
+        disabled: true
       },
       {
         fieldType: 'text',
-        dependsOn: 'cptCode',
-        condition: 'other',
-        label: ' ',
-        name: 'otherCptCode',
-        placeholder: 'Enter other procedure (CPT) code',
-        validation: { required: true }
-      }
-    ],
-    right: [
-      {
-        fieldType: 'checkbox',
-        label: 'HCPCS Code',
-        name: 'cptModifier',
-        options: HCPCSCode,
-        validation: { required: true }
+        label: 'NDC',
+        name: 'productNdc',
+        disabled: true
       },
       {
-        fieldType: 'checkbox',
-        label: 'CPT Modifier',
-        name: 'CptModifier',
-        options: cptMofifier,
-        validation: { required: true }
+        fieldType: 'text',
+        label: 'Estimated Quantity',
+        name: 'estimatedQuantity',
+        placeholder: 'Enter estimated quantity'
+      },
+      {
+        fieldType: 'date',
+        label: 'Anticipated Date of Infusion',
+        name: 'anticipatedInfusionDate',
+        placeholder: 'MM/DD/YYYY',
+        iconColor: '#0D62FF'
       }
     ]
-  })
+  }
 };
 
 export const POPUP_CONTENT: EnrollmentPopups = {
   prescriberLegalContent: {
     type: 'custom',
     open: false,
-    title: 'Prescriber Legal Content/Agreement',
+    title: 'Healthcare provider certification and authorization',
     action: [{ index: 1, label: 'I Agree', action: 'agree' }],
-    content:
-      'By signing, I confirm that the patient named on this form is under my care, and the information provided is accurate to the best of my knowledge. The ordered diagnostic procedure, a PET scan using PYLARIFY®, is medically necessary and aligns with FDA-approved labeling. I certify that I have obtained any permission, consent or authorization necessary under applicable law in order to disclose the patient’s individually identifiable health information provided on this form with Lantheus Link for: (1) Verifying insurance coverage and eligibility for a PET scan using PYLARIFY®, (2) identifying imaging centers for the ordered scan, and (3) introducing related services  to my patient and contacting them for these purposes. I acknowledge that I am not obligated to order any Lantheus products and have not received nor will receive any benefit from Lantheus for doing so. I consent to being contacted by Lantheus Link via fax, phone, mail, or email to assist the above-named patient and/or to provide me with additional program information. I understand that Lantheus may change or end program services without notice.'
+    content: `I hereby attest that I am the prescribing healthcare provider and I have determined that the Product selected in the Product Information section is medically appropriate for this patient and I have explained such to my patient. I agree to notify Y-MABS Connect if I become aware at any time in the future of changes in my patient’s circumstances that would affect his or her eligibility, including but not limited to changes in health insurance status or coverage, financial status, United States residency status, or the indication for which the Product has been prescribed for this patient. My signature certifies that I have read, understand, and agree to this Prescriber Certification and Attestation Statement and that the information being disclosed on this enrollment form is complete and accurate to the best of my knowledge, that the use of the indicated treatment is medically necessary, and I will be supervising the patient’s treatment.`
   },
-  patientSignSupport: {
+  patientAuthorization: {
     type: 'custom',
     open: false,
-    title: 'Patient Support Services',
+    title: 'Patient Authorization Statement',
+    action: [{ index: 1, label: 'I Agree', action: 'agree' }],
+    content: `I authorize my healthcare providers and insurance companies to disclose to BTG International, Inc. (d/b/a SERB Pharmaceuticals), and its affiliates, its authorized agents and assignees, its business partners, service providers, and third-party contractors, including Valeris, Inc., the company providing HUB services to the Y-mAbs Connect Program, and other companies used to administer the Y-mAbs Connect Program (collectively, “SERB”), all medical records, insurance information and other documentation relevant to my treatment with SERB Products, including information about my eligibility for limited financial assistance and the coordination of my treatment or proposed treatment (collectively, my “Information”). I understand that when disclosed to SERB, my Information may no longer be protected by certain federal privacy rules. I authorize SERB to use or disclose my Information to (i) facilitate my participation in the services provided by SERB, including, but not limited to, helping to verify or coordinate insurance coverage (the “Services”), (ii) send me information or materials related to my treatment or other programs in which I might be interested, (iii) contact me on occasion for feedback to be given SERB about my treatment and/or the information or programs, (iv) operate and improve the quality of the information or programs, and (v) conduct market research, internal analysis, and data analytics for purposes of strategic business decision-making and scientific development. I understand that if I do not sign this authorization, that will not affect my medical treatment or my health insurance coverage, but it will make me ineligible to enroll in the Y-mAbs Connect Patient Support Program, such as the Patient Assistance Program, the Copay Program and any other Ymabs Connect support programs. I may withdraw this authorization by calling 1-833-339-6227 or by writing to ymabsconnect@valeris.com. If I do withdraw the authorization, it cannot be relied upon after the date SERB receives my notice of withdrawal, but my withdrawal will not invalidate uses and disclosures already made in reliance on the authorization. If I do not withdraw the authorization sooner, it will remain valid for 5 years (or such lesser time as applicable law may require). I understand that I am entitled to receive a copy of this authorization.<br /> <br /> By signing this authorization, either as the patient or a legal representative or guardian of the patient, I attest that I am legally able to sign such documents and am properly acting in my capacity to do so. Proof of such guardian’s or representative’s authority to act for the patient may be requested such as power of attorney or legal court order.`
+  },
+  marketingOptIn: {
+    type: 'custom',
+    open: false,
+    title: 'Marketing/Other Communications Opt-In (Optional)',
     action: [],
     content: ``
-  },
-  patientSignHealthInfo: {
-    type: 'custom',
-    open: false,
-    title: 'Permission to Share Health Information',
-    action: [{ index: 1, label: 'OK', action: 'ok' }],
-    content: `By enrolling in Lantheus Link, I authorize my health insurance, physicians, and other healthcare providers (“Providers”) to share My Information with Lantheus, its affiliates, and partners to enroll me in Lantheus Link, provide program services and conduct quality assurance and other business activities. Lantheus Link may  use my de-identified information for internal analysis or research purposes. I understand that federal privacy laws may not protect My Information from further disclosure once disclosed to Lantheus Link, but Lantheus Link  has agreed to only use it as allowed by me in this authorization or required by law. Signing this form is voluntary and will not affect my ability to obtain medical treatment, my eligibility for insurance benefits, or coverage under my health insurance, or access to Lantheus products including a PET scan with PYLARIFY®. Without this authorization, Lantheus Link cannot provide Services to me. Unless revoked, this authorization expires one year from the date signed, or earlier if required by law. I understand that I may revoke this authorization at any time by emailing such cancellation to support@lantheuslink.com or calling 844-339-8514; however, this cancellation will not apply to My Information already used or disclosed before notice of cancellation is received by Lantheus Link. I understand that I am entitled to a copy of this form.`
-  },
-  confirmation: {
-    type: 'alert',
-    open: false,
-    title: 'Confirmation',
-    action: [
-      { index: 1, label: 'Cancel', action: 'cancel' },
-      { index: 1, label: 'Proceed', action: 'proceed' }
-    ],
-    content: `You are about to finalize the enrollment form and proceed to e-sign the enrollment form. You will not be able to edit the information once you proceed.`
   }
 };
 
@@ -762,15 +811,22 @@ export const EXIT_CONFIRMATION = `Are you sure you want to exit the patient enro
 export const E_SIGN_CONFIRMATION = `You are about to finalize the enrollment form and <br> proceed to e-sign the enrollment form.<br> You will not be able to edit the information once  <br> you proceed.`;
 
 export const VIEW_DOWNLOAD = {
-  title: `You 're almost done!`,
-  content: `Please download, print, complete, sign and fax the PYLARIFY<sup class="text-small">TM</sup> enrollment form to <br /> 1-844-339-8515. <br />  <br /> If you have any questions, please contact us at 1-844-339-8514.`
+  title: `You're almost done!`,
+  content: `Please download, print, complete, sign and fax the Y-mAbs Connect enrollment form to <br /> 1-877-209-6227. <br />  <br /> If you have any questions, please contact us at 1-833-339-6227.`
 };
+
+export const MARKETING_CONTACT_OPTIONS: SelectOptions[] = [
+  { option: 'Phone', value: 'phone' },
+  { option: 'Voicemail', value: 'voicemail' },
+  { option: 'Text', value: 'text' },
+  { option: 'Mail', value: 'mail' },
+  { option: 'Email', value: 'email' }
+];
 
 interface EnrollmentPopups {
   prescriberLegalContent: PopupConfig;
-  patientSignSupport: PopupConfig;
-  patientSignHealthInfo: PopupConfig;
-  confirmation: PopupConfig;
+  patientAuthorization: PopupConfig;
+  marketingOptIn: PopupConfig;
 }
 interface PopupConfig {
   type: PopupType;
