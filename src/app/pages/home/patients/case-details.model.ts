@@ -17,7 +17,7 @@ export interface CaseDetail {
   NurseEducation: NurseEducation;
   NurseTeach: NurseTeach;
   Documents: Document[];
-  Notes: null;
+  Notes: CaseNote[] | null;
   TherapyJourney: TherapyJourney[];
   Treatment: unknown[];
   Alerts: unknown[];
@@ -32,6 +32,14 @@ export interface CaseDetail {
   OrdersAndShipmentsInfo: ShipmentInfo;
   CaseInteractionHistory: unknown[];
   NotesCategory: unknown[];
+}
+
+export interface CaseNote {
+  Note: string;
+  Category: string;
+  Workflow: string | null;
+  EnteredBy: string | null;
+  DateTime: string;
 }
 
 interface SiteOfCareInfo {
@@ -490,21 +498,21 @@ interface PrescriptionInfo {
 }
 
 interface CopayCardInfo {
-  CopayCardStatus: null;
-  DenialReason: null;
-  EnrollmentDate: null;
-  ExpirationDate: null;
-  BIN: null;
-  PCN: null;
-  Group: null;
-  ID: null;
-  MaxAmountPerYear: null;
-  MaxRxFillsPerYear: null;
+  CopayCardStatus: string | null;
+  DenialReason: string | null;
+  EnrollmentDate: string | null;
+  ExpirationDate: string | null;
+  BIN: string | null;
+  PCN: string | null;
+  Group: string | null;
+  ID: string | null;
+  MaxAmountPerYear: number | null;
+  MaxRxFillsPerYear: number | null;
   Claims: unknown[];
-  MinOutOfPocketPerFill: null;
-  MaxCopayCardAmount: null;
-  CopayAmountUsed: null;
-  RemainingAmount: null;
+  MinOutOfPocketPerFill: number | null;
+  MaxCopayCardAmount: number | null;
+  CopayAmountUsed: number | null;
+  RemainingAmount: number | null;
 }
 
 interface PharmacyInsuranceInfo {

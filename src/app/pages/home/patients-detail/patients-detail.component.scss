@@ -1,40 +1,176 @@
 @use 'variables' as var;
 @use 'mixins' as mix;
 
-.top-bar {
+:host {
+  display: block;
+  min-width: 0;
+  background: var.$dashboard-background;
+}
+.patient-detail-card {
+  min-width: 0;
+  margin: var.$container-margin;
+  padding: 1.25rem;
+  border-radius: 0.85rem;
+  background: var.$white;
+}
+.top-bar,
+.title,
+.actions,
+.page-action,
+.feedback {
   @include mix.flexCentered(space-between);
-  padding: 0.75rem 1rem;
+  gap: 0.75rem;
 }
-
+.top-bar {
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var.$medium-grey;
+}
 .title {
-  @include mix.flexCentered(flex-start);
-  padding: 0.5rem;
-  gap: 0.5rem;
-
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
   span {
-    color: var.$dark;
-    font-size: 1.125rem;
+    font-size: 1rem;
   }
-
   img {
-    max-width: 1.85rem;
+    object-fit: contain;
   }
 }
-
-.card {
-  background: white;
-  border-radius: var.$container-radius;
+.actions {
+  flex-shrink: 0;
+}
+:host .page-action {
+  justify-content: center;
+  padding: 0.65rem 1.25rem;
+  border: 1px solid var.$secondary-color;
+  border-radius: 0.35rem;
+  background: var.$secondary-color;
+  color: var.$white;
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+.heading {
+  margin: 1.25rem 0;
+  padding: 0.9rem 1rem;
+  border-radius: 0.4rem;
+  background: var.$secondary-color;
+  color: var.$white;
+  font-size: 1.1rem;
+}
+.patient-case-details {
+  margin-top: 1.25rem;
+}
+.feedback {
+  margin-block: 1rem;
+  color: var.$error;
 }
 
-.content {
-  padding: 1rem;
-
-  .heading {
-    background-color: var.$dark;
-    border-radius: var.$container-radius;
-    margin-bottom: 1.5rem;
-    padding: 1rem 0.75rem;
-    font-weight: bold;
-    color: #fff;
+:host ::ng-deep app-table {
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid var.$border-color;
+  border-radius: var.$container-radius;
+  .table-container {
+    max-width: 100%;
+    overflow: auto;
+    @include mix.scrollbars(0.3rem, var.$secondary-color);
+  }
+  table {
+    min-width: 40rem;
+    font-size: 0.875rem;
+  }
+  th {
+    background: var.$patient-table-heading;
+    .wrap {
+      justify-content: space-between;
+      gap: 1rem;
+      .column-head {
+        color: var.$font-color;
+        font-size: 1rem;
+        font-weight: 500;
+      }
+    }
+  }
+  td {
+    min-width: 8rem;
+    height: 3.25rem;
+    box-sizing: border-box;
+  }
+  tbody tr {
+    &:nth-child(odd) {
+      background: var.$patient-table-row;
+    }
+    &.selected {
+      background: var.$patient-table-selected;
+    }
+  }
+  .pagination {
+    padding: 0.5rem;
+    background: var.$patient-pagination;
+    .page {
+      background: var.$secondary-color;
+      border-radius: 0.3rem;
+    }
+    button {
+      min-width: 1.75rem;
+      padding: 0;
+      color: var.$dark-grey;
+    }
+  }
+  .row-action button {
+    background: var.$secondary-color;
+    border-color: var.$secondary-color;
+    color: var.$white;
+  }
+}
+:host ::ng-deep .patient-case-details app-table .pagination select {
+  display: block;
+  padding: 0.25rem;
+  color: var.$font-color;
+}
+@include mix.responsive(large) {
+  .top-bar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+}
+@include mix.responsive(medium) {
+  .patient-detail-card {
+    margin: 1rem;
+    padding: 0.75rem;
+  }
+  .title span {
+    width: 100%;
+    padding-left: 2.75rem;
+  }
+  .page-action {
+    padding: 0.5rem 0.75rem;
+  }
+}
+@media print {
+  app-home-header,
+  .actions {
+    display: none;
+  }
+  .patient-detail-card {
+    margin: 0;
+    padding: 0;
+  }
+  :host ::ng-deep app-table {
+    overflow: visible;
+    table {
+      min-width: 0;
+    }
+    .table-container {
+      overflow: visible;
+    }
+    .pagination {
+      display: none;
+    }
   }
 }

@@ -7,87 +7,86 @@ import {
   OnInit,
   signal
 } from '@angular/core';
-import { HomeHeaderComponent } from '@shared/layouts/home-header/home-header.component';
-import { ColConfig, TableComponent } from '@shared/components/table/table.component';
-import { IconComponent } from '@shared/components/icon/icon.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { CASE_DETAIL_COLUMNS, PATIENT_DETAIL } from '@constants/patient-details';
+import { HomeHeaderComponent } from '@shared/layouts/home-header/home-header.component';
+import { TableComponent } from '@shared/components/table/table.component';
+import { IconComponent } from '@shared/components/icon/icon.component';
+import { ApiService } from '@shared/services/api.service';
+import { DataService } from '@shared/services/data.service';
+import { environment } from 'environments/environment';
 import { CaseData } from '../dashboard/dashboard.model';
 import { PatientsComponent } from '../patients/patients.component';
-import { ApiService } from '@shared/services/api.service';
-import { environment } from 'environments/environment';
-import { DataService } from '@shared/services/data.service';
-import { DatePipe } from '@angular/common';
-import { BooleanPipe } from '@shared/utils/boolean.pipe';
 import { CaseDetail } from '../patients/case-details.model';
+import { detailRecord, detailText, mapPatientCaseRows } from '../patients/patient-details.mapper';
 
 @Component({
   selector: 'app-patients-detail',
   imports: [
     HomeHeaderComponent,
-    ReactiveFormsModule,
     TableComponent,
     IconComponent,
     RouterLink,
-    PatientsComponent
+    PatientsComponent,
+    NgOptimizedImage
   ],
-  providers: [DatePipe, BooleanPipe],
   templateUrl: './patients-detail.component.html',
-  styleUrls: ['./patients-detail.component.scss'],
+  styleUrl: './patients-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PatientsDetailComponent implements OnInit {
-  private router = inject(Router);
-  private api = inject(ApiService);
-  private data = inject(DataService);
-  private activeatedRoute = inject(ActivatedRoute);
-  patientId = this.activeatedRoute.snapshot.paramMap.get('id');
-  popupOpen = signal<boolean>(false);
-  patientData = this.data.selectedPatient;
-  caseData = computed(() =>
-    this.data.caseData().filter(x => x.PatientId == this.patientData()?.PatientId)
+  readonly content = PATIENT_DETAIL;
+  readonly caseColumns = CASE_DETAIL_COLUMNS;
+  private readonly router = inject(Router);
+  private readonly api = inject(ApiService);
+  private readonly data = inject(DataService);
+  private readonly route = inject(ActivatedRoute);
+  readonly patientId = this.route.snapshot.paramMap.get('id');
+  readonly popupOpen = signal(false);
+  readonly caseData = computed(() =>
+    this.data.caseData().filter(item => String(item.PatientId) === this.patientId)
   );
-  selectedCaseId = linkedSignal(() => this.patientData()?.CaseId ?? this.caseData().at(0)?.CaseId);
-  patientDetailsRs = this.api.getRs<CaseDetail>(`case/${this.api?.tokenInfo()?.acctname}`, {
+  readonly patientData = computed<CaseData | undefined>(() => {
+    const patient = this.data.selectedPatient();
+    return patient && String(patient.PatientId) === this.patientId ? patient : this.caseData()[0];
+  });
+  readonly selectedCaseId = linkedSignal<CaseData[], string | undefined>({
+    source: this.caseData,
+    computation: (cases, previous) => {
+      const currentId = previous?.value;
+      if (cases.some(item => item.CaseId === currentId)) return currentId;
+      const preferredId = this.patientData()?.CaseId;
+      return cases.find(item => item.CaseId === preferredId)?.CaseId ?? cases[0]?.CaseId;
+    }
+  });
+  readonly selectedCase = computed(
+    () => this.caseData().find(item => item.CaseId === this.selectedCaseId()) ?? null
+  );
+  readonly caseRows = computed(() => mapPatientCaseRows(this.caseData()));
+  readonly selectedRows = computed(() =>
+    this.caseRows().filter(item => item['CaseId'] === this.selectedCaseId())
+  );
+  readonly patientDetailsRs = this.api.getRs<CaseDetail>(`case/${this.api.tokenInfo()?.acctname}`, {
     baseUrl: environment.portalv11Url,
     parameter: this.selectedCaseId
   });
-  caseDetails = computed(() => this.patientDetailsRs.value()?.Payload);
+  readonly caseDetails = computed(() => this.patientDetailsRs.value()?.Payload);
 
-  ngOnInit(): void {
-    if (!this.patientData()) {
-      const patient = this.data.caseData().find(x => x.PatientId?.toString() == this.patientId);
-      if (patient) {
-        this.data.selectedPatient.set(patient);
-      } else {
-        this.router.navigate(['../'], { relativeTo: this.activeatedRoute });
-      }
+  ngOnInit() {
+    if (!this.patientData() && !this.data.caseDataRs.isLoading()) {
+      void this.router.navigate(['../'], { relativeTo: this.route });
     }
   }
-
-  onSelect(row: unknown[]) {
-    this.selectedCaseId.set((row[0] as CaseData).CaseId ?? '');
+  onSelect(rows: unknown[]) {
+    const caseId = detailText(detailRecord(rows[0])['CaseId']);
+    if (caseId) this.selectedCaseId.set(caseId);
   }
-
-  onUploadPopup() {
-    this.popupOpen.set(true);
-  }
-
-  onClose() {
+  closeUpload() {
     this.popupOpen.set(false);
     this.patientDetailsRs.reload();
   }
-
-  onAlertAcknowledged() {
-    this.patientDetailsRs.reload();
+  print() {
+    window.print();
   }
-
-  caseColumns: ColConfig[] = [
-    { key: 'CaseId', title: 'Case ID' },
-    { key: 'CaseStartDate', title: 'Date Submitted', pipeName: 'date', pipeAttr: ['MM/dd/yyyy'] },
-    { key: 'EnrollmentStatus', title: 'Enrollment Status' },
-    { key: 'CaseStatus', title: 'Case Status' },
-    { key: 'Reverification', title: 'Benefits Reverification?', pipeName: 'boolean' },
-    { key: 'ActionNeeded', title: 'Action Needed', pipeName: 'boolean' }
-  ];
 }

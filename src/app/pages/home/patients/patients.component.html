@@ -1,216 +1,244 @@
 @if (showPopup()) {
   <div class="overlay">
-    <div class="popup">
-      <div class="popup-header">
+    <section
+      class="popup"
+      role="dialog"
+      tabindex="-1"
+      (keydown.escape)="closeUpload()"
+      aria-modal="true"
+      aria-labelledby="patient-upload-title"
+      [attr.aria-busy]="uploading()">
+      <header class="popup-header">
         <div>
-          <span class="popup-heading">Upload Supplemental Documents</span>
-          <span class="description">{{ patientDocumentPrompt() }}</span>
+          <h2 id="patient-upload-title">{{ content.upload }}</h2>
+          <p>{{ documentPrompt() }}</p>
         </div>
-        <button class="close-btn" (click)="onClosePopUp()">
-          <app-icon icon="cross" />
+        <button
+          type="button"
+          class="close-btn transparent"
+          [attr.aria-label]="content.close"
+          [disabled]="uploading()"
+          (click)="closeUpload()">
+          <app-icon icon="cross" aria-hidden="true" />
+        </button>
+      </header>
+      <input
+        type="file"
+        #fileInput
+        hidden
+        accept="application/pdf"
+        [disabled]="uploading()"
+        (change)="onFileSelected($event)" />
+      <button
+        type="button"
+        class="drop-zone transparent"
+        [disabled]="uploading()"
+        (dragover)="$event.preventDefault()"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()">
+        <img ngSrc="Upload.png" width="50" height="50" alt="" />
+        <span>{{ content.dragFiles }}</span
+        ><small>{{ content.fileRestriction }}</small>
+      </button>
+      @if (uploadError()) {
+        <p class="upload-error" role="alert">{{ uploadError() }}</p>
+      }
+      <div class="upload-footer">
+        <span>{{ content.or }}</span
+        ><button type="button" [disabled]="uploading()" (click)="fileInput.click()">
+          {{ uploading() ? content.uploading : content.browse }}
         </button>
       </div>
-
-      <div
-        class="drop-zone"
-        (dragover)="onDragOver($event)"
-        (drop)="onDrop($event)"
-        (click)="fileInput.click()"
-        (keydown.enter)="fileInput.click()"
-        (keydown.space)="fileInput.click()"
-        tabindex="0"
-        role="button">
-        <input
-          type="file"
-          #fileInput
-          hidden
-          (change)="onFileSelected($event)"
-          accept="application/pdf" />
-        <img src="Upload.png" alt="upload" height="50" width="50" />
-        <span class="drag-label">Drag and drop file here</span>
-        @if (errorMessage) {
-          <span class="error-message file-restriction">{{ errorMessage }}</span>
-        }
-      </div>
-
-      <div class="bottom-text">
-        <p class="drag-label mt-0 mb-3">or</p>
-        <button class="browse-btn" (click)="fileInput.click()">Browse Files</button>
-      </div>
-    </div>
+    </section>
   </div>
 }
-<div class="bottom-container">
-  <div class="stepper-container">
-    <button class="arrow left" [class.active]="canScrollLeft()" (click)="scrollLeft()">
-      <app-icon icon="chevron-left" />
+<section class="bottom-container">
+  <nav class="stepper-container" aria-label="Patient case details">
+    <button
+      type="button"
+      class="arrow"
+      [disabled]="!canScrollLeft()"
+      [attr.aria-label]="content.previous"
+      (click)="scrollTabs(-1)">
+      <app-icon icon="chevron-left" aria-hidden="true" />
     </button>
-
-    <div class="stepper" #stepper>
-      @for (item of steps() | keyvalue: null; track item.key) {
-        @let step = item.value;
-        <div
+    <div class="stepper" #stepper role="tablist" (scroll)="checkScroll()">
+      @for (tab of tabs; track tab; let index = $index) {
+        <button
+          type="button"
           class="step"
-          (click)="currentStep.set(step)"
-          [class.active]="currentStep() === step"
-          (keydown)="onKeydown($event)"
-          tabindex="0">
-          {{ step }}
-        </div>
+          role="tab"
+          [id]="'patient-case-tab-' + index"
+          aria-controls="patient-case-panel"
+          [attr.aria-selected]="currentStep() === tab"
+          [class.active]="currentStep() === tab"
+          (click)="currentStep.set(tab)">
+          {{ tab }}
+        </button>
       }
     </div>
-
-    <button class="arrow right" [class.active]="canScrollRight()" (click)="scrollRight()">
-      <app-icon icon="chevron-right" />
+    <button
+      type="button"
+      class="arrow"
+      [disabled]="!canScrollRight()"
+      [attr.aria-label]="content.next"
+      (click)="scrollTabs(1)">
+      <app-icon icon="chevron-right" aria-hidden="true" />
     </button>
-  </div>
-
-  @if (currentStep() === 'Case Info') {
-    <div class="stepper-content">
-      <h3>Case Information</h3>
-      <ng-container *ngTemplateOutlet="tmp; context: { form: caseDetails().CaseInfo }" />
-    </div>
-  }
-  @if (currentStep() === 'Alerts') {
-    <div class="stepper-content">
-      @if (alertsData()?.length) {
-        <h3>Case Alerts</h3>
-        <app-table
-          [tableData]="alertsData() || []"
-          [columnConfigs]="alertColumns"
-          [actions]="alertRowActions"
-          (emitAction)="onAlertAction($event)" />
-      } @else {
-        <ng-container *ngTemplateOutlet="empty" />
+  </nav>
+  <div
+    class="stepper-content"
+    id="patient-case-panel"
+    role="tabpanel"
+    [attr.aria-labelledby]="'patient-case-tab-' + tabs.indexOf(currentStep())">
+    <h2>{{ titles[currentStep()] }}</h2>
+    @switch (currentStep()) {
+      @case ('Case Info') {
+        <ng-container *ngTemplateOutlet="fields; context: { $implicit: view().case }" />
       }
-    </div>
-  }
-  @if (currentStep() === 'Patient Info') {
-    <div class="stepper-content">
-      <h3>Patient Information</h3>
-      <ng-container *ngTemplateOutlet="tmp; context: { form: caseDetails().patientInfo }" />
-    </div>
-  }
-  @if (currentStep() === 'Prescriber Info') {
-    <div class="stepper-content">
-      <h3>Prescriber Information</h3>
-      <ng-container *ngTemplateOutlet="tmp; context: { form: caseDetails().prescriberInfo }" />
-    </div>
-  }
-  @if (currentStep() === 'Prescription Info') {
-    <div class="stepper-content">
-      @if (prescriptionData()?.length) {
-        <h3>Prescription Info</h3>
-        <app-table
-          [tableData]="prescriptionData() || []"
-          [columnConfigs]="prescriptionColumns"
-          [paginated]="true" />
-      } @else {
-        <ng-container *ngTemplateOutlet="empty" />
+      @case ('Patient Info') {
+        <ng-container *ngTemplateOutlet="fields; context: { $implicit: view().patient }" />
       }
-    </div>
-  }
-  @if (currentStep() === 'Medical Insurance Info') {
-    @if (
-      caseDetails().medicalInsuranceInfo.adminstration.left.at(0)?.value ||
-      buyBillData().length ||
-      adminData().length
-    ) {
-      <div class="stepper-content">
-        @let section = caseDetails().medicalInsuranceInfo;
-        <h3>Medical Insurance Information</h3>
-        <ng-container *ngTemplateOutlet="tmp; context: { form: section.medicalInfo }" />
-        <h3>Buy and Bill Product Coverage Details</h3>
-        <ng-container *ngTemplateOutlet="tmp; context: { form: section.buyAndBill }" />
-        <app-table
-          class="d-block my-3"
-          [tableData]="buyBillData() || []"
-          [columnConfigs]="medicalCols" />
-        @if (adminData().length > 0) {
-          <h2>Administration</h2>
-          <ng-container *ngTemplateOutlet="tmp; context: { form: section.adminstration }" />
+      @case ('Prescriber Info') {
+        <ng-container *ngTemplateOutlet="fields; context: { $implicit: view().prescriber }" />
+      }
+      @case ('Alerts') {
+        @if (view().alerts.length) {
           <app-table
-            class="d-block my-3"
-            [tableData]="adminData() || []"
-            [columnConfigs]="medicalCols" />
+            [tableData]="view().alerts"
+            [columnConfigs]="columns['alerts']"
+            [actions]="alertActions"
+            [paginated]="true"
+            [sortingEnabled]="true"
+            (emitAction)="onAlertAction($event)" />
+        } @else {
+          <ng-container *ngTemplateOutlet="empty" />
         }
-      </div>
-    } @else {
-      <ng-container *ngTemplateOutlet="empty" />
-    }
-  }
-  @if (currentStep() === 'Pharmacy Insurance Info') {
-    @if (false) {
-      <!-- No Data available for this section yet -->
-      <div class="stepper-content">
-        @let section = caseDetails().pharmacyInsuranceInfo;
-        <h3>Prescription Insurance Information</h3>
+      }
+      @case ('Prescription Info') {
         <ng-container
-          *ngTemplateOutlet="tmp; context: { form: section.prescriptionInsuranceInfo }" />
-      </div>
-      <div class="stepper-content">
-        <h3>Medicare Coverage Information</h3>
+          *ngTemplateOutlet="
+            dataTable;
+            context: {
+              $implicit: view().prescriptions,
+              columns: columns['prescription'],
+              scroll: false
+            }
+          " />
+      }
+      @case ('Medical Insurance Info') {
+        @if (view().medicalPlans.length) {
+          <app-select class="plan-select" [field]="medicalPlanField()" [group]="planForm" />
+          <ng-container *ngTemplateOutlet="fields; context: { $implicit: view().medical }" />
+          @for (
+            section of [view().product, view().administration];
+            track $index;
+            let index = $index
+          ) {
+            @if (section.fields.left.length || section.rows.length) {
+              <h3>{{ index === 0 ? coverageTitles.product : coverageTitles.administration }}</h3>
+              <ng-container *ngTemplateOutlet="fields; context: { $implicit: section.fields }" />
+              @if (section.rows.length) {
+                <app-table
+                  [tableData]="section.rows"
+                  [columnConfigs]="columns['authorization']"
+                  [sortingEnabled]="true" />
+              }
+            }
+          }
+        } @else {
+          <ng-container *ngTemplateOutlet="empty" />
+        }
+      }
+      @case ('Pharmacy Insurance Info') {
+        @if (view().pharmacyPlans.length) {
+          <app-select class="plan-select" [field]="pharmacyPlanField()" [group]="planForm" />
+          <ng-container *ngTemplateOutlet="fields; context: { $implicit: view().pharmacy }" />
+          @if (view().medicare.left.length || view().medicare.right.length) {
+            <h3>{{ coverageTitles.medicare }}</h3>
+            <ng-container *ngTemplateOutlet="fields; context: { $implicit: view().medicare }" />
+          }
+          @if (view().pharmacyAuthorizations.length) {
+            <h3>{{ coverageTitles.authorization }}</h3>
+            <app-table
+              [tableData]="view().pharmacyAuthorizations"
+              [columnConfigs]="columns['authorization']"
+              [sortingEnabled]="true" />
+          }
+        } @else {
+          <ng-container *ngTemplateOutlet="empty" />
+        }
+      }
+      @case ('Copay Card Info') {
         <ng-container
-          *ngTemplateOutlet="tmp; context: { form: section.medicareCoverageInformation }" />
-      </div>
-      @if (iaData().length) {
-        <div class="stepper-content">
-          <h3>Insurance Authorization (IA) Information</h3>
+          *ngTemplateOutlet="
+            dataTable;
+            context: { $implicit: view().copay, columns: columns['copay'], scroll: true }
+          " />
+      }
+      @case ('Shipment Info') {
+        <ng-container
+          *ngTemplateOutlet="
+            dataTable;
+            context: { $implicit: view().shipments, columns: columns['shipment'], scroll: true }
+          " />
+      }
+      @case ('Notes') {
+        <ng-container
+          *ngTemplateOutlet="
+            dataTable;
+            context: { $implicit: view().notes, columns: columns['notes'], scroll: false }
+          " />
+      }
+      @case ('Documents') {
+        @if (view().documents.length) {
           <app-table
-            class="d-block my-3"
-            [tableData]="iaData() || []"
-            [columnConfigs]="insColumns" />
-        </div>
+            [tableData]="view().documents"
+            [columnConfigs]="columns['documents']"
+            [paginated]="true"
+            [sortingEnabled]="true"
+            [rowsWithPdf]="true"
+            [pdfSrc]="pdfSrc()"
+            (emitSelection)="handlePdfSrc($event)" />
+        } @else {
+          <ng-container *ngTemplateOutlet="empty" />
+        }
       }
-    } @else {
-      <ng-container *ngTemplateOutlet="empty" />
     }
-  }
-
-  @if (currentStep() === 'Documents') {
-    <div class="stepper-content">
-      @if (documents()?.length) {
-        <h3>Documents</h3>
-        <app-table
-          class="d-block my-3"
-          [pageSize]="5"
-          [rowsWithPdf]="true"
-          [pdfSrc]="pdfSrc()"
-          [tableData]="documents() || []"
-          (emitSelection)="handlePdfSrc($event)"
-          [columnConfigs]="documentColumns" />
-      } @else {
-        <ng-container *ngTemplateOutlet="empty" />
-      }
-    </div>
-  }
-</div>
-
-<ng-template #tmp let-form="form">
-  <div class="row">
-    <div class="col-md-6">
-      <ng-container *ngTemplateOutlet="innerLabels; context: { form: form.left }" />
-    </div>
-    <div class="col-md-6">
-      <ng-container *ngTemplateOutlet="innerLabels; context: { form: form.right }" />
-    </div>
   </div>
-</ng-template>
-<ng-template #innerLabels let-form="form">
-  @for (field of form; track $index) {
-    @if (field.field) {
-      <ng-container appDynamicField [field]="field.field" [group]="group" [flex]="true" />
-    } @else {
-      @if (field.value) {
-        <div class="label-info">
-          <label [for]="field.label">{{ field.label }}</label>
-          <span> {{ field.value }}</span>
-        </div>
+</section>
+<ng-template #fields let-group>
+  @if (group.left.length || group.right.length) {
+    <div class="field-columns">
+      @for (column of [group.left, group.right]; track $index) {
+        <dl>
+          @for (field of column; track field.label) {
+            <div class="label-info">
+              <dt>{{ field.label }}</dt>
+              <dd>{{ field.value }}</dd>
+            </div>
+          }
+        </dl>
       }
-    }
+    </div>
+  } @else {
+    <ng-container *ngTemplateOutlet="empty" />
   }
 </ng-template>
+<ng-template #empty
+  ><p class="no-information">{{ content.empty }}</p></ng-template
+>
 
-<ng-template #empty>
-  <div class="p-5 text-center">No Information available</div>
+<ng-template #dataTable let-rows let-columns="columns" let-scroll="scroll">
+  @if (rows.length) {
+    <app-table
+      [class.scrolling-table]="scroll"
+      [style.--patient-column-count]="columns.length"
+      [tableData]="rows"
+      [columnConfigs]="columns"
+      [paginated]="true"
+      [sortingEnabled]="true" />
+  } @else {
+    <ng-container *ngTemplateOutlet="empty" />
+  }
 </ng-template>

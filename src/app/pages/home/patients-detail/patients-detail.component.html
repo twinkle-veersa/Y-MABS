@@ -1,40 +1,47 @@
-<app-home-header [hasUpload]="!!selectedCaseId()" (upload)="onUploadPopup()" />
-<div class="container inner p-0">
-  <div class="card">
-    <div class="top-bar">
-      <div class="title">
-        <img src="my-patient.png" alt="patient-icon" />
-        <h3 class="m-0 ms-2">{{ patientData()?.PatientName }}</h3>
-        <span>(Patient ID: {{ patientData()?.PatientId }})</span>
-      </div>
-      <div class="actions">
-        <button class="sm outline" [routerLink]="['/home/my-patients']">
-          <app-icon [icon]="'chevron-left'" /> Back
-        </button>
-      </div>
+<app-home-header [hasUpload]="!!selectedCaseId()" (upload)="popupOpen.set(true)" />
+<section class="patient-detail-card" aria-labelledby="patient-name">
+  <header class="top-bar">
+    <div class="title">
+      <img ngSrc="patient-detail.png" width="36" height="36" alt="" />
+      <h1 id="patient-name">{{ patientData()?.PatientName }}</h1>
+      <span>({{ content.patientId }}: {{ patientData()?.PatientId || patientId }})</span>
     </div>
-
-    <div class="content">
-      <div class="heading">Patient Cases</div>
-      <app-table
-        [columnConfigs]="caseColumns"
-        [tableData]="caseData()"
-        [paginated]="true"
-        [selection]="'single'"
-        [pageSize]="10"
-        [preSelectedRows]="caseData()[0] ? [caseData()[0]] : []"
-        (emitSelection)="onSelect($event)" />
-
-      @if (selectedCaseId()) {
-        <app-patients
-          class="d-block mt-4"
-          [openPopUp]="popupOpen()"
-          (closePopup)="onClose()"
-          [data]="caseDetails()"
-          [selectedCaseId]="selectedCaseId()"
-          [patient]="patientData()"
-          (alertAcknowledged)="onAlertAcknowledged()" />
-      }
+    <div class="actions">
+      <a class="page-action" routerLink="/home/my-patients"
+        ><app-icon icon="chevron-left" aria-hidden="true" />{{ content.back }}</a
+      >
+      <button type="button" class="page-action" (click)="print()">
+        <app-icon icon="print" aria-hidden="true" />{{ content.print }}
+      </button>
     </div>
-  </div>
-</div>
+  </header>
+  <h2 class="heading">{{ content.cases }}</h2>
+  <app-table
+    class="case-table"
+    [columnConfigs]="caseColumns"
+    [tableData]="caseRows()"
+    [paginated]="true"
+    selection="single"
+    idKey="CaseId"
+    [sortingEnabled]="true"
+    [pageSize]="5"
+    [preSelectedRows]="selectedRows()"
+    (emitSelection)="onSelect($event)" />
+  @if (patientDetailsRs.error()) {
+    <div class="feedback" role="alert">
+      <span>{{ content.loadError }}</span
+      ><button type="button" class="outline" (click)="patientDetailsRs.reload()">
+        {{ content.retry }}
+      </button>
+    </div>
+  } @else if (selectedCaseId()) {
+    <app-patients
+      class="patient-case-details"
+      [openPopUp]="popupOpen()"
+      (closePopup)="closeUpload()"
+      [data]="caseDetails()"
+      [selectedCaseId]="selectedCaseId()"
+      [patient]="selectedCase()"
+      (alertAcknowledged)="patientDetailsRs.reload()" />
+  }
+</section>

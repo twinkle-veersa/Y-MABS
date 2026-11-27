@@ -1,6 +1,11 @@
 @use 'variables' as var;
 @use 'mixins' as mix;
 
+:host {
+  display: block;
+  min-width: 0;
+}
+
 .top-bar {
   @include mix.flexCentered(space-between);
   padding: 0 0.5rem;
@@ -28,7 +33,7 @@
 
     &:focus {
       border: 1px solid var.$border-color;
-      background-color: #fff;
+      background-color: var.$white;
     }
   }
 }
@@ -40,11 +45,10 @@
 
 .actions .filter-btn {
   padding: 0.5rem;
-  display: inline-flex;
-  align-items: center;
+  @include mix.flexCentered(null, center, inline-flex);
   gap: 0.5rem;
   span {
-    color: #fff;
+    color: var.$white;
     font-size: 0.75rem;
     border-radius: 100%;
     background-color: var.$dark;
@@ -63,7 +67,7 @@
   top: 3.15rem;
   z-index: 9;
   max-width: 15.5rem;
-  background-color: white;
+  background-color: var.$white;
   border-radius: 0.35rem;
   border: var.$field-border;
   overflow: hidden;
@@ -83,9 +87,8 @@
 
   .content {
     padding: 0.5rem;
-    display: flex;
+    @include mix.flexColumn;
     gap: 0.25rem;
-    flex-direction: column;
 
     label {
       input[type='checkbox'] {
@@ -100,6 +103,52 @@
 }
 
 app-table {
+  min-width: 0;
+  max-width: 100%;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+:host ::ng-deep app-header-wrap .container {
+  min-width: 0;
+}
+
+:host ::ng-deep app-table.patient-list-table .table-container {
+  table {
+    table-layout: fixed;
+    width: 100%;
+  }
+  th,
+  td {
+    padding-inline: 0.65rem;
+    overflow-wrap: anywhere;
+  }
+  th .wrap {
+    white-space: normal;
+    gap: 0.35rem;
+    .column-head {
+      min-width: 0;
+    }
+    .sort-icon {
+      flex-shrink: 0;
+    }
+  }
+}
+
+@include mix.responsive(medium) {
+  .top-bar {
+    flex-wrap: wrap;
+    > .actions {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+  .search-bar {
+    flex: 1;
+    min-width: 0;
+    input {
+      box-sizing: border-box;
+      width: 100%;
+    }
+  }
 }

@@ -7,12 +7,13 @@
 }
 .wrap {
   display: grid;
-  grid-template-columns: var.$side-nav-width auto;
+  grid-template-columns: var.$side-nav-width minmax(0, 1fr);
   &.full {
-    grid-template-columns: auto;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .content-panel {
+    min-width: 0;
     min-height: 600px;
     background-color: #eeeffe;
   }
@@ -23,7 +24,7 @@
   }
   :host {
     .wrap {
-      grid-template-columns: 100% auto;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 }

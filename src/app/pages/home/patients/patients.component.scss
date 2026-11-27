@@ -1,236 +1,248 @@
-@use 'mixins' as mix;
 @use 'variables' as var;
+@use 'mixins' as mix;
 
-.header {
-  @include mix.flexCentered(space-between);
-  background-color: var.$light-grey;
-  font-weight: bold;
-  padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid #dbdbdb;
-
-  .header-left {
-    @include mix.flexCentered(center);
-    gap: 1rem;
-
-    .lantheus-tm {
-      @include mix.flexCentered(center, flex-start);
-      gap: 0.25rem;
-      background: var.$dark;
-      color: #fff;
-      padding: 1rem;
-      border-radius: 0.3rem;
-
-      .tm {
-        font-size: 0.625rem;
-      }
-    }
-  }
-
-  .header-button {
-    display: flex;
-    gap: 1rem;
-
-    .submit-enrollment {
-      @include mix.flexCentered(center);
-      border-radius: 0.32rem !important;
-      gap: 0.25rem;
-    }
-  }
-}
-
-.overlay {
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  @include mix.flexCentered(center, center);
-
-  .popup {
-    background: var.$background-color;
-    border-radius: 0.5rem;
-    border: 1px solid #404041;
-    width: 40rem;
-    box-shadow: 0 0.25rem 0.63rem rgba(0, 0, 0, 0.1);
-
-    .popup-header {
-      @include mix.flexCentered(space-between, center);
-      background: var.$primary-color;
-      color: var.$background-color;
-      padding: 0.75rem 0.875rem;
-      border-radius: 0.5rem 0.5rem 0 0;
-
-      .popup-heading {
-        display: block;
-        font-weight: 700;
-        font-size: 1.13rem;
-      }
-
-      .description {
-        font-size: 0.75rem;
-        font-weight: 500;
-      }
-    }
-
-    .close-btn {
-      position: relative;
-      bottom: 1rem;
-      background: none;
-      border: none;
-      min-width: 0 !important;
-      font-size: 1.25rem;
-      color: var.$background-color;
-      cursor: pointer;
-    }
-
-    .drop-zone {
-      @include mix.flexCentered(center, center);
-      @include mix.flexColumn;
-      border: 2px dashed #404041;
-      padding: 3.15rem;
-      margin: 1.75rem;
-      cursor: pointer;
-      border-radius: 0.31rem;
-
-      .file-restriction {
-        font-weight: 400;
-        font-size: 0.75rem;
-        color: #e72020;
-      }
-    }
-
-    .drag-label {
-      font-weight: 500;
-      font-size: 1.5rem;
-    }
-
-    .bottom-text {
-      @include mix.flexCentered(center, center);
-      @include mix.flexColumn;
-
-      .browse-btn {
-        margin-bottom: 1rem;
-        background: var.$primary-color;
-        color: var.$background-color;
-        border: none;
-        padding: 1rem 3.25rem;
-        cursor: pointer;
-        border-radius: 0.31rem;
-      }
-    }
-  }
-}
-
-.patient-case {
-  @include mix.flexCentered(space-between);
-  margin: 0 0.5rem 1rem;
-
-  .patient-name {
-    @include mix.flexCentered();
-  }
-
-  .back-btn {
-    padding: 0.5rem 1rem;
-    min-width: auto;
-    background-color: transparent;
-    border: 0.2rem solid var.$secondary-color;
-    color: var.$dark;
-  }
-}
-
-.stepper-container {
-  display: flex;
-  align-items: center;
-  position: relative;
-  border: 0.125rem solid #dbdbdb;
-  border-style: none none solid none;
-  overflow: hidden;
-
-  .stepper {
-    display: flex;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    padding: 0 2.5rem;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    .step {
-      flex: 0 0 auto;
-      padding: 1rem 2.5rem;
-      background: #f3f3f3;
-      cursor: pointer;
-      border: 1px solid #fff;
-      border-style: none solid;
-
-      &.active {
-        background-color: var.$primary-color;
-        color: #fff;
-      }
-    }
-  }
-}
-
-.arrow {
-  position: absolute;
-  min-width: 0.7rem;
-  background-color: #fff;
-  border: none;
-  color: #dbdbdb;
-  min-height: 4.5rem;
-  cursor: not-allowed;
-
-  &.left {
-    left: 0;
-  }
-
-  &.right {
-    right: 0;
-  }
-
-  &.active {
-    color: var.$primary-color;
-    cursor: pointer;
-    opacity: 1;
-  }
-}
-
-.stepper-content {
-  h2 {
-    color: var.$dark;
-  }
-
-  padding: 1rem;
-
-  .label-info {
-    margin-top: 0.75rem;
-    padding: 0.25rem 0;
-    @include mix.flexCentered(flex-start, baseline);
-    gap: 0.5rem;
-
-    span {
-      width: 60%;
-    }
-
-    label {
-      display: inline-block;
-      position: relative;
-      width: 40%;
-
-      &::after {
-        content: ':';
-        position: absolute;
-        right: 0.25rem;
-      }
-    }
-  }
+:host {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .bottom-container {
-  border: 0.125rem solid var.$container-border;
+  border: 1px solid var.$medium-grey;
   border-radius: var.$container-radius;
   overflow: hidden;
+}
+.stepper-container {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) 3rem;
+  border-bottom: 1px solid var.$medium-grey;
+}
+.stepper {
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+:host button.step {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 1rem 1.75rem;
+  border: 0;
+  border-right: 1px solid var.$white;
+  border-radius: 0;
+  background: var.$panel-color;
+  color: var.$font-color;
+  font-size: 1rem;
+  font-weight: 400;
+  white-space: nowrap;
+  &.active {
+    background: var.$secondary-color;
+    color: var.$white;
+    font-weight: 700;
+  }
+}
+:host button.arrow {
+  min-width: 0;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 0;
+  background: var.$white;
+  color: var.$primary-color;
+  &:disabled {
+    background: var.$white;
+    color: var.$medium-grey;
+    cursor: default;
+  }
+}
+.stepper-content {
+  min-height: 16rem;
+  padding: 1.5rem;
+  h2 {
+    margin: 0 0 1.5rem;
+    font-size: 1.25rem;
+  }
+  h3 {
+    margin-block: 1.5rem 1rem;
+    font-size: 1.1rem;
+  }
+}
+
+:host ::ng-deep app-table.scrolling-table {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  table {
+    table-layout: fixed;
+    width: calc(100% * var(--patient-column-count) / 4);
+    min-width: 100%;
+  }
+  th,
+  td {
+    overflow-wrap: anywhere;
+  }
+  th .wrap {
+    white-space: normal;
+  }
+}
+.field-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+  margin-bottom: 1rem;
+  dl {
+    margin: 0;
+  }
+}
+.label-info {
+  display: grid;
+  grid-template-columns: 40% minmax(0, 1fr);
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  dt {
+    position: relative;
+    padding-right: 0.75rem;
+    font-weight: 500;
+    &::after {
+      content: ':';
+      position: absolute;
+      right: 0;
+    }
+  }
+  dd {
+    margin: 0;
+  }
+}
+.plan-select {
+  width: calc(50% - 1rem);
+  margin: 0 0 1rem;
+}
+:host ::ng-deep .plan-select {
+  display: grid;
+  grid-template-columns: 40% minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  min-height: 0;
+  .input-wrap {
+    min-width: 0;
+  }
+  app-input-label label {
+    margin: 0;
+  }
+}
+.no-information {
+  padding: 2rem;
+  text-align: center;
+  color: var.$font-color;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  padding: 1rem;
+  background: var.$patient-dialog-backdrop;
+  @include mix.flexCentered;
+}
+.popup {
+  width: 40rem;
+  max-width: 100%;
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  border: 1px solid var.$border-color;
+  border-radius: var.$container-radius;
+  background: var.$white;
+}
+.popup-header {
+  @include mix.flexCentered(space-between, flex-start);
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var.$secondary-color;
+  color: var.$white;
+  h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+  }
+  p {
+    margin: 0;
+    font-size: 0.75rem;
+  }
+}
+:host button.close-btn {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  color: var.$white;
+}
+:host button.drop-zone {
+  @include mix.flexColumn;
+  align-items: center;
+  gap: 0.75rem;
+  width: calc(100% - 3rem);
+  margin: 1.5rem;
+  padding: 2.5rem 1rem;
+  border: 2px dashed var.$dark-grey;
+  border-radius: 0.3rem;
+  background: var.$white;
+  color: var.$font-color;
+  font-size: 1.25rem;
+  font-weight: 400;
+  small {
+    color: var.$red;
+    font-size: 0.75rem;
+  }
+}
+.upload-footer {
+  @include mix.flexColumn;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1rem 1rem;
+  button {
+    padding: 0.6rem 2rem;
+    border-color: var.$accent-color;
+    background: var.$accent-color;
+    font-weight: 400;
+  }
+}
+.upload-error {
+  margin: 0 1.5rem 1rem;
+  color: var.$error;
+}
+@include mix.responsive(medium) {
+  .field-columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .plan-select {
+    width: 100%;
+  }
+  .stepper-content {
+    padding: 1rem;
+  }
+  :host button.step {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+@media print {
+  :host ::ng-deep app-table.scrolling-table table {
+    width: 100%;
+    min-width: 0;
+  }
+  .stepper-container,
+  .overlay {
+    display: none;
+  }
+  .bottom-container {
+    overflow: visible;
+    border: 0;
+  }
+  .stepper-content {
+    padding: 1rem 0;
+  }
 }
