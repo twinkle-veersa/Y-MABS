@@ -1,5 +1,5 @@
 {
-  "name": "merck-hcp",
+  "name": "yambs-connect",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -15,7 +15,7 @@
     "build:uat": "ng build --configuration uat",
     "build:prod": "ng build --configuration prod",
     "generate-sprite": "npx tsx generate-svg-sprite.ts",
-    "visualize": "ng build --configuration=analyze-bundle --verbose && esbuild-visualizer --metadata dist/lantheus-portal/stats.json --filename dist/lantheus-portal/stats.html"
+    "visualize": "ng build --configuration=analyze-bundle --verbose && esbuild-visualizer --metadata dist/yambs-connect/stats.json --filename dist/yambs-connect/stats.html"
   },
   "private": true,
   "packageManager": "yarn@4.12.0",

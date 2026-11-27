@@ -1,4 +1,4 @@
-# Merck HCP Portal
+# YAMBS Connect Portal
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli).
 For more details and official documentation follow [angular.dev](https://angular.dev/).
@@ -36,7 +36,7 @@ For more details and official documentation follow [angular.dev](https://angular
 
 - **Husky**: This project also comes with uses git hooks configured to enforce and ensure all the required checks and standards pass at different stages of development workflow, this keeps the codebase consistent, maintainable and always bound to follow the best coding standards and recommended guidelines.
 
-- **Bundle Analyzer**: To keep track of the bundle sizes and keep the app performant over time, `esbuild-visualizer` has been setup in this project to have a better view of the bundles sizes generated over the time and optimize it. To view this, use `npm run visualize` command in the terminal and open `stats.html` in any browser of your choice, you can find this in the dist folder after the build completes --> `dist/lantheus-portal/stats.html`.
+- **Bundle Analyzer**: To keep track of the bundle sizes and keep the app performant over time, `esbuild-visualizer` has been setup in this project to have a better view of the bundles sizes generated over the time and optimize it. To view this, use `npm run visualize` command in the terminal and open `stats.html` in any browser of your choice, you can find this in the dist folder after the build completes --> `dist/yambs-connect/stats.html`.
 
 ## Development server
 
